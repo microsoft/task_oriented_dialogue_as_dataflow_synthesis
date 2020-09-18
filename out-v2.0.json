@@ -1,0 +1,250 @@
+{
+    "config": {
+        "allow_multiple_models": false,
+        "allow_orphans": true,
+        "count_failed_submissions": true,
+        "evaluate": {
+            "command": "sh evaluate.sh answers predictions",
+            "dependencies": [
+                {
+                    "child_path": "src",
+                    "parent_path": "",
+                    "parent_uuid": "0x082f5cfe37de4e5aa4423570f46dcbf8"
+                },
+                {
+                    "child_path": "setup.py",
+                    "parent_path": "",
+                    "parent_uuid": "0x95b569f4b8a7422cb93342f543e66124"
+                },
+                {
+                    "child_path": "evaluate.sh",
+                    "parent_path": "",
+                    "parent_uuid": "0x89ee74f835ca4f73899a8343db92faba"
+                },
+                {
+                    "child_path": "answers",
+                    "parent_path": "",
+                    "parent_uuid": "0xc8664989061943d8a6dd05462e7daa2b"
+                },
+                {
+                    "child_path": "predictions",
+                    "parent_path": "predictions.jsonl",
+                    "parent_uuid": "{predict}"
+                }
+            ],
+            "metadata": {
+                "request_docker_image": "pytorch/pytorch:1.4-cuda10.1-cudnn7-runtime",
+                "request_network": true
+            },
+            "tag": "competition-evaluate"
+        },
+        "host": "https://worksheets.codalab.org",
+        "log_worksheet_uuid": "0x42d253c3cb6e41a2a06bc9589b7a0da0",
+        "make_predictions_public": false,
+        "max_leaderboard_size": 10000,
+        "max_submissions_per_period": 5,
+        "max_submissions_total": 10000,
+        "metadata": {},
+        "predict": {
+            "depth": 10,
+            "metadata": {},
+            "mimic": [
+                {
+                    "new": "0x1cf4d6b4d55a40c2a8c55443daef806e",
+                    "old": "0xe9196147881c467aaf19412b2e9ec273"
+                }
+            ],
+            "tag": "competition-predict"
+        },
+        "quota_period_seconds": 86400,
+        "refresh_period_seconds": 60,
+        "score_specs": [
+            {
+                "key": "/scores.json:accuracy",
+                "name": "accuracy"
+            }
+        ],
+        "submission_tag": "smcalflow-leaderboard-submit"
+    },
+    "leaderboard": [
+        {
+            "bundle": {
+                "args": "run src:0x082f5cfe37de4e5aa4423570f46dcbf8 setup.py:0x95b569f4b8a7422cb93342f543e66124 evaluate.sh:0x89ee74f835ca4f73899a8343db92faba answers:0xc8664989061943d8a6dd05462e7daa2b predictions:0x6efd71ceb8e342768f414497c4d94064/predictions.jsonl \"sh evaluate.sh answers predictions\" --request-network --request-cpus 1 --request-docker-image pytorch/pytorch:1.4-cuda10.1-cudnn7-runtime --request-memory 2g",
+                "bundle_type": "run",
+                "command": "sh evaluate.sh answers predictions",
+                "data_hash": "0x42c0c68aefd55e38cc0b878e980df6e27aaa91e9",
+                "dependencies": [
+                    {
+                        "child_path": "src",
+                        "child_uuid": "0x8e71773ce2e041c892a880dcf65460c4",
+                        "parent_name": "src",
+                        "parent_path": "",
+                        "parent_uuid": "0x082f5cfe37de4e5aa4423570f46dcbf8"
+                    },
+                    {
+                        "child_path": "setup.py",
+                        "child_uuid": "0x8e71773ce2e041c892a880dcf65460c4",
+                        "parent_name": "setup.py",
+                        "parent_path": "",
+                        "parent_uuid": "0x95b569f4b8a7422cb93342f543e66124"
+                    },
+                    {
+                        "child_path": "evaluate.sh",
+                        "child_uuid": "0x8e71773ce2e041c892a880dcf65460c4",
+                        "parent_name": "evaluate.sh",
+                        "parent_path": "",
+                        "parent_uuid": "0x89ee74f835ca4f73899a8343db92faba"
+                    },
+                    {
+                        "child_path": "answers",
+                        "child_uuid": "0x8e71773ce2e041c892a880dcf65460c4",
+                        "parent_name": "test.answers.jsonl",
+                        "parent_path": "",
+                        "parent_uuid": "0xc8664989061943d8a6dd05462e7daa2b"
+                    },
+                    {
+                        "child_path": "predictions",
+                        "child_uuid": "0x8e71773ce2e041c892a880dcf65460c4",
+                        "parent_name": "Subhro-run-sh-predict",
+                        "parent_path": "predictions.jsonl",
+                        "parent_uuid": "0x6efd71ceb8e342768f414497c4d94064"
+                    }
+                ],
+                "id": "0x8e71773ce2e041c892a880dcf65460c4",
+                "is_anonymous": false,
+                "metadata": {
+                    "actions": [],
+                    "allow_failed_dependencies": false,
+                    "created": 1597691586,
+                    "data_size": 38751,
+                    "description": "{\"submit_id\": \"0x890ae96e4c7740afbee79caae1ca4a0b\", \"submitter_id\": \"f000eb7ed1044d4fa4ba20d19a8f0445\", \"predict_id\": \"0x6efd71ceb8e342768f414497c4d94064\"}",
+                    "docker_image": "pytorch/pytorch@sha256:ee783a4c0fccc7317c150450e84579544e171dd01a3f76cf2711262aced85bf7",
+                    "exclude_patterns": [],
+                    "exitcode": 0,
+                    "last_updated": 1597694046,
+                    "name": "Subhro-run-sh-results",
+                    "remote": "vm-clws-prod-worker-0",
+                    "request_cpus": 1,
+                    "request_disk": "",
+                    "request_docker_image": "pytorch/pytorch:1.4-cuda10.1-cudnn7-runtime",
+                    "request_gpus": 0,
+                    "request_memory": "2g",
+                    "request_network": true,
+                    "request_priority": 0,
+                    "request_queue": "",
+                    "request_time": "",
+                    "run_status": "Finished",
+                    "started": 1597693930,
+                    "tags": [
+                        "competition-evaluate"
+                    ],
+                    "time": 94.721378,
+                    "time_system": 0.0,
+                    "time_user": 0.0
+                },
+                "owner": {
+                    "id": "f000eb7ed1044d4fa4ba20d19a8f0445",
+                    "type": "users"
+                },
+                "permission": 2,
+                "permission_spec": "all",
+                "state": "ready",
+                "uuid": "0x8e71773ce2e041c892a880dcf65460c4"
+            },
+            "scores": {
+                "accuracy": 0.6678288729739917
+            },
+            "submission": {
+                "created": 1597638329,
+                "description": "Seq2Seq (single model) (Semantic Machines)",
+                "num_period_submissions": 1,
+                "num_total_submissions": 2,
+                "public": false,
+                "user_name": "Subhro"
+            }
+        },
+        {
+            "bundle": {
+                "args": "run evaluate.py:0x42022fbad9964152a831c222f2a447a9 test.json:0x9cf74bc722004b5ea451bb4f345f6e9d predictions.json:0x12d0fa7d855b40de82b08d9e995c7d55/predictions.json \"python evaluate.py test.json predictions.json\" --request-cpus 1 --request-memory 2g",
+                "bundle_type": "run",
+                "command": "python evaluate.py test.json predictions.json",
+                "data_hash": "0x0f3143fa52dcbc59a9cbd1db8608b966a09dad84",
+                "dependencies": [
+                    {
+                        "child_path": "evaluate.py",
+                        "child_uuid": "0x68df2ccff4974af0a5439d35f7e2f480",
+                        "parent_name": "evaluate.py",
+                        "parent_path": "",
+                        "parent_uuid": "0x42022fbad9964152a831c222f2a447a9"
+                    },
+                    {
+                        "child_path": "test.json",
+                        "child_uuid": "0x68df2ccff4974af0a5439d35f7e2f480",
+                        "parent_name": "test.json",
+                        "parent_path": "",
+                        "parent_uuid": "0x9cf74bc722004b5ea451bb4f345f6e9d"
+                    },
+                    {
+                        "child_path": "predictions.json",
+                        "child_uuid": "0x68df2ccff4974af0a5439d35f7e2f480",
+                        "parent_name": "Subhro-run-python-predict",
+                        "parent_path": "predictions.json",
+                        "parent_uuid": "0x12d0fa7d855b40de82b08d9e995c7d55"
+                    }
+                ],
+                "id": "0x68df2ccff4974af0a5439d35f7e2f480",
+                "is_anonymous": false,
+                "metadata": {
+                    "actions": [],
+                    "allow_failed_dependencies": false,
+                    "created": 1590446357,
+                    "data_size": 4164,
+                    "description": "{\"submit_id\": \"0xd4a074daaace4da9aad27e6429554531\", \"submitter_id\": \"f000eb7ed1044d4fa4ba20d19a8f0445\", \"predict_id\": \"0x12d0fa7d855b40de82b08d9e995c7d55\"}",
+                    "docker_image": "codalab/default-cpu@sha256:ff7de716ac5f94d9b4ff8d6341d60166ed5b0163cc05d8d51da9418511caf5e1",
+                    "exclude_patterns": [],
+                    "exitcode": 0,
+                    "last_updated": 1590446409,
+                    "name": "Subhro-run-python-results",
+                    "remote": "vm-clws-prod-gpuworker-19",
+                    "request_cpus": 1,
+                    "request_disk": "",
+                    "request_docker_image": "",
+                    "request_gpus": 0,
+                    "request_memory": "2g",
+                    "request_network": false,
+                    "request_priority": 0,
+                    "request_queue": "",
+                    "request_time": "",
+                    "run_status": "Finished",
+                    "started": 1590446387,
+                    "tags": [
+                        "competition-evaluate"
+                    ],
+                    "time": 0.074376,
+                    "time_system": 0.0,
+                    "time_user": 0.0
+                },
+                "owner": {
+                    "id": "f000eb7ed1044d4fa4ba20d19a8f0445",
+                    "type": "users"
+                },
+                "permission": 2,
+                "permission_spec": "all",
+                "state": "ready",
+                "uuid": "0x68df2ccff4974af0a5439d35f7e2f480"
+            },
+            "scores": {
+                "accuracy": null
+            },
+            "submission": {
+                "created": 1590446141,
+                "description": "",
+                "num_period_submissions": 1,
+                "num_total_submissions": 2,
+                "public": true,
+                "user_name": "Subhro"
+            }
+        }
+    ],
+    "updated": 1597694186.132711
+}

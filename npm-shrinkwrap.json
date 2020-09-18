@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "graceful-fs": {
+        "version": "4.2.2"
+     },
+     "gift": {
+        "version": "0.10.2"
+     }    
+  }
+}

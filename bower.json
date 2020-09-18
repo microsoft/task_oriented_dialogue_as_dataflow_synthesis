@@ -1,0 +1,23 @@
+{
+  "name": "smcalflow",
+  "description": "",
+  "main": "gulpfile.js",
+  "authors": [
+    "Subhro Roy",
+    "Sam Thomson"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/microsoft/task_oriented_dialogue_as_dataflow_synthesis",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "lato-webfont": "^1.1.2"
+  }
+}

@@ -1,0 +1,114 @@
+extends layout
+
+block title
+  title SMCalFlow
+
+block description
+  meta(name='description', content='SMCalFlow is a new dataset for task oriented dialogue. User utterances are annotated with dataflow programs, a new representation to support rich dialogue interactions.')
+
+block extralinks
+  link(rel='stylesheet', href='/stylesheets/index.css')
+  script(async defer src="https://buttons.github.io/buttons.js")
+
+block extrascripts
+
+mixin model_display(group, is_test)
+  table.table.performanceTable
+    tr
+      if is_test
+        th Rank
+      th Model
+      th Test Accuracy
+    - var largest_accuracy = Math.max.apply(null, group.map(function (model) { return model.accuracy; }))
+
+    each model in group
+      tr
+        if is_test
+          td
+            p #{model.rank}
+            span.date.label.label-default #{moment.unix(model.date).format('MMM DD, YYYY')}
+        td(style="word-break:break-word;")
+          | #{model.model_name}
+          p.institution #{model.institution}
+          if model.link
+            a.link(href=model.link) #{model.link}
+        td
+          if model.accuracy == largest_accuracy
+            b #{model.accuracy.toPrecision(5)}
+          else
+            | #{model.accuracy.toPrecision(5)}
+
+
+block content
+  .cover#contentCover
+    .container
+      .row
+        .col-md-5
+          .infoCard
+            .infoBody
+              .infoHeadline
+                h2 What is SMCalFlow?
+              p
+                | One central challenge in conversational AI is the
+                | design of a dialogue state representation that agents can use
+                | to reason about the information and actions available to them.
+                | We’ve developed a new representational framework for dialogue
+                | that enables efficient machine learning of complex
+                | conversations.
+
+              p
+                span
+                  b SMCalFlow
+                |  is a large English-language dialogue dataset, featuring
+                | natural conversations about tasks involving calendars,
+                | weather, places, and people. Each turn is annotated with an
+                | executable
+                b  dataflow program
+                |  featuring API calls, function composition, and complex
+                | constraints built from strings, numbers, dates and times. For
+                | more information about dataflow-based dialogue agents and
+                | details about the dataset, check out our blog post and
+                | paper:
+
+              a.btn.actionBtn(href="https://aka.ms/AA9p7dd") Blog post
+
+              a.btn.actionBtn(href="https://www.mitpressjournals.org/doi/10.1162/tacl_a_00333") Task-Oriented Dialogue as Dataflow Synthesis (TACL '20)
+              p
+
+
+              p
+              .infoHeadline
+                h2 Getting Started
+              p
+                | We've built a few resources to help you get started with the dataset.
+                | Download a copy of the dataset (distributed under the
+                a(href="http://creativecommons.org/licenses/by-sa/4.0/legalcode") CC BY-SA 4.0
+                |  license):
+                ul.list-unstyled
+                  li
+                    a.btn.actionBtn.inverseBtn(href="https://www.microsoft.com/en-us/research/project/smcalflow-dataset-0/")
+                      | Data
+              p Once you have a built a model that works to your expectations on the dev set, you submit it to get official scores on the dev and a hidden test set. To preserve the integrity of test results, we do not release the test set to the public. Instead, we require you to submit your model so that we can run it on the test set for you. We will not access your code or model for any purpose other than to evaluate your model on SMCalFlow. Here's a tutorial walking you through official evaluation of your model:
+              a.btn.actionBtn.inverseBtn(href="https://worksheets.codalab.org/worksheets/0xfc168b6317924c8a85df9ecd39bc52b2")
+                | Submission Tutorial
+              p
+
+
+              p
+              .infoHeadline
+                h2 Have Questions?
+              p
+                | Email us at
+                a(href="mailto:samuel.thomson@microsoft.com")  samuel.thomson@microsoft.com
+                |  and
+                a(href="mailto:subhrroy@microsoft.com")  subhrroy@microsoft.com
+                | .
+            .infoSubheadline
+              include includes/tweet
+              include includes/github
+        .col-md-7
+          .infoCard
+            .infoBody
+              .infoHeadline
+                h2 Leaderboard
+              +model_display(test2, true)
