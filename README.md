@@ -11,7 +11,7 @@ If you use any source code or data included in this toolkit in your work, please
 Coming soon
 ```
 
-## Install (DOES NOT WORK RIGHT NOW)
+## Install
 ```bash
 # (Recommended) Create a virtual environment
 virtualenv --python=python3 env
@@ -32,7 +32,7 @@ You can skip these two packages if you don't need to train or run the models.
 ## SMCalFlow Experiments
 Follow the steps below to reproduce the results reported in the paper (Table 2).
 
-1. Download the SMCalFlow dataset on [this page](https://www.microsoft.com/en-us/research/project/dataflow-based-dialogue-semantic-machines/).
+1. Download the SMCalFlow dataset on [this page](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/).
 
 2. Compute data statistics:
     ```bash
