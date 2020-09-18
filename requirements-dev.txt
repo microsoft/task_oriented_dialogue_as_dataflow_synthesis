@@ -1,0 +1,5 @@
+black==19.10b0
+pylint==2.4.4
+mypy==0.761
+pytest==4.6.3
+pytest-xdist==1.31.0

@@ -1,0 +1,765 @@
+{
+  "dialogue_idx": "MUL2258.json",
+  "domains": [
+    "train",
+    "hotel"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-day",
+          "sunday"
+        ],
+        [
+          "train-departure",
+          "cambridge"
+        ]
+      ],
+      "transcript": "i would like a train leaving from cambridge on sunday , please .",
+      "system_acts": [],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "i can do that for you ! is there a particular destination , or even an arrival or departure time you need ?",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-destination",
+          "norwich"
+        ],
+        [
+          "train-arriveby",
+          "17:00"
+        ]
+      ],
+      "transcript": "going to norwich . arrive by 17:00 .",
+      "system_acts": [
+        "arrive",
+        "leave",
+        "dest"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "tr4969 will get you to norwich by 10:55 . would you like me to book it for you ?",
+      "turn_idx": 2,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "i need the price , travel time , and train id .",
+      "system_acts": [
+        [
+          "arrive",
+          "10:55"
+        ],
+        [
+          "id",
+          "tr4969"
+        ]
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "certainly . the price is 14.08 pounds and the travel time is 79 minutes .",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "none"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-name",
+          "none"
+        ],
+        [
+          "hotel-area",
+          "west"
+        ],
+        [
+          "hotel-stars",
+          "4"
+        ],
+        [
+          "hotel-type",
+          "hotel"
+        ]
+      ],
+      "transcript": "thanks . i also need a hotel with a star of 4 in the west .",
+      "system_acts": [
+        [
+          "ticket",
+          "14.08 pounds"
+        ],
+        [
+          "time",
+          "79 minutes"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i have 2 choices in that area . would you like those addresses ?",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "none"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-parking",
+          "yes"
+        ],
+        [
+          "hotel-pricerange",
+          "expensive"
+        ]
+      ],
+      "transcript": "do any of those choices include free parking and in the expensive price range ?",
+      "system_acts": [
+        [
+          "choice",
+          "2"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "the huntingdon marriott hotel meets your needs . do you want me to book it ?",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "huntingdon marriott hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-name",
+          "huntingdon marriott hotel"
+        ]
+      ],
+      "transcript": "yes please , for 2 people for 4 nights .",
+      "system_acts": [
+        [
+          "none",
+          "none"
+        ],
+        [
+          "name",
+          "the huntingdon marriott"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "what day would you like to book the room for ?",
+      "turn_idx": 6,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "wednesday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "2"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "huntingdon marriott hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book day",
+          "wednesday"
+        ],
+        [
+          "hotel-book people",
+          "2"
+        ],
+        [
+          "hotel-book stay",
+          "4"
+        ]
+      ],
+      "transcript": "wednesday . could i get the reference number as well ?",
+      "system_acts": [
+        "day"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "ok , i have got your booking confirmed . your reference number is sdgkfomn . is there anything else i can help you with ?",
+      "turn_idx": 7,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "wednesday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "2"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "huntingdon marriott hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "thank you so much . i think that s all i need for today . take care . bye .",
+      "system_acts": [],
+      "domain": "hotel"
+    }
+  ]
+}

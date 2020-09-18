@@ -1,0 +1,1043 @@
+{
+  "dialogue_idx": "PMUL3166.json",
+  "domains": [
+    "attraction",
+    "hotel"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "attraction-type",
+          "swimming pool"
+        ]
+      ],
+      "transcript": "i am looking for a swimmingpool in cambridge",
+      "system_acts": [],
+      "domain": "attraction"
+    },
+    {
+      "system_transcript": "we have 4 public pool in cambridge , do you have a preference on area ?",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "no . which 1 is best ?",
+      "system_acts": [
+        "area",
+        [
+          "area",
+          "cambridge"
+        ],
+        [
+          "type",
+          "public pool"
+        ],
+        [
+          "choice",
+          "4"
+        ]
+      ],
+      "domain": "attraction"
+    },
+    {
+      "system_transcript": "parkside pools is located in the centre .",
+      "turn_idx": 2,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-area",
+          "north"
+        ],
+        [
+          "hotel-type",
+          "guesthouse"
+        ]
+      ],
+      "transcript": "that will work for me , but i would like to stay in the north part of town , are there any open guesthouses ?",
+      "system_acts": [
+        [
+          "name",
+          "parkside pools"
+        ],
+        [
+          "area",
+          "centre"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "how about acorn house ? it looks lovely",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-pricerange",
+          "expensive"
+        ],
+        [
+          "hotel-stars",
+          "4"
+        ]
+      ],
+      "transcript": "i need 1 that s expensive and has a 4 star rating .",
+      "system_acts": [],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i am sorry , i am afraid i do not see any guesthouses matching that description . do you want to try a different price range or star rating ?",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "attraction-name",
+          "parkside pools"
+        ],
+        [
+          "attraction-area",
+          "centre"
+        ]
+      ],
+      "transcript": "maybe try for a moderate instead ? also , what was the entrance fee for parkside pools ?",
+      "system_acts": [],
+      "domain": "attraction"
+    },
+    {
+      "system_transcript": "i am sorry i do not have information on the entrance fee at the parkside pools but you can call them at 01223446100 and ask .",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-pricerange",
+          "moderate"
+        ]
+      ],
+      "transcript": "thanks . going back to the hotel booking , would you try a moderate price range , please ?",
+      "system_acts": [
+        [
+          "fee",
+          "do not have information"
+        ],
+        [
+          "name",
+          "parkside pools"
+        ],
+        [
+          "phone",
+          "01223446100"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "there are 7 entries with a moderate price range . is that what you wanted ?",
+      "turn_idx": 6,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "hotel"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-pricerange",
+          "expensive"
+        ],
+        [
+          "hotel-type",
+          "hotel"
+        ]
+      ],
+      "transcript": "no , i would like an expensive hotel .",
+      "system_acts": [
+        [
+          "price",
+          "moderate"
+        ],
+        [
+          "choice",
+          "7"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i am not showing any entries here . can i help with anything else ?",
+      "turn_idx": 7,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-pricerange",
+          "moderate"
+        ],
+        [
+          "hotel-type",
+          "guesthouse"
+        ]
+      ],
+      "transcript": "try a moderate -ly priced guesthouse in the north then . with 4 stars",
+      "system_acts": [],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "there are 7 entries listed here . do you care about parking and internet ?",
+      "turn_idx": 8,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book stay",
+          "5"
+        ]
+      ],
+      "transcript": "no it really does not matter , just whatever is in the moderate price range . i'll need it for 5 nights .",
+      "system_acts": [
+        "internet",
+        "parking",
+        [
+          "choice",
+          "7"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "would you like to try the acorn guest house ?",
+      "turn_idx": 9,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "that sounds great . can you book it for me ?",
+      "system_acts": [],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "how many nights are you wanting to stay ?",
+      "turn_idx": 10,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "wednesday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "acorn guest house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book day",
+          "wednesday"
+        ],
+        [
+          "hotel-name",
+          "acorn guest house"
+        ]
+      ],
+      "transcript": "i need it for 5 nights starting on wednesday .",
+      "system_acts": [
+        "stay"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i have started your reservation , but i need to know how many people will be staying",
+      "turn_idx": 11,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "wednesday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "acorn guest house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book people",
+          "5"
+        ]
+      ],
+      "transcript": "i would like to book it for 5 people . thanks .",
+      "system_acts": [
+        "people"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "it is booked , and your reference number is bg6ttzoq",
+      "turn_idx": 12,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "wednesday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "5"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "acorn guest house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "north"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-pricerange",
+              "moderate"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "swimming pool"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-name",
+              "parkside pools"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "thanks for all the help . you've taken care of both my concerns . goodbye .",
+      "system_acts": [],
+      "domain": "hotel"
+    }
+  ]
+}
