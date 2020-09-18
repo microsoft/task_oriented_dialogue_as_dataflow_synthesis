@@ -1,0 +1,836 @@
+{
+  "dialogue_idx": "MUL2096.json",
+  "domains": [
+    "train",
+    "hotel"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-area",
+          "west"
+        ],
+        [
+          "hotel-stars",
+          "4"
+        ]
+      ],
+      "transcript": "i would like a 4 star hotel in the west , please .",
+      "system_acts": [],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "finches bed and breakfast is a guesthouse in the cheap range . huntingdon marriott hotel is in the expensive range and the cambridge belfry is a hotel in the cheap range .",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-parking",
+          "yes"
+        ]
+      ],
+      "transcript": "which of these hotel -s include free parking ?",
+      "system_acts": [
+        [
+          "price",
+          "cheap"
+        ],
+        [
+          "price",
+          "expensive"
+        ],
+        [
+          "price",
+          "cheap"
+        ],
+        [
+          "name",
+          "finches bed and breakfast"
+        ],
+        [
+          "name",
+          "huntingdon marriott hotel"
+        ],
+        [
+          "name",
+          "the cambridge belfry"
+        ],
+        [
+          "type",
+          "guesthouse"
+        ],
+        [
+          "type",
+          "hotel"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "they all have free parking and free wifi .",
+      "turn_idx": 2,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book day",
+          "sunday"
+        ],
+        [
+          "hotel-book people",
+          "4"
+        ],
+        [
+          "hotel-book stay",
+          "3"
+        ],
+        [
+          "hotel-internet",
+          "yes"
+        ]
+      ],
+      "transcript": "i would like to book 1 for 4 people for 3 nights starting sunday . will that be possible ?",
+      "system_acts": [
+        [
+          "choice",
+          "all"
+        ],
+        [
+          "internet",
+          "none"
+        ],
+        [
+          "parking",
+          "none"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i was not able to book any of the 4 star hotel -s for 3 nights starting sunday . can you book on a different day or a shorter stay ?",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book stay",
+          "1"
+        ]
+      ],
+      "transcript": "yes can you try 1 night instead ?",
+      "system_acts": [
+        "stay",
+        "day"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "perfect ! you have been booked and your reference number is dq0xvs0z .",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "awesome . i am also looking for a train .",
+      "system_acts": [],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "i can help you with a train as well . when would you like this scheduled for ? where will you be departing and arriving ?",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "20:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-arriveby",
+          "20:00"
+        ],
+        [
+          "train-departure",
+          "cambridge"
+        ]
+      ],
+      "transcript": "depart from cambridge and should arrive by 20:00 .",
+      "system_acts": [
+        "dest",
+        "day",
+        "depart"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "what is your destination ?",
+      "turn_idx": 6,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "leicester"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "20:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-destination",
+          "leicester"
+        ]
+      ],
+      "transcript": "it is leicester .",
+      "system_acts": [
+        "dest"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "what day would you like to travel ?",
+      "turn_idx": 7,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "leicester"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "monday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "20:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-book people",
+          "1"
+        ],
+        [
+          "train-day",
+          "monday"
+        ]
+      ],
+      "transcript": "i would like to travel on monday .",
+      "system_acts": [
+        "day"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "booking was successful , the total fee is 37.79 gbp payable at the station . reference number is : 4gvi1b9l .",
+      "turn_idx": 8,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-internet",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "leicester"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "monday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "20:00"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "thank you for all your help today . i have all i need at this time .",
+      "system_acts": [],
+      "domain": "train"
+    }
+  ]
+}

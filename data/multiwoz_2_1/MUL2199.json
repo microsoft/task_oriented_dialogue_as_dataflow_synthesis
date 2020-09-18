@@ -1,0 +1,1073 @@
+{
+  "dialogue_idx": "MUL2199.json",
+  "domains": [
+    "train",
+    "hotel"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-destination",
+          "norwich"
+        ],
+        [
+          "train-departure",
+          "cambridge"
+        ]
+      ],
+      "transcript": "i need information for a train from cambridge to norwich .",
+      "system_acts": [],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "there are several trains departing from cambridge arriving in norwich at a price of 17.60 pounds . what day are you looking to travel ?",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-leaveat",
+          "21:30"
+        ],
+        [
+          "train-day",
+          "sunday"
+        ]
+      ],
+      "transcript": "i am looking to travel on sunday , and leave after 21:30",
+      "system_acts": [
+        [
+          "choice",
+          "several"
+        ],
+        [
+          "depart",
+          "cambridge"
+        ],
+        [
+          "ticket",
+          "17.60 pounds"
+        ],
+        [
+          "dest",
+          "norwich"
+        ],
+        "day"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "i have train tr7767 leaving at 21:36 and arriving by 22:55 . would that be something that would work for you ?",
+      "turn_idx": 2,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-book people",
+          "1"
+        ]
+      ],
+      "transcript": "yes please book for 1 person and send the reference number .",
+      "system_acts": [
+        [
+          "arrive",
+          "22:55"
+        ],
+        [
+          "leave",
+          "21:36"
+        ],
+        [
+          "id",
+          "tr7767"
+        ]
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "okay , i have done that for you . your reference number is 0tdrhzkn .",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-stars",
+          "3"
+        ],
+        [
+          "hotel-type",
+          "guesthouse"
+        ]
+      ],
+      "transcript": "thank you . i also need a place to stay . can you find me a 3 star guesthouse ?",
+      "system_acts": [],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "sure , what area of town are you interested in ?",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-area",
+          "centre"
+        ],
+        [
+          "hotel-parking",
+          "yes"
+        ]
+      ],
+      "transcript": "in the centre i guess . i do need free parking .",
+      "system_acts": [
+        "area"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i am sorry , there are not any 3 star guesthouses in the centre , would you like to try another level ?",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-area",
+          "west"
+        ]
+      ],
+      "transcript": "no , can you check for a 3 star guesthouse in the west ?",
+      "system_acts": [
+        "stars"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "yes , there is the hobsons house . shall i go ahead and book that for you ?",
+      "turn_idx": 6,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "thursday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "hobsons house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book day",
+          "thursday"
+        ],
+        [
+          "hotel-book people",
+          "1"
+        ],
+        [
+          "hotel-book stay",
+          "3"
+        ],
+        [
+          "hotel-name",
+          "hobsons house"
+        ]
+      ],
+      "transcript": "yes please . it will be for the same group of people for 3 nights starting on thursday .",
+      "system_acts": [
+        [
+          "none",
+          "none"
+        ],
+        [
+          "none",
+          "none"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "okay , your booking was successful . your reference number is 9cny4ioq .",
+      "turn_idx": 7,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "thursday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "hobsons house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "college"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "attraction-type",
+          "college"
+        ],
+        [
+          "attraction-area",
+          "centre"
+        ]
+      ],
+      "transcript": "thank you . are there any colleges with free admission in the area ? or any other attractions that i may visit inbetween my meetings ?",
+      "system_acts": [],
+      "domain": "attraction"
+    },
+    {
+      "system_transcript": "what area would you prefer it to be in ?",
+      "turn_idx": 8,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "thursday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "hobsons house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "college"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "somewhere in the center that gives free parking . it s pretty important as that s where i am interested in . if that does not exist , i would like to be somewhere in the west .",
+      "system_acts": [
+        "area"
+      ],
+      "domain": "attraction"
+    },
+    {
+      "system_transcript": "i am sorry , the attractions segment on my computer system seems to be down at the moment . can i perhaps help with something else ?",
+      "turn_idx": 9,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "thursday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "hobsons house"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-parking",
+              "yes"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-stars",
+              "3"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-type",
+              "guesthouse"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-type",
+              "college"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "attraction-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "21:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "norwich"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "sunday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "that is alright . actually , that should be all i need today . thank you for your help . goodbye .",
+      "system_acts": [],
+      "domain": "attraction"
+    }
+  ]
+}

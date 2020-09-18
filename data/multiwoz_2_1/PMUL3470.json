@@ -1,0 +1,372 @@
+{
+  "dialogue_idx": "PMUL3470.json",
+  "domains": [
+    "train",
+    "hotel"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "express by holiday inn cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-name",
+          "express by holiday inn cambridge"
+        ]
+      ],
+      "transcript": "i am looking for a specific hotel , its name is express by holiday inn cambridge",
+      "system_acts": [],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "i have the express by holiday inn cambridge located on 1517 norman way , coldhams business park . their phone number is 01223866800 . would you like to know anything else ?",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "7"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "express by holiday inn cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book people",
+          "7"
+        ]
+      ],
+      "transcript": "yes , could you book the hotel room for me for 7 people ?",
+      "system_acts": [
+        [
+          "name",
+          "express by holiday inn cambridge"
+        ],
+        [
+          "addr",
+          "1517 norman way"
+        ],
+        [
+          "addr",
+          "coldhams business park"
+        ],
+        [
+          "phone",
+          "01223866800"
+        ]
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "yes , of course . what day would you like to stay ?",
+      "turn_idx": 2,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "monday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "7"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "express by holiday inn cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "hotel-book day",
+          "monday"
+        ],
+        [
+          "hotel-book stay",
+          "4"
+        ]
+      ],
+      "transcript": "monday , please . there will be 7 of us and we'd like to stay for 4 days .",
+      "system_acts": [
+        "day"
+      ],
+      "domain": "hotel"
+    },
+    {
+      "system_transcript": "here is the booking information:booking was successful . reference number is : 5f8g6j1g",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "monday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "7"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "express by holiday inn cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "thank you . i would also like to book a train , please .",
+      "system_acts": [],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "sure , which stations will you be traveling between ?",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "monday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "7"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "express by holiday inn cambridge"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "birmingham new street"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "none"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-destination",
+          "birmingham new street"
+        ],
+        [
+          "train-day",
+          "none"
+        ],
+        [
+          "train-departure",
+          "cambridge"
+        ]
+      ],
+      "transcript": "i will be going from cambridge to birmingham new street .",
+      "system_acts": [
+        "dest",
+        "depart"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "what time would you like to leave ? the trains depart every hour .",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "hotel-book day",
+              "monday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book people",
+              "7"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-book stay",
+              "4"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "hotel-name",
+              "express by holiday inn cambridge"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "birmingham new street"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "friday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-arriveby",
+              "17:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-day",
+          "friday"
+        ],
+        [
+          "train-arriveby",
+          "17:30"
+        ]
+      ],
+      "transcript": "whenever will get me there by 17:30 . i do need to leave on friday and i will need the travel time please .",
+      "system_acts": [
+        [
+          "leave",
+          "every hour"
+        ],
+        "leave"
+      ],
+      "domain": "train"
+    }
+  ]
+}

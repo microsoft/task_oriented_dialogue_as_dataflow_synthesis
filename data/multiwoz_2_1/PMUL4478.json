@@ -1,0 +1,204 @@
+{
+  "dialogue_idx": "PMUL4478.json",
+  "domains": [
+    "train",
+    "restaurant"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [],
+      "turn_label": [],
+      "transcript": "i am traveling to cambridge and looking forward to try local restaurant -s .",
+      "system_acts": [],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "okay , any type in mind ?",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "16:45"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "stevenage"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-leaveat",
+          "16:45"
+        ],
+        [
+          "train-departure",
+          "stevenage"
+        ]
+      ],
+      "transcript": "the train i am looking for should depart from stevenage and be leaving after 16:45 . can you help ?",
+      "system_acts": [
+        "food"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "okay . you mentioned finding a local restaurant , initially . would you like me to search for 1 ? if so , what kind of cuisine ?",
+      "turn_idx": 2,
+      "belief_state": [],
+      "turn_label": [],
+      "transcript": "i am looking for something local . what do you recommend ?",
+      "system_acts": [
+        "food"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "it depends on what your price range is .",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "singaporean"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-food",
+          "singaporean"
+        ],
+        [
+          "restaurant-pricerange",
+          "expensive"
+        ],
+        [
+          "restaurant-area",
+          "centre"
+        ]
+      ],
+      "transcript": "actually i am craving singaporean food , price is no object . i would also like something in the centre area .",
+      "system_acts": [
+        "price"
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "unfortunately , there is not a singaporean restaurant in the centre of town . any other preferences ?",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "asian oriental"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-food",
+          "asian oriental"
+        ]
+      ],
+      "transcript": "do you have any asian expensive restaurant -s ?",
+      "system_acts": [],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "yes , there s a place called kymmoy .",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "asian oriental"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-pricerange",
+              "expensive"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "centre"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "thank you so much for your information .",
+      "system_acts": [
+        [
+          "name",
+          "kymmoy"
+        ]
+      ],
+      "domain": "restaurant"
+    }
+  ]
+}

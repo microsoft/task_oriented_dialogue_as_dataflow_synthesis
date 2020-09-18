@@ -1,0 +1,1043 @@
+{
+  "dialogue_idx": "MUL1626.json",
+  "domains": [
+    "train",
+    "restaurant"
+  ],
+  "dialogue": [
+    {
+      "system_transcript": "",
+      "turn_idx": 0,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-day",
+          "saturday"
+        ],
+        [
+          "train-departure",
+          "cambridge"
+        ]
+      ],
+      "transcript": "i need to take a train from cambridge on saturday .",
+      "system_acts": [],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "there are 202 trains that fit that criteria , whats your destination ?",
+      "turn_idx": 1,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "train-leaveat",
+          "15:30"
+        ],
+        [
+          "train-destination",
+          "stansted airport"
+        ]
+      ],
+      "transcript": "i am going to stansted airport on saturday and need the train to leave anytime after 15:30 please",
+      "system_acts": [
+        [
+          "choice",
+          "202"
+        ],
+        "dest"
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "i have train id 2001 leaving at 16:40 arriving stansted airport at 17:08 . would you like me to confirm this for you .",
+      "turn_idx": 2,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "before i book this , what is the price ?",
+      "system_acts": [
+        [
+          "arrive",
+          "17:08"
+        ],
+        [
+          "leave",
+          "16:40"
+        ],
+        [
+          "dest",
+          "stansted airport"
+        ],
+        [
+          "id",
+          "2001"
+        ]
+      ],
+      "domain": "train"
+    },
+    {
+      "system_transcript": "the price is 8.08 pounds . would you like me to book it ?",
+      "turn_idx": 3,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-area",
+          "west"
+        ]
+      ],
+      "transcript": "no i am not ready to book a spot yet . i do need to find a place to eat in the west though .",
+      "system_acts": [
+        [
+          "ticket",
+          "8.08 pounds"
+        ]
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "there are 14 restaurant -s in the west . is there a particular cuisine you are looking for ?",
+      "turn_idx": 4,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-food",
+          "indian"
+        ]
+      ],
+      "transcript": "i would like an indian restaurant .",
+      "system_acts": [
+        "food",
+        [
+          "area",
+          "west"
+        ],
+        [
+          "choice",
+          "14"
+        ]
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "the tandoori palace has indian cuisine . would you like me to book a table ?",
+      "turn_idx": 5,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "10:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-name",
+              "tandoori palace"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-book day",
+          "saturday"
+        ],
+        [
+          "restaurant-book people",
+          "1"
+        ],
+        [
+          "restaurant-book time",
+          "10:15"
+        ],
+        [
+          "restaurant-name",
+          "tandoori palace"
+        ]
+      ],
+      "transcript": "yes i would love 1 , please . just me , and i would like to eat at 10:15 on the same day .",
+      "system_acts": [
+        [
+          "none",
+          "none"
+        ],
+        [
+          "food",
+          "indian"
+        ],
+        [
+          "name",
+          "tandoori palace"
+        ]
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "i apologize , the booking for that time slot was unsuccessful . would you like to book for another day or time ?",
+      "turn_idx": 6,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "09:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-name",
+              "tandoori palace"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-book time",
+          "09:15"
+        ]
+      ],
+      "transcript": "how about 9:15 ?",
+      "system_acts": [
+        "day",
+        "time"
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "they are not open that early , can i try another time ?",
+      "turn_idx": 7,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "11:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-name",
+              "tandoori palace"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-book time",
+          "11:15"
+        ]
+      ],
+      "transcript": "sure . are they open at 11:15 ?",
+      "system_acts": [
+        "time"
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "i am sorry , that time did not work either , would you like to try something else ?",
+      "turn_idx": 8,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "10:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-book time",
+          "10:15"
+        ]
+      ],
+      "transcript": "sure . please try 10:15 on the same day . i would like the reference number , please .",
+      "system_acts": [],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "i am sorry , neither 11:15 nor 10:15 are available at tandoori palace . would you like to try a different restaurant , maybe meghna , an indian place with a moderate price range ?",
+      "turn_idx": 9,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "10:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "yes , please book meghna for 10:15 , same day .",
+      "system_acts": [
+        "name"
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "unfortunately , there are no bookings available for that time . would you like to try a different time or day ?",
+      "turn_idx": 10,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "09:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [
+        [
+          "restaurant-book time",
+          "09:15"
+        ]
+      ],
+      "transcript": "i would really like indian food on saturday in the west area . if you can book it for 1 person at 10:15 or 9:15 i do not care which place .",
+      "system_acts": [
+        "day",
+        "time"
+      ],
+      "domain": "restaurant"
+    },
+    {
+      "system_transcript": "i booked india house for 1 at 9:15 on saturday , reference number xwr84us7 . the restaurant is at 31 newnham road . is this satisfactory ?",
+      "turn_idx": 11,
+      "belief_state": [
+        {
+          "slots": [
+            [
+              "restaurant-book day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book people",
+              "1"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-book time",
+              "09:15"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-food",
+              "indian"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "restaurant-area",
+              "west"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-leaveat",
+              "15:30"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-destination",
+              "stansted airport"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-day",
+              "saturday"
+            ]
+          ],
+          "act": "inform"
+        },
+        {
+          "slots": [
+            [
+              "train-departure",
+              "cambridge"
+            ]
+          ],
+          "act": "inform"
+        }
+      ],
+      "turn_label": [],
+      "transcript": "yes , i am relieved . i have no more questions . thank you for your persistence . goodbye .",
+      "system_acts": [
+        [
+          "addr",
+          "31 newnham road"
+        ]
+      ],
+      "domain": "restaurant"
+    }
+  ]
+}
