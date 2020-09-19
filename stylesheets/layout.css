@@ -377,7 +377,7 @@ button:focus {
   text-align: left;
 }
 #topCover #appTitle b {
-  font-weight: 250;
+  font-weight: 100;
 }
 #topCover #appSubtitle {
   color: #fff;
@@ -386,7 +386,7 @@ button:focus {
   padding: 0px;
   text-align: left;
   margin-bottom: 20px;
-  font-weight: 75;
+  font-weight: 25;
 }
 @media (max-width: 768px) {
   #topCover #appTitle {
