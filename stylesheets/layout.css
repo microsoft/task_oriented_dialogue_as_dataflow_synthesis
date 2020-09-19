@@ -154,18 +154,18 @@
   padding-bottom: 10px;
 }
 .cover h1 {
-  font-weight: 300;
+  font-weight: 600;
   margin: 8px 0px;
   font-size: 2em;
 }
 .cover h2 {
-  font-weight: 150;
+  font-weight: 300;
   font-size: 1.3em;
   margin: 8px 0px;
 }
 .cover p {
   font-size: 1.1em;
-  font-weight: 200;
+  font-weight: 400;
 }
 .cover .vertical-center {
   min-height: 100%;
@@ -373,11 +373,11 @@ button:focus {
   font-size: 5.3em;
   margin: 0px;
   padding: 0px;
-  font-weight: 10;
+  font-weight: 100;
   text-align: left;
 }
 #topCover #appTitle b {
-  font-weight: 10;
+  font-weight: 350;
 }
 #topCover #appSubtitle {
   color: #fff;
@@ -386,7 +386,6 @@ button:focus {
   padding: 0px;
   text-align: left;
   margin-bottom: 20px;
-  font-weight: 10;
 }
 @media (max-width: 768px) {
   #topCover #appTitle {
