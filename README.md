@@ -5,10 +5,18 @@
 
 
 This repository contains tools and instructions for reproducing the experiments in the paper
-**Task-Oriented Dialogue as Dataflow Synthesis** (to appear in TACL 2020).
+**Task-Oriented Dialogue as Dataflow Synthesis** (TACL 2020).
 If you use any source code or data included in this toolkit in your work, please cite the following paper.
 ```bib
-Coming soon
+@article{SMDataflow2020,
+  author = {Semantic Machines},
+  title = {Task-Oriented Dialogue as Dataflow Synthesis},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume = {8},
+  pages = {556-571},
+  year = {2020},
+  URL = { https://doi.org/10.1162/tacl_a_00333}
+}
 ```
 
 ## Install
