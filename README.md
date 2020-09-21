@@ -15,7 +15,7 @@ If you use any source code or data included in this toolkit in your work, please
   volume = {8},
   pages = {556-571},
   year = {2020},
-  URL = { https://doi.org/10.1162/tacl_a_00333}
+  URL = {https://doi.org/10.1162/tacl_a_00333}
 }
 ```
 
