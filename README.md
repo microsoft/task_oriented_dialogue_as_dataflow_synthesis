@@ -13,8 +13,9 @@ If you use any source code or data included in this toolkit in your work, please
   title = {Task-Oriented Dialogue as Dataflow Synthesis},
   journal = {Transactions of the Association for Computational Linguistics},
   volume = {8},
-  pages = {556-571},
+  pages = {556--571},
   year = {2020},
+  month = sep,
   url = {https://doi.org/10.1162/tacl_a_00333}
 }
 ```
