@@ -439,7 +439,7 @@ with the final model you get from the previous step.
    
     # creates the hypo file from predicted programs
     python -m dataflow.multiwoz.execute_programs \
-        --dialogues_file ${processed_translate_outdir}/test.dataflow_dialogues.jsonl \
+        --dialogues_file ${evaluation_outdir}/test.dataflow_dialogues.jsonl \
         --cheating_mode never \
         --outbase ${belief_state_tracker_eval_dir}/test.hypo
    
