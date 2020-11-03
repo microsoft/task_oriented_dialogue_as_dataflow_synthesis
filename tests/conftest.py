@@ -7,5 +7,5 @@ import pytest
 
 @pytest.fixture(scope="module")
 def data_dir() -> str:
-    base_dir = dirname(dirname(__file__))
+    base_dir = dirname(__file__)
     return join(base_dir, "data")
