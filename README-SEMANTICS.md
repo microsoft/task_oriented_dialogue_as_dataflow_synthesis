@@ -201,8 +201,8 @@ confirmation is required.
 
 ## Refer and Revise
 
-Sometimes the user may want to revise a previous request. For example, if
-the user asks "Anything earlier?" in follow-up turn, then we interpret
+Sometimes the user may want to revise a previous request. If
+the user asks "Anything earlier?" in a follow-up turn, then we interpret
 it as "redo an existing computation but constrain the event time to
 be earlier than a previously mentioned event's time". The program is:
 ```clojure
@@ -234,9 +234,9 @@ be earlier than a previously mentioned event's time". The program is:
 ```
 This program calls `refer` to extract a salient `Time` that was
 the start time of a previous event, then constructs a new `Constraint[Event]`
-requiring the start time to be earlier than that time. Then it calls
-the `ReviseConstraint` function to revise the `Constraint[Event]` in an existing
-computation with the new constraint. See Section 3, Section 4 of
+requiring the start time to be earlier than that time. Finally, it uses
+`ReviseConstraint` to revise the `Constraint[Event]` in an existing
+computation by the new constraint. See Section 3, Section 4 of
 [the paper](https://www.mitpressjournals.org/doi/pdf/10.1162/tacl_a_00333)
 for more details about `refer` and `ReviseConstraint`.
 
