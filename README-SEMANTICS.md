@@ -2,14 +2,15 @@
 
 SMCalFlow programs are written in the [Lispress](./README-LISPRESS.md)
 language. Executing those programs requires a *library* that defines
-the execution logic for each function. A library is not required for
-the semantic parsing task, but knowing the program
+the execution logic for each function. Although a library is not required for
+the semantic parsing task, knowing the program
 semantics can often help us understanding the dataset better, and
 sometimes helps making better modeling decisions.
 
 In this document, we use some representative programs to explain how
-calendar events are created, queried, updated and deleted. We also illustrate
-how context reference and revision works in the programming interface.
+calendar events are created, queried, updated and deleted in SMCalFlow.
+We also illustrate how context reference and revision works by a
+concrete example.
 
 ## Create Event
 
