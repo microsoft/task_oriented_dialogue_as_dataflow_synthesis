@@ -89,7 +89,7 @@ the event will be added to the user's calendar.
 
 The user can query events in the calendar. If the user says
 "Where is the avocado festival?", then the program is:
-```
+```clojure
 (Yield :output 
   (:location 
     (singleton 
@@ -119,7 +119,7 @@ handling mechanism (See Section 5 of
 
 The user can update existing events. For example, if
 the user says "Chang my meeting tomorrow to 4 PM", then the program is:
-```
+```clojure
 (Yield :output 
   (UpdateCommitEventWrapper :event 
     (UpdatePreflightEventWrapper 
@@ -169,7 +169,7 @@ before it actually takes the action.
 Deletion is similar to update, except that you don't
 need to specify a constraint for the new event. If the user says
 "Delete my meeting with Emma", then the program is:
-```
+```clojure
 (Yield :output 
   (DeleteCommitEventWrapper :event 
     (DeletePreflightEventWrapper :id 
@@ -204,7 +204,7 @@ Sometimes the user may want to revise a previous request. For example, if
 the user asks "Anything earlier?" in follow-up turn, then we interpret
 it as "redo an existing computation but constrain the event time to
 be earlier than a previously mentioned event's time". The program is:
-```
+```clojure
 (Yield :output 
   (Execute :intension 
     (ReviseConstraint 
