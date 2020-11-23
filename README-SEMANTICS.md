@@ -15,7 +15,7 @@ how context reference and revision works in the programming interface.
 
 Here is a program for the utterance "Create a work meeting on
 Monday at 11 AM":
-```
+```clojure
 (Yield :output 
   (CreateCommitEventWrapper :event 
     (CreatePreflightEventWrapper :constraint 
