@@ -1,4 +1,4 @@
-# SMCalFlow Program Semantics
+# Program Semantics
 
 SMCalFlow programs are written in the [Lispress](./README-LISPRESS.md)
 language. Executing those programs requires a *library* that defines

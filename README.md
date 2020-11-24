@@ -467,7 +467,8 @@ with the final model you get from the previous step.
     ```
     * The `exp0_evaluation_outdir` and `exp1_evaluation_outdir` are the `belief_state_tracker_eval_dir` in Step 7 for corresponding experiments. 
 
-## Understand SMCallFlow Programs
+## Understand SMCalFlow Programs
 
-Please read [this document](./README-LISPRESS.md) to understand the syntax of SMCallFlow
-programs, and read [this document](./README-SEMANTICS.md) to understand their semantics.
+Please read [this document](./README-LISPRESS.md) to understand the
+syntax of SMCalFlow programs, and read [this document](./README-SEMANTICS.md)
+to understand their semantics.
