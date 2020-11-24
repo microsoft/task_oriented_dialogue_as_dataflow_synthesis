@@ -23,10 +23,10 @@ Monday at 11 AM":
       (Constraint[Event] 
         :start 
           (Constraint[DateTime]
-            :date (?= (NextDOW :dow #(DayOfWeek \"MONDAY\")))
+            :date (?= (NextDOW :dow #(DayOfWeek "MONDAY")))
             :time (?= (NumberAM :number #(Number 11)))
           )) 
-        :subject (?= #(String \"work meeting\"))
+        :subject (?= #(String "work meeting"))
       )
     )
   )
@@ -39,7 +39,7 @@ can be compositional too. For example, the `start` field (which represents
 a constraint on the start time of the event) has two sub-constraints: `date` and
 `time`.
 
-Let's take a closer look at the `date` sub-field. This filed contains
+Let's take a closer look at the `date` sub-field. This field contains
 a `Date` constraint constructed by the `?=` function.
 Here, `?=` means "exact match". It takes an
 reference object of type `T` and returns a constraint
@@ -75,6 +75,15 @@ has been "confirmed" by the user. In this example, it is not confirmed
 yet, therefore an `UnconfirmedError` will be thrown, which triggers an
 agent utterance like: "Does this look right? \[showing an event card\]".
 
+The functions `CreatePreflightEventWrapper` and `CreateCommitEventWrapper`
+represent a common two-step process to modify a user's calendar.
+In a pre-processing step, the "Preflight" function takes a user constraint
+and runs constraint inference to figure out the actual change that the user
+wants to make, and the "Commit" function commits that change to the
+database. The "Wrapper" suffix suggests that both functions wrap a series of
+sub-steps in them, as we described above. The same naming convention
+is used in the update and the deletion programs too.
+
 If the user says "Yes" in the next turn, then the confirmation program
 will be like:
 ```
@@ -96,7 +105,7 @@ The user can query events in the calendar. If the user says
     (singleton 
       (:results 
         (FindEventWrapperWithDefaults :constraint 
-          (Constraint[Event] :subject (?~= #(String \"avocado festival\")))
+          (Constraint[Event] :subject (?~= #(String "avocado festival")))
         )
       )
     )
@@ -107,6 +116,10 @@ This program builds an `Event` constraint requiring the event's
 subject to fuzzily match the string "avocado festival" (the `?~=`
 function returns a "fuzzy match" constraint). It is then
 sent to the `FindEventWrapperWithDefaults` for querying the database.
+The "WithDefault" suffix suggests that the function may inject some
+default settings if they are not specified by the constraint,
+such as the default time zone and the default ordering of search results.
+
 The query will return a response object, whose `results` field contains
 a list of events that matches the constraint. The program
 calls the `singleton` function to convert the list to an element, and
@@ -119,7 +132,7 @@ handling mechanism (See Section 5 of
 ## Update Event
 
 The user can update existing events. For example, if
-the user says "Chang my meeting tomorrow to 4 PM", then the program is:
+the user says "Change my meeting tomorrow to 4 PM", then the program is:
 ```clojure
 (Yield :output 
   (UpdateCommitEventWrapper :event 
@@ -180,7 +193,7 @@ need to specify a constraint for the new event. If the user says
             (FindEventWrapperWithDefaults :constraint 
               (Constraint[Event] :attendees 
                 (AttendeeListHasRecipientConstraint :recipientConstraint 
-                  (RecipientWithNameLike :name #(PersonName \"Emma\"))
+                  (RecipientWithNameLike :name #(PersonName "Emma"))
                 )
               )
             )
@@ -209,7 +222,7 @@ be earlier than a previously mentioned event's time". The program is:
 (Yield :output 
   (Execute :intension 
     (ReviseConstraint 
-      :rootLocation (roleConstraint #(Path \"output\")) 
+      :rootLocation (roleConstraint #(Path "output")) 
       :oldLocation (Constraint[Constraint[Event]]) 
       :new 
         (Constraint[Event] :start 
@@ -219,7 +232,7 @@ be earlier than a previously mentioned event's time". The program is:
                 (refer 
                   (andConstraint 
                     (roleConstraint 
-                      (append #(List[Path] []) #(Path \"start\"))
+                      (append #(List[Path] []) #(Path "start"))
                     ) 
                     (extensionConstraint (Constraint[Time]))
                   )
@@ -233,16 +246,24 @@ be earlier than a previously mentioned event's time". The program is:
 )
 ```
 This program calls `refer` to extract a salient `Time` that was
-the start time of a previous event, then constructs a new `Constraint[Event]`
-requiring the start time to be earlier than that time. Finally, it uses
-`ReviseConstraint` to revise the `Constraint[Event]` in an existing
-computation by the new constraint. See Section 3, Section 4 of
+the start time of a previous event. Here, the `roleConstraint`
+requires that the referred computation is put into the `start` field of
+a structure, and the `extensionConstraint` constrains the value of
+that computation. In this example, it only requires the value type
+to be `Time`.
+
+The program then constructs a new `Constraint[Event]`
+requiring the start time to be earlier than the above time.
+Finally, it uses
+`ReviseConstraint` to find an existing root computation, and revises
+a sub-computation of it by the new constraint.
+See Section 3, Section 4 of
 [the paper](https://www.mitpressjournals.org/doi/pdf/10.1162/tacl_a_00333)
 for more details about `refer` and `ReviseConstraint`.
 
 It is worth noting that the above program is a valid revision program
-regardless of the type of the previous request: no matter it is a creation,
+regardless of the type of the previous request: whether it is a creation,
 query, update, deletion or another revision,
-they are all performed based on a
+they all operate on a
 `Constraint[Event]`. This uniformity guarantees that the program
 can be written independent of the dialogue history.
