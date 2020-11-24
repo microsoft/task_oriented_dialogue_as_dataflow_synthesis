@@ -79,7 +79,7 @@ The functions `CreatePreflightEventWrapper` and `CreateCommitEventWrapper`
 represent a common two-step process to modify a user's calendar.
 In a pre-processing step, the "Preflight" function takes a user constraint
 and runs constraint inference to figure out the actual change that the user
-wants to make, and the "Commit" function commits that change to the
+wants to make, then the "Commit" function commits that change to the
 database. The "Wrapper" suffix suggests that both functions wrap a series of
 sub-steps in them, as we described above. The same naming convention
 is used in the update and the deletion programs too.
