@@ -1,4 +1,4 @@
-# Understanding SMCalFlow programs
+# SMCalFlow Program Semantics
 
 SMCalFlow programs are written in the [Lispress](./README-LISPRESS.md)
 language. Executing those programs requires a *library* that defines
@@ -49,7 +49,7 @@ the event date is equal to "next Monday". Similarly, the `time` constraint
 is satisfied if the event's start time is equal to 11 AM, and the `subject`
 constraint is satisfied if the event's subject is equal to "work meeting".
 
-Why do we want to use **constraints**, instead of concrete values, to
+Why do we want to use *constraints*, instead of concrete values, to
 represent date, time and subject?
 It is because that constraints are flexible enough to represent
 the ambiguity in natural language. For example, if the user says "Create a work meeting
