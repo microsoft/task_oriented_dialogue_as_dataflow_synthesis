@@ -86,7 +86,7 @@ is used in the update and the deletion programs too.
 
 If the user says "Yes" in the next turn, then the confirmation program
 will be like:
-```
+```clojure
 (Yield :output (Execute :intension (ConfirmAndReturnAction)))
 ```
 The `ConfirmAndReturnAction` function puts a "confirm" token to the
@@ -247,15 +247,15 @@ be earlier than a previously mentioned event's time". The program is:
 ```
 This program calls `refer` to extract a salient `Time` that was
 the start time of a previous event. Here, the `roleConstraint`
-requires that the referred computation is put into the `start` field of
-a structure, and the `extensionConstraint` constrains the value of
+requires that the referred computation is in the `start` field of
+a structure, and the `extensionConstraint` constrains the result of
 that computation. In this example, it only requires the value type
 to be `Time`.
 
 The program then constructs a new `Constraint[Event]`
-requiring the start time to be earlier than the above time.
+requiring the start time to be earlier than the referred time.
 Finally, it uses
-`ReviseConstraint` to find an existing root computation, and revises
+`ReviseConstraint` to find an existing root program, and revises
 a sub-computation of it by the new constraint.
 See Section 3, Section 4 of
 [the paper](https://www.mitpressjournals.org/doi/pdf/10.1162/tacl_a_00333)
