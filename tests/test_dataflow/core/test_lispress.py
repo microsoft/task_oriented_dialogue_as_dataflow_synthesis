@@ -91,7 +91,8 @@ surface_strings = [
     '(#(String "i got quotes\\""))',
     # tests that empty plans are handled correctly
     "()",
-    # tests that no whitespace is inserted between "#" and "("
+    # regression test that no whitespace is inserted between "#" and "(".
+    # `#(PersonName "Tom")` was being rendered with whitespace.
     """
 (Yield
   :output (:start
@@ -131,6 +132,7 @@ def test_surface_to_program_round_trips():
         sexp = parse_lispress(surface_string)
         program, _ = lispress_to_program(sexp, 0)
         round_tripped_sexp = program_to_lispress(program)
+        assert round_tripped_sexp == sexp
         round_tripped_surface_string = render_pretty(round_tripped_sexp, max_width=60)
         assert round_tripped_surface_string == surface_string
 
