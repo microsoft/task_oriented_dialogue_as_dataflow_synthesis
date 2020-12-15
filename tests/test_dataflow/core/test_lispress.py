@@ -91,6 +91,21 @@ surface_strings = [
     '(#(String "i got quotes\\""))',
     # tests that empty plans are handled correctly
     "()",
+    # tests that no whitespace is inserted between "#" and "("
+    """
+(Yield
+  :output (:start
+    (FindNumNextEvent
+      :constraint (Constraint[Event]
+        :attendees (AttendeeListHasRecipient
+          :recipient (FindManager
+            :recipient (Execute
+              :intension (refer
+                (extensionConstraint
+                  (RecipientWithNameLike
+                    :constraint (Constraint[Recipient])
+                    :name #(PersonName "Tom"))))))))
+      :number #(Number 1))))""",
 ]
 
 
