@@ -145,7 +145,7 @@ def _render_value_expressions(sexp: Sexp) -> Sexp:
     if isinstance(sexp, str):
         return sexp
     else:
-        result = []
+        result: List[Lispress] = []
         i = 0
         while i < len(sexp):
             s = sexp[i]
