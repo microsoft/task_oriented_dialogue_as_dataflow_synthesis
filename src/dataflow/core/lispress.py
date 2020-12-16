@@ -142,20 +142,19 @@ def _render_value_expressions(sexp: Sexp) -> Sexp:
     This ensures that values are always atomically rendered on the same line,
     and also allows us to render "#(" without a space between them.
     """
-    if isinstance(sexp, str) or len(sexp) < 2:
+    if isinstance(sexp, str):
         return sexp
-    elif VALUE_CHAR not in sexp:
-        return [_render_value_expressions(s) for s in sexp]
     else:
-        result = []
+        result: List[Lispress] = []
         i = 0
         while i < len(sexp):
-            token = sexp[i]
-            if token == VALUE_CHAR and i + 1 < len(sexp):
+            s = sexp[i]
+            if s == VALUE_CHAR and i + 1 < len(sexp):
+                # merge "#" and the following (rendered) subexpression
                 result.append(VALUE_CHAR + render_compact(sexp[i + 1]))
                 i += 2
             else:
-                result.append(token)
+                result.append(_render_value_expressions(s))
                 i += 1
         return result
 
