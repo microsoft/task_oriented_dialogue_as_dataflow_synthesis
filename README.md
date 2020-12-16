@@ -5,7 +5,7 @@
 
 
 This repository contains tools and instructions for reproducing the experiments in the paper
-**Task-Oriented Dialogue as Dataflow Synthesis** (TACL 2020).
+[**Task-Oriented Dialogue as Dataflow Synthesis** (TACL 2020)](https://www.mitpressjournals.org/doi/full/10.1162/tacl_a_00333).
 If you use any source code or data included in this toolkit in your work, please cite the following paper.
 ```bib
 @article{SMDataflow2020,
@@ -20,6 +20,12 @@ If you use any source code or data included in this toolkit in your work, please
   abstract = {We describe an approach to task-oriented dialogue in which dialogue state is represented as a dataflow graph. A dialogue agent maps each user utterance to a program that extends this graph. Programs include metacomputation operators for reference and revision that reuse dataflow fragments from previous turns. Our graph-based state enables the expression and manipulation of complex user intents, and explicit metacomputation makes these intents easier for learned models to predict. We introduce a new dataset, SMCalFlow, featuring complex dialogues about events, weather, places, and people. Experiments show that dataflow graphs and metacomputation substantially improve representability and predictability in these natural dialogues. Additional experiments on the MultiWOZ dataset show that our dataflow representation enables an otherwise off-the-shelf sequence-to-sequence model to match the best existing task-specific state tracking model. The SMCalFlow dataset, code for replicating experiments, and a public leaderboard are available at \url{https://www.microsoft.com/en-us/research/project/dataflow-based-dialogue-semantic-machines}.},
 }
 ```
+
+## Understand SMCalFlow Programs
+
+Please read [this document](./README-LISPRESS.md) to understand the
+syntax of SMCalFlow programs, and read [this document](./README-SEMANTICS.md)
+to understand their semantics.
 
 ## Install
 ```bash
@@ -466,9 +472,3 @@ with the final model you get from the previous step.
         --scores_json ${analysis_outdir}/exp0_vs_exp1.test.scores.json
     ```
     * The `exp0_evaluation_outdir` and `exp1_evaluation_outdir` are the `belief_state_tracker_eval_dir` in Step 7 for corresponding experiments. 
-
-## Understand SMCalFlow Programs
-
-Please read [this document](./README-LISPRESS.md) to understand the
-syntax of SMCalFlow programs, and read [this document](./README-SEMANTICS.md)
-to understand their semantics.
