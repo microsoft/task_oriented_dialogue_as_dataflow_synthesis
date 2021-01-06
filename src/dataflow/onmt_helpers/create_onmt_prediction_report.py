@@ -27,7 +27,7 @@ from dataflow.core.io import (
     save_jsonl_file,
 )
 from dataflow.core.linearize import seq_to_lispress
-from dataflow.core.lispress import render_compact
+from dataflow.core.lispress import render_compact, try_round_trip
 from dataflow.core.prediction_report import (
     PredictionReportDatum,
     save_prediction_report_tsv,
@@ -50,9 +50,29 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
     program_execution_oracle: ProgramExecutionOracle
 
     @property
+    def gold_canonical(self) -> str:
+        return try_round_trip(self.gold)
+
+    @property
+    def prediction_canonical(self) -> str:
+        return try_round_trip(self.prediction)
+
+    @property
     def is_correct(self) -> bool:
         return (
             self.gold == self.prediction
+            and self.program_execution_oracle.refer_are_correct
+        )
+
+    @property
+    def is_correct_leaderboard(self) -> bool:
+        """Returns true if the gold and the prediction match after canonicalization.
+
+        This is the metric used in the leaderboard, which would be slightly higher than the one reported in the TACL2020
+        paper, since the named arguments are sorted after canonicalization.
+        """
+        return (
+            self.gold_canonical == self.prediction_canonical
             and self.program_execution_oracle.refer_are_correct
         )
 
@@ -70,8 +90,11 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
                 "source": self.source,
                 "gold": self.gold,
                 "prediction": self.prediction,
+                "goldCanonical": self.gold_canonical,
+                "predictionCanonical": self.prediction_canonical,
                 "oracleResolveAreCorrect": self.program_execution_oracle.refer_are_correct,
                 "isCorrect": self.is_correct,
+                "isCorrectLeaderboard": self.is_correct_leaderboard,
             }
         )
         return flatten_datum_dict
@@ -132,8 +155,11 @@ def create_onmt_prediction_report(
             "source",
             "oracleResolveAreCorrect",
             "isCorrect",
+            "isCorrectLeaderboard",
             "gold",
             "prediction",
+            "goldCanonical",
+            "predictionCanonical",
         ],
     )
     return predictions_jsonl

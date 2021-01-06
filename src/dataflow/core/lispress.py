@@ -46,6 +46,22 @@ VALUE_CHAR = "#"
 Lispress = Sexp
 
 
+def try_round_trip(lispress_str: str) -> str:
+    """
+    If `lispress_str` is valid lispress, round-trips it to and from `Program`.
+    This puts named arguments in alphabetical order.
+    If it is not valid, returns the original string unmodified.
+    """
+    try:
+        # round-trip to canonicalize
+        lispress = parse_lispress(lispress_str)
+        program, _ = lispress_to_program(lispress, 0)
+        round_tripped = program_to_lispress(program)
+        return render_compact(round_tripped)
+    except Exception:  # pylint: disable=W0703
+        return lispress_str
+
+
 def program_to_lispress(program: Program) -> Lispress:
     """ Converts a Program to Lispress. """
     unsugared = _program_to_unsugared_lispress(program)
