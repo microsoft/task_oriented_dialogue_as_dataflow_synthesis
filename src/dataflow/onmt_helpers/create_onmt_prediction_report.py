@@ -50,13 +50,6 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
     program_execution_oracle: ProgramExecutionOracle
 
     @property
-    def is_correct(self) -> bool:
-        return (
-            self.gold == self.prediction
-            and self.program_execution_oracle.refer_are_correct
-        )
-
-    @property
     def gold_canonical(self) -> str:
         return try_round_trip(self.gold)
 
@@ -65,19 +58,23 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
         return try_round_trip(self.prediction)
 
     @property
+    def is_correct(self) -> bool:
+        return (
+            self.gold == self.prediction
+            and self.program_execution_oracle.refer_are_correct
+        )
+
+    @property
     def is_correct_leaderboard(self) -> bool:
         """Returns true if the gold and the prediction match after canonicalization.
 
         This is the metric used in the leaderboard, which would be slightly higher than the one reported in the TACL2020
         paper, since the named arguments are sorted after canonicalization.
-
-        The `if` statements are ordered intentionally to speed up the evaluation since `try_round_trip` is expensive.
         """
-        if self.program_execution_oracle.refer_are_correct:
-            return False
-        if self.gold == self.prediction:
-            return True
-        return try_round_trip(self.gold) == try_round_trip(self.prediction)
+        return (
+            self.gold_canonical == self.prediction_canonical
+            and self.program_execution_oracle.refer_are_correct
+        )
 
     def flatten_datum_id(self) -> Dict[str, Union[str, int]]:
         return {
@@ -93,6 +90,8 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
                 "source": self.source,
                 "gold": self.gold,
                 "prediction": self.prediction,
+                "goldCanonical": self.gold_canonical,
+                "predictionCanonical": self.prediction_canonical,
                 "oracleResolveAreCorrect": self.program_execution_oracle.refer_are_correct,
                 "isCorrect": self.is_correct,
                 "isCorrectLeaderboard": self.is_correct_leaderboard,
@@ -159,6 +158,8 @@ def create_onmt_prediction_report(
             "isCorrectLeaderboard",
             "gold",
             "prediction",
+            "goldCanonical"
+            "predictionCanonical"
         ],
     )
     return predictions_jsonl

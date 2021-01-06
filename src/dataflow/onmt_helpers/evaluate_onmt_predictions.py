@@ -90,12 +90,16 @@ def evaluate_dialogue(turns: List[Tuple[int, bool]]) -> EvaluationScores:
     )
 
 
-def evaluate_dataset(prediction_report_df: pd.DataFrame,) -> EvaluationScores:
+def evaluate_dataset(prediction_report_df: pd.DataFrame, use_leaderboard_metric: bool) -> EvaluationScores:
     # pylint: disable=singleton-comparison
     dataset_scores = EvaluationScores()
+    if use_leaderboard_metric:
+        field_name = "isCorrectLeaderboard"
+    else:
+        field_name = "isCorrect"
     for _dialogue_id, df_for_dialogue in prediction_report_df.groupby("dialogueId"):
         turns = [
-            (int(row.get("turnIndex")), row.get("isCorrect"))
+            (int(row.get("turnIndex")), row.get(field_name))
             for _, row in df_for_dialogue.iterrows()
         ]
         dialogue_scores = evaluate_dialogue(turns)
@@ -105,7 +109,9 @@ def evaluate_dataset(prediction_report_df: pd.DataFrame,) -> EvaluationScores:
 
 
 def main(
-    prediction_report_tsv: str, datum_ids_jsonl: Optional[str], scores_json: str,
+    prediction_report_tsv: str, datum_ids_jsonl: Optional[str],
+    use_leaderboard_metric: bool,
+    scores_json: str,
 ) -> None:
     prediction_report_df = pd.read_csv(
         prediction_report_tsv,
@@ -128,7 +134,7 @@ def main(
         ]
         prediction_report_df = prediction_report_df.loc[mask_datum_id]
 
-    scores = evaluate_dataset(prediction_report_df)
+    scores = evaluate_dataset(prediction_report_df, use_leaderboard_metric)
     with open(scores_json, "w") as fp:
         fp.write(jsons.dumps(scores, jdkwargs={"indent": 2}))
         fp.write("\n")
@@ -141,6 +147,10 @@ def add_arguments(argument_parser: argparse.ArgumentParser) -> None:
     argument_parser.add_argument(
         "--datum_ids_jsonl", default=None, help="if set, only evaluate on these turns",
     )
+    argument_parser.add_argument(
+        "--use_leaderboard_metric", default=False, action="store_true",
+        help="if set, use the isCorrectLeaderboard field instead of isCorrect field in the prediction report"
+    )
     argument_parser.add_argument("--scores_json", help="output scores json file")
 
 
@@ -152,8 +162,15 @@ if __name__ == "__main__":
     args = cmdline_parser.parse_args()
 
     print("Semantic Machines\N{TRADE MARK SIGN} software.")
+    if not args.use_leaderboard_metric:
+        print("""
+        WARNING: The flag --use_leaderboard_metric is not set. The reported results will be consistent with the numbers
+        reported in the TACL2020 paper. To report on the leaderboard evaluation metric, please use
+        --use_leaderboard_metric, which canonicalizes the labels and predictions.
+        """)
     main(
         prediction_report_tsv=args.prediction_report_tsv,
         datum_ids_jsonl=args.datum_ids_jsonl,
+        use_leaderboard_metric=args.use_leaderboard_metric,
         scores_json=args.scores_json,
     )
