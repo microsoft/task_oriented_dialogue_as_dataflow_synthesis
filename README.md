@@ -48,6 +48,10 @@ You can skip these two packages if you don't need to train or run the models.
 ## SMCalFlow Experiments
 Follow the steps below to reproduce the results reported in the paper (Table 2).
 
+**NOTE: We highly recommend following [the instructions](https://worksheets.codalab.org/worksheets/0xfc168b6317924c8a85df9ecd39bc52b2) for 
+[the leaderboard](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/) to report your results for consistency.**
+If you use your own evaluation script, please pay attention to the notes in Step 2 and Step 7.
+
 1. Download the SMCalFlow dataset on [this page](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/).
 
 2. Compute data statistics:
@@ -237,6 +241,13 @@ with the final model you get from the previous step.
         --datum_ids_json ${dataflow_dialogues_stats_dir}/valid.revise_turn_ids.jsonl \
         --scores_json ${evaluation_outdir}/valid.revise_turns.scores.json
     ```
+   * **NOTE**: The numbers reported using the scripts above should match those reported in Table 2 
+    in [the paper](https://www.mitpressjournals.org/doi/full/10.1162/tacl_a_00333).
+    [The leaderboard](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/) has used a slightly
+    different evaluation script that canonicalizes both the gold and predicted programs, and thus, the accuracy would be
+    slightly higher (e.g., 0.665 vs. 0.668 on the test set). To obtain the leaderboard results, please add 
+    `--use_leaderboard_metric` when running `python -m dataflow.onmt_helpers.create_onmt_prediction_report` to create
+    the report. 
    
 8. Calculate the statistical significance for two different experiments.
     ```bash
