@@ -27,7 +27,7 @@ from dataflow.core.io import (
     save_jsonl_file,
 )
 from dataflow.core.linearize import seq_to_lispress
-from dataflow.core.lispress import render_compact
+from dataflow.core.lispress import render_compact, try_round_trip
 from dataflow.core.prediction_report import (
     PredictionReportDatum,
     save_prediction_report_tsv,
@@ -56,6 +56,29 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
             and self.program_execution_oracle.refer_are_correct
         )
 
+    @property
+    def gold_canonical(self) -> str:
+        return try_round_trip(self.gold)
+
+    @property
+    def prediction_canonical(self) -> str:
+        return try_round_trip(self.prediction)
+
+    @property
+    def is_correct_leaderboard(self) -> bool:
+        """Returns true if the gold and the prediction match after canonicalization.
+
+        This is the metric used in the leaderboard, which would be slightly higher than the one reported in the TACL2020
+        paper, since the named arguments are sorted after canonicalization.
+
+        The `if` statements are ordered intentionally to speed up the evaluation since `try_round_trip` is expensive.
+        """
+        if self.program_execution_oracle.refer_are_correct:
+            return False
+        if self.gold == self.prediction:
+            return True
+        return try_round_trip(self.gold) == try_round_trip(self.prediction)
+
     def flatten_datum_id(self) -> Dict[str, Union[str, int]]:
         return {
             "dialogueId": self.datum_id.dialogue_id,
@@ -72,6 +95,7 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
                 "prediction": self.prediction,
                 "oracleResolveAreCorrect": self.program_execution_oracle.refer_are_correct,
                 "isCorrect": self.is_correct,
+                "isCorrectLeaderboard": self.is_correct_leaderboard,
             }
         )
         return flatten_datum_dict
@@ -132,6 +156,7 @@ def create_onmt_prediction_report(
             "source",
             "oracleResolveAreCorrect",
             "isCorrect",
+            "isCorrectLeaderboard",
             "gold",
             "prediction",
         ],

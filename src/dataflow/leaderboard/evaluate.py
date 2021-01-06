@@ -11,35 +11,14 @@ from typing import Iterable, List, Optional, Set, Tuple
 
 from dataflow.core.dialogue import TurnId
 from dataflow.core.io import load_jsonl_file
-from dataflow.core.lispress import (
-    lispress_to_program,
-    parse_lispress,
-    program_to_lispress,
-    render_compact,
-)
+from dataflow.core.lispress import try_round_trip
 from dataflow.core.turn_prediction import TurnAnswer, TurnPrediction, missing_prediction
-
-
-def _try_round_trip(lispress_str: str) -> str:
-    """
-    If `lispress_str` is valid lispress, round-trips it to and from `Program`.
-    This puts named arguments in alphabetical order.
-    If it is not valid, returns the original string unmodified.
-    """
-    try:
-        # round-trip to canonicalize
-        lispress = parse_lispress(lispress_str)
-        program, _ = lispress_to_program(lispress, 0)
-        round_tripped = program_to_lispress(program)
-        return render_compact(round_tripped)
-    except Exception:  # pylint: disable=W0703
-        return lispress_str
 
 
 def evaluate_prediction_exact_match(pred: TurnPrediction, gold: TurnAnswer) -> bool:
     assert pred.datum_id == gold.datum_id, f"mismatched data: {pred}, {gold}"
-    pred_lispress = _try_round_trip(pred.lispress)
-    gold_lispress = _try_round_trip(gold.lispress)
+    pred_lispress = try_round_trip(pred.lispress)
+    gold_lispress = try_round_trip(gold.lispress)
     return (
         pred_lispress == gold_lispress
         and gold.program_execution_oracle.refer_are_correct
