@@ -169,11 +169,10 @@ if __name__ == "__main__":
     print("Semantic Machines\N{TRADE MARK SIGN} software.")
     if not args.use_leaderboard_metric:
         print(
-            """
-        WARNING: The flag --use_leaderboard_metric is not set. The reported results will be consistent with the numbers
-        reported in the TACL2020 paper. To report on the leaderboard evaluation metric, please use
-        --use_leaderboard_metric, which canonicalizes the labels and predictions.
-        """
+            "WARNING: The flag --use_leaderboard_metric is not set."
+            " The reported results will be consistent with the numbers"
+            " reported in the TACL2020 paper. To report on the leaderboard evaluation metric, please use"
+            " --use_leaderboard_metric, which canonicalizes the labels and predictions."
         )
     main(
         prediction_report_tsv=args.prediction_report_tsv,
