@@ -90,7 +90,9 @@ def evaluate_dialogue(turns: List[Tuple[int, bool]]) -> EvaluationScores:
     )
 
 
-def evaluate_dataset(prediction_report_df: pd.DataFrame, use_leaderboard_metric: bool) -> EvaluationScores:
+def evaluate_dataset(
+    prediction_report_df: pd.DataFrame, use_leaderboard_metric: bool
+) -> EvaluationScores:
     # pylint: disable=singleton-comparison
     dataset_scores = EvaluationScores()
     if use_leaderboard_metric:
@@ -109,7 +111,8 @@ def evaluate_dataset(prediction_report_df: pd.DataFrame, use_leaderboard_metric:
 
 
 def main(
-    prediction_report_tsv: str, datum_ids_jsonl: Optional[str],
+    prediction_report_tsv: str,
+    datum_ids_jsonl: Optional[str],
     use_leaderboard_metric: bool,
     scores_json: str,
 ) -> None:
@@ -148,8 +151,10 @@ def add_arguments(argument_parser: argparse.ArgumentParser) -> None:
         "--datum_ids_jsonl", default=None, help="if set, only evaluate on these turns",
     )
     argument_parser.add_argument(
-        "--use_leaderboard_metric", default=False, action="store_true",
-        help="if set, use the isCorrectLeaderboard field instead of isCorrect field in the prediction report"
+        "--use_leaderboard_metric",
+        default=False,
+        action="store_true",
+        help="if set, use the isCorrectLeaderboard field instead of isCorrect field in the prediction report",
     )
     argument_parser.add_argument("--scores_json", help="output scores json file")
 
@@ -163,11 +168,13 @@ if __name__ == "__main__":
 
     print("Semantic Machines\N{TRADE MARK SIGN} software.")
     if not args.use_leaderboard_metric:
-        print("""
+        print(
+            """
         WARNING: The flag --use_leaderboard_metric is not set. The reported results will be consistent with the numbers
         reported in the TACL2020 paper. To report on the leaderboard evaluation metric, please use
         --use_leaderboard_metric, which canonicalizes the labels and predictions.
-        """)
+        """
+        )
     main(
         prediction_report_tsv=args.prediction_report_tsv,
         datum_ids_jsonl=args.datum_ids_jsonl,

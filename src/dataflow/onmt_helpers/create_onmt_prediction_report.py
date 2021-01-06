@@ -158,8 +158,7 @@ def create_onmt_prediction_report(
             "isCorrectLeaderboard",
             "gold",
             "prediction",
-            "goldCanonical"
-            "predictionCanonical"
+            "goldCanonical" "predictionCanonical",
         ],
     )
     return predictions_jsonl
