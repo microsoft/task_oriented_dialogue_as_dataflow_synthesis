@@ -15,10 +15,11 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+from pydantic.dataclasses import dataclass
+
 from dataflow.core.dialogue import Dialogue, Turn, TurnId
 from dataflow.core.io import load_jsonl_file, save_jsonl_file
 from dataflow.core.program_utils import DataflowFn
-from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)

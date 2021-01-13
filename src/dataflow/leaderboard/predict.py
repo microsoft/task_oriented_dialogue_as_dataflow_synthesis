@@ -9,10 +9,11 @@ import argparse
 from typing import List
 
 import jsons
+from more_itertools import chunked
+
 from dataflow.core.dialogue import TurnId
 from dataflow.core.io import save_jsonl_file
 from dataflow.core.turn_prediction import TurnPrediction
-from more_itertools import chunked
 
 
 def build_prediction_report_datum(

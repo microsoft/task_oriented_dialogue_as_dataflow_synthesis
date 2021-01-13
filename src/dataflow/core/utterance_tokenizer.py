@@ -4,8 +4,9 @@ import re
 from typing import List
 
 import spacy
-from dataflow.core.constants import SpecialStrings
 from spacy.language import Language
+
+from dataflow.core.constants import SpecialStrings
 
 
 def tokenize_datetime(text: str) -> str:

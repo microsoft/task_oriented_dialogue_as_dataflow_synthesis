@@ -10,10 +10,11 @@ import re
 from typing import Dict, Iterator, List, TextIO
 
 import jsons
-from dataflow.core.constants import SpecialStrings
-from dataflow.core.dialogue import Dialogue, Turn, TurnId
 from pydantic.dataclasses import dataclass
 from tqdm import tqdm
+
+from dataflow.core.constants import SpecialStrings
+from dataflow.core.dialogue import Dialogue, Turn, TurnId
 
 # We assume all dialogues start from turn 0.
 # This is true for MultiWoZ and CalFlow datasets.

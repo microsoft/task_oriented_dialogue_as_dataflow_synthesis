@@ -11,12 +11,13 @@ from dataclasses import field
 from typing import Dict, cast
 
 import jsons
+from pydantic.dataclasses import dataclass
+
 from dataflow.core.io import load_jsonl_file_and_build_lookup
 from dataflow.multiwoz.create_belief_state_prediction_report import (
     BeliefStatePredictionReportDatum,
 )
 from dataflow.multiwoz.ontology import DATAFLOW_SLOT_NAMES_FOR_DOMAIN
-from pydantic.dataclasses import dataclass
 
 
 @dataclass
