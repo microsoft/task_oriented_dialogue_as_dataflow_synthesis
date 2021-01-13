@@ -53,10 +53,6 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
 
     @property
     def gold_canonical(self) -> str:
-        """Returns canonical form of the gold lispress.
-
-        The canonical form is un-tokenized, compact, and sort named arguments in alphabetical order.
-        """
         return to_canonical_form(self.gold)
 
     @property
