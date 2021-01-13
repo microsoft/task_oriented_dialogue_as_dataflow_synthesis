@@ -26,8 +26,8 @@ from dataflow.core.io import (
     load_jsonl_file_and_build_lookup,
     save_jsonl_file,
 )
-from dataflow.core.linearize import seq_to_lispress
-from dataflow.core.lispress import render_compact, try_round_trip
+from dataflow.core.linearize import seq_to_lispress, to_canonical_form
+from dataflow.core.lispress import render_compact
 from dataflow.core.prediction_report import (
     PredictionReportDatum,
     save_prediction_report_tsv,
@@ -45,17 +45,22 @@ _PARSE_ERROR_LISPRESS = '(parseError #(InvalidLispress "")'
 class OnmtPredictionReportDatum(PredictionReportDatum):
     datum_id: TurnId
     source: str
+    # The tokenized gold lispress.
     gold: str
+    # The tokenized predicted lispress.
     prediction: str
     program_execution_oracle: ProgramExecutionOracle
 
     @property
     def gold_canonical(self) -> str:
-        return try_round_trip(self.gold)
+        return to_canonical_form(self.gold)
 
     @property
     def prediction_canonical(self) -> str:
-        return try_round_trip(self.prediction)
+        try:
+            return to_canonical_form(self.prediction)
+        except Exception:  # pylint: disable=W0703
+            return _PARSE_ERROR_LISPRESS
 
     @property
     def is_correct(self) -> bool:
