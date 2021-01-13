@@ -4,6 +4,7 @@ import json
 import os
 
 import jsons
+from test_dataflow.multiwoz.test_create_programs import load_test_trade_dialogues
 
 from dataflow.multiwoz.create_belief_state_prediction_report import (
     main as create_belief_state_prediction_report,
@@ -18,7 +19,6 @@ from dataflow.multiwoz.evaluate_belief_state_predictions import (
 )
 from dataflow.multiwoz.execute_programs import main as execute_programs
 from dataflow.multiwoz.patch_trade_dialogues import main as patch_trade_dialogues
-from test_dataflow.multiwoz.test_create_programs import load_test_trade_dialogues
 
 
 def test_cli_workflow(data_dir: str, tmp_path: str):

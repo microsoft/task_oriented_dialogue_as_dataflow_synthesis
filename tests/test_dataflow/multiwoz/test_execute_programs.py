@@ -2,6 +2,8 @@
 #  Licensed under the MIT license.
 from typing import Any, Dict
 
+from test_dataflow.multiwoz.conftest import build_trade_dialogue
+
 from dataflow.core.utterance_tokenizer import UtteranceTokenizer
 from dataflow.multiwoz.create_belief_state_tracker_data import (
     build_belief_state_from_belief_dict,
@@ -10,7 +12,6 @@ from dataflow.multiwoz.create_belief_state_tracker_data import (
 from dataflow.multiwoz.create_programs import create_programs_for_trade_dialogue
 from dataflow.multiwoz.execute_programs import execute_programs_for_dialogue
 from dataflow.multiwoz.salience_model import VanillaSalienceModel
-from test_dataflow.multiwoz.conftest import build_trade_dialogue
 
 
 def test_execute_programs(trade_dialogue_1: Dict[str, Any]):

@@ -11,7 +11,7 @@ import string
 from typing import List
 
 from dataflow.core.dialogue import Dialogue, TurnId
-from dataflow.core.io import save_jsonl_file, load_jsonl_file
+from dataflow.core.io import load_jsonl_file, save_jsonl_file
 from dataflow.core.turn_prediction import TurnAnswer, UtteranceWithContext
 
 
@@ -33,7 +33,9 @@ def main(
     contextualized_turns: List[UtteranceWithContext] = []
     turn_predictons: List[TurnAnswer] = []
 
-    for dialogue in load_jsonl_file(data_jsonl=dataflow_dialogues_jsonl, cls=Dialogue, unit=" dialogues"):
+    for dialogue in load_jsonl_file(
+        data_jsonl=dataflow_dialogues_jsonl, cls=Dialogue, unit=" dialogues"
+    ):
         for turn_index, turn in enumerate(dialogue.turns):
             if turn.skip:
                 continue
@@ -45,8 +47,7 @@ def main(
                 datum_id=datum_id,
                 user_utterance=turn.user_utterance,
                 context=Dialogue(
-                    dialogue_id=full_dialogue_id,
-                    turns=dialogue.turns[:turn_index],
+                    dialogue_id=full_dialogue_id, turns=dialogue.turns[:turn_index],
                 ),
             )
             answer = TurnAnswer(
