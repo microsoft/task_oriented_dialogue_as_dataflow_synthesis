@@ -10,8 +10,6 @@ import dataclasses
 from typing import Dict, Iterator
 
 import jsons
-from tqdm import tqdm
-
 from dataflow.core.dialogue import AgentUtterance, Turn
 from dataflow.core.turn_prediction import UtteranceWithContext
 from dataflow.onmt_helpers.create_onmt_text_data import (
@@ -19,6 +17,7 @@ from dataflow.onmt_helpers.create_onmt_text_data import (
     create_context_turns,
     create_onmt_text_datum_for_turn,
 )
+from tqdm import tqdm
 
 # We assume all dialogues start from turn 0.
 # This is true for MultiWoZ and CalFlow datasets.

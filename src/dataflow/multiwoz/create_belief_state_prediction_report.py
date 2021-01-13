@@ -10,8 +10,6 @@ import argparse
 import json
 from typing import Any, Dict, List, Union
 
-from pydantic.dataclasses import dataclass
-
 from dataflow.core.io import load_jsonl_file_and_build_lookup, save_jsonl_file
 from dataflow.core.prediction_report import (
     PredictionReportDatum,
@@ -31,6 +29,7 @@ from dataflow.multiwoz.create_belief_state_tracker_data import (
 from dataflow.multiwoz.execute_programs import CompleteExecutionResult
 from dataflow.multiwoz.ontology import DATAFLOW_SLOT_NAMES_FOR_DOMAIN
 from dataflow.multiwoz.trade_dst_utils import normalize_trade_slot_name
+from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)

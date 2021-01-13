@@ -5,8 +5,6 @@ from collections import Counter
 from json import JSONDecodeError, loads
 from typing import Dict, List, Set, Tuple
 
-from more_itertools import chunked
-
 from dataflow.core.program import (
     BuildStructOp,
     CallLikeOp,
@@ -25,6 +23,7 @@ from dataflow.core.program_utils import (
     unwrap_idx_str,
 )
 from dataflow.core.sexp import LEFT_PAREN, RIGHT_PAREN, Sexp, parse_sexp, sexp_to_str
+from more_itertools import chunked
 
 # node label used for external references
 EXTERNAL_LABEL = "ExternalReference"

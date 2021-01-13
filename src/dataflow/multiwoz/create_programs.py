@@ -15,8 +15,6 @@ from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Set, TextIO, Tuple
 
 import jsons
-from tqdm import tqdm
-
 from dataflow.core.dialogue import Dialogue, ProgramExecutionOracle, Turn
 from dataflow.core.lispress import program_to_lispress, render_compact
 from dataflow.core.program import CallLikeOp, Expression, Program
@@ -48,6 +46,7 @@ from dataflow.multiwoz.trade_dst_utils import (
     flatten_belief_state,
     get_domain_and_slot_name,
 )
+from tqdm import tqdm
 
 
 def mentioned_in_text(value: str, text: str) -> bool:

@@ -12,8 +12,6 @@ from typing import Dict, List, Optional, Tuple
 
 import jsons
 import numpy as np
-from pydantic.dataclasses import dataclass
-
 from dataflow.core.dialogue import Dialogue, Turn
 from dataflow.core.io import load_jsonl_file, load_jsonl_file_and_build_lookup
 from dataflow.core.program import BuildStructOp, CallLikeOp, Expression, ValueOp
@@ -25,6 +23,7 @@ from dataflow.multiwoz.salience_model import (
     SalienceModelBase,
     VanillaSalienceModel,
 )
+from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)

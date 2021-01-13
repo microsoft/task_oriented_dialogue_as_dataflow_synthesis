@@ -12,11 +12,10 @@ from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from statsmodels.stats.contingency_tables import mcnemar
-
 from dataflow.core.dialogue import TurnId
 from dataflow.core.io import load_jsonl_file
 from dataflow.onmt_helpers.evaluate_onmt_predictions import evaluate_dialogue
+from statsmodels.stats.contingency_tables import mcnemar
 
 
 def get_report_dataframes(

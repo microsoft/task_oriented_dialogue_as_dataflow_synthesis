@@ -14,10 +14,9 @@ from typing import List, Optional, Tuple
 
 import jsons
 import pandas as pd
-from pydantic.dataclasses import dataclass
-
 from dataflow.core.dialogue import TurnId
 from dataflow.core.io import load_jsonl_file
+from pydantic.dataclasses import dataclass
 
 
 @dataclass

@@ -10,9 +10,6 @@ import dataclasses
 from typing import Dict, Iterator, List, Union
 
 import jsons
-from more_itertools import chunked
-from pydantic.dataclasses import dataclass
-
 from dataflow.core.dialogue import (
     AgentUtterance,
     Dialogue,
@@ -33,6 +30,8 @@ from dataflow.core.prediction_report import (
     save_prediction_report_tsv,
     save_prediction_report_txt,
 )
+from more_itertools import chunked
+from pydantic.dataclasses import dataclass
 
 _DUMMY_USER_UTTERANCE = UserUtterance(original_text="", tokens=[])
 _DUMMY_AGENT_UTTERANCE = AgentUtterance(
