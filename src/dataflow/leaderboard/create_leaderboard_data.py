@@ -10,11 +10,8 @@ import random
 import string
 from typing import List
 
-import jsons
-from tqdm import tqdm
-
 from dataflow.core.dialogue import Dialogue, TurnId
-from dataflow.core.io import save_jsonl_file
+from dataflow.core.io import save_jsonl_file, load_jsonl_file
 from dataflow.core.turn_prediction import TurnAnswer, UtteranceWithContext
 
 
@@ -36,9 +33,7 @@ def main(
     contextualized_turns: List[UtteranceWithContext] = []
     turn_predictons: List[TurnAnswer] = []
 
-    for line in tqdm(open(dataflow_dialogues_jsonl), unit=" dialogues"):
-        dialogue: Dialogue
-        dialogue = jsons.loads(line.strip(), Dialogue)
+    for dialogue in load_jsonl_file(data_jsonl=dataflow_dialogues_jsonl, cls=Dialogue, unit=" dialogues"):
         for turn_index, turn in enumerate(dialogue.turns):
             if turn.skip:
                 continue
@@ -50,18 +45,18 @@ def main(
                 datum_id=datum_id,
                 user_utterance=turn.user_utterance,
                 context=Dialogue(
-                    dialogue_id=full_dialogue_id, turns=dialogue.turns[:turn_index]
+                    dialogue_id=full_dialogue_id,
+                    turns=dialogue.turns[:turn_index],
                 ),
             )
-            contextualized_turns.append(contextualized_turn)
-            turn_predictons.append(
-                TurnAnswer(
-                    datum_id=datum_id,
-                    user_utterance=turn.user_utterance.original_text,
-                    lispress=" ".join(turn.tokenized_lispress()),
-                    program_execution_oracle=turn.program_execution_oracle,
-                )
+            answer = TurnAnswer(
+                datum_id=datum_id,
+                user_utterance=turn.user_utterance.original_text,
+                lispress=turn.lispress,
+                program_execution_oracle=turn.program_execution_oracle,
             )
+            contextualized_turns.append(contextualized_turn)
+            turn_predictons.append(answer)
             new_dialogue_id_index += 1
 
     random.shuffle(contextualized_turns)
