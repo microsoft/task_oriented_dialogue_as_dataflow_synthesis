@@ -12,6 +12,7 @@ from dataflow.core.lispress import (
     Lispress,
     lispress_to_program,
     program_to_lispress,
+    render_compact,
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import Idx, OpType
@@ -26,7 +27,7 @@ def to_canonical_form(tokenized_lispress: str) -> str:
     lispress = seq_to_lispress(tokenized_lispress.split(" "))
     program, _ = lispress_to_program(lispress, 0)
     round_tripped = program_to_lispress(program)
-    return round_tripped
+    return render_compact(round_tripped)
 
 
 def seq_to_program(seq: List[str], idx: Idx) -> Tuple[Program, Idx]:
