@@ -19,11 +19,9 @@ def evaluate_prediction_exact_match(pred: TurnPrediction, gold: TurnAnswer) -> b
     assert pred.datum_id == gold.datum_id, f"mismatched data: {pred}, {gold}"
     pred_lispress = try_round_trip(pred.lispress)
     gold_lispress = try_round_trip(gold.lispress)
-    if pred_lispress != gold_lispress:
-       print(f'{gold.datum_id}\ngold: {gold_lispress}\npred: {pred_lispress}\n')
     return (
         pred_lispress == gold_lispress
-        #and gold.program_execution_oracle.refer_are_correct
+        and gold.program_execution_oracle.refer_are_correct
     )
 
 
