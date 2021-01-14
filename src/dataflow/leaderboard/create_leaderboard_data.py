@@ -24,6 +24,7 @@ def main(
 ) -> None:
     contextualized_turns: List[UtteranceWithContext] = []
     turn_predictons: List[TurnAnswer] = []
+
     for dialogue in load_jsonl_file(
         data_jsonl=dataflow_dialogues_jsonl, cls=Dialogue, unit=" dialogues"
     ):
@@ -41,6 +42,7 @@ def main(
                     dialogue_id=full_dialogue_id, turns=dialogue.turns[:turn_index],
                 ),
             )
+<<<<<<< HEAD
             contextualized_turns.append(contextualized_turn)
             turn_predictons.append(
                 TurnAnswer(
@@ -50,6 +52,17 @@ def main(
                     program_execution_oracle=turn.program_execution_oracle,
                 )
             )
+=======
+            answer = TurnAnswer(
+                datum_id=datum_id,
+                user_utterance=turn.user_utterance.original_text,
+                lispress=turn.lispress,
+                program_execution_oracle=turn.program_execution_oracle,
+            )
+            contextualized_turns.append(contextualized_turn)
+            turn_predictons.append(answer)
+            new_dialogue_id_index += 1
+>>>>>>> origin/master
 
     random.shuffle(contextualized_turns)
     save_jsonl_file(contextualized_turns, contextualized_turns_file)
