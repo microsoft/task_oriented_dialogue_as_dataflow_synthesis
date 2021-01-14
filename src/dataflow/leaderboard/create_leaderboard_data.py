@@ -6,22 +6,14 @@ Semantic Machines\N{TRADE MARK SIGN} software.
 Converts native Calflow data to the format used by the leaderboard.
 """
 import argparse
+import hashlib
 import random
 import string
 from typing import List
 
-import jsons
-from tqdm import tqdm
-
 from dataflow.core.dialogue import Dialogue, TurnId
-from dataflow.core.io import save_jsonl_file
+from dataflow.core.io import load_jsonl_file, save_jsonl_file
 from dataflow.core.turn_prediction import TurnAnswer, UtteranceWithContext
-
-
-def get_random_string(length: int) -> str:
-    letters = string.ascii_lowercase
-    result_str = "".join(random.choice(letters) for _ in range(length))
-    return result_str
 
 
 def main(
@@ -30,27 +22,23 @@ def main(
     contextualized_turns_file: str,
     turn_answers_file: str,
 ) -> None:
-    new_dialogue_id_index = 0
-    new_dialogue_ids = [get_random_string(16) for _ in range(500000)]
-    new_dialogue_ids = list(set(new_dialogue_ids))
     contextualized_turns: List[UtteranceWithContext] = []
     turn_predictons: List[TurnAnswer] = []
-
-    for line in tqdm(open(dataflow_dialogues_jsonl), unit=" dialogues"):
-        dialogue: Dialogue
-        dialogue = jsons.loads(line.strip(), Dialogue)
+    for dialogue in load_jsonl_file(
+        data_jsonl=dataflow_dialogues_jsonl, cls=Dialogue, unit=" dialogues"
+    ):
         for turn_index, turn in enumerate(dialogue.turns):
             if turn.skip:
                 continue
             full_dialogue_id = (
-                dialogue_id_prefix + "-" + new_dialogue_ids[new_dialogue_id_index]
+                dialogue_id_prefix + "-" + hashlib.sha1(str.encode(dialogue.dialogue_id)).hexdigest()
             )
             datum_id = TurnId(full_dialogue_id, turn.turn_index)
             contextualized_turn = UtteranceWithContext(
                 datum_id=datum_id,
                 user_utterance=turn.user_utterance,
                 context=Dialogue(
-                    dialogue_id=full_dialogue_id, turns=dialogue.turns[:turn_index]
+                    dialogue_id=full_dialogue_id, turns=dialogue.turns[:turn_index],
                 ),
             )
             contextualized_turns.append(contextualized_turn)
@@ -58,11 +46,10 @@ def main(
                 TurnAnswer(
                     datum_id=datum_id,
                     user_utterance=turn.user_utterance.original_text,
-                    lispress=" ".join(turn.tokenized_lispress()),
+                    lispress=turn.lispress,
                     program_execution_oracle=turn.program_execution_oracle,
                 )
             )
-            new_dialogue_id_index += 1
 
     random.shuffle(contextualized_turns)
     save_jsonl_file(contextualized_turns, contextualized_turns_file)

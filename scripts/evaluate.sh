@@ -9,7 +9,7 @@
 gold_file=$1
 prediction_file=$2
 
-pip install --user .
+#pip install . #--user
 export PATH=$PATH:.local/bin
 
 python -m dataflow.leaderboard.evaluate  --predictions_jsonl ${prediction_file} --gold_jsonl ${gold_file} --scores_json scores.json
