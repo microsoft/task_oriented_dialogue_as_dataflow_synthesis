@@ -34,7 +34,7 @@ def main(
                 dialogue_id_prefix
                 + "-"
                 + hashlib.sha1(
-                    str.encode(dialogue.dialogue_id + ":" + turn.turn_index)
+                    str.encode(dialogue.dialogue_id + ":" + str(turn.turn_index))
                 ).hexdigest()
             )
             datum_id = TurnId(full_dialogue_id, turn.turn_index)
