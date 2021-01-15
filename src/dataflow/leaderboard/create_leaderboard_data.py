@@ -32,7 +32,7 @@ def main(
             if turn.skip:
                 continue
             full_dialogue_id = (
-                dialogue_id_prefix + "-" + hashlib.sha1(str.encode(dialogue.dialogue_id)).hexdigest()
+                dialogue_id_prefix + "-" + hashlib.sha1(str.encode(dialogue.dialogue_id + ":" +  turn.turn_index)).hexdigest()
             )
             datum_id = TurnId(full_dialogue_id, turn.turn_index)
             contextualized_turn = UtteranceWithContext(
