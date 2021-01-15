@@ -32,14 +32,19 @@ def main(
             if turn.skip:
                 continue
             full_dialogue_id = (
-                dialogue_id_prefix + "-" + hashlib.sha1(str.encode(dialogue.dialogue_id + ":" +  turn.turn_index)).hexdigest()
+                dialogue_id_prefix
+                + "-"
+                + hashlib.sha1(
+                    str.encode(dialogue.dialogue_id + ":" + turn.turn_index)
+                ).hexdigest()
             )
             datum_id = TurnId(full_dialogue_id, turn.turn_index)
             contextualized_turn = UtteranceWithContext(
                 datum_id=datum_id,
                 user_utterance=turn.user_utterance,
                 context=Dialogue(
-                    dialogue_id=full_dialogue_id, turns=dialogue.turns[:turn_index],
+                    dialogue_id=full_dialogue_id,
+                    turns=dialogue.turns[:turn_index],
                 ),
             )
             contextualized_turns.append(contextualized_turn)
@@ -63,13 +68,16 @@ def add_arguments(argument_parser: argparse.ArgumentParser) -> None:
         help="the jsonl file containing the dialogue data with dataflow programs",
     )
     argument_parser.add_argument(
-        "--contextualized_turns_file", help="the output file",
+        "--contextualized_turns_file",
+        help="the output file",
     )
     argument_parser.add_argument(
-        "--turn_answers_file", help="the output file",
+        "--turn_answers_file",
+        help="the output file",
     )
     argument_parser.add_argument(
-        "--dialogue_id_prefix", help="dialogue id prefix",
+        "--dialogue_id_prefix",
+        help="dialogue id prefix",
     )
 
 
