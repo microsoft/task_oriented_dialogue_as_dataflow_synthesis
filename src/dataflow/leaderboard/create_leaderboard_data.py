@@ -8,7 +8,6 @@ Converts native Calflow data to the format used by the leaderboard.
 import argparse
 import hashlib
 import random
-import string
 from typing import List
 
 from dataflow.core.dialogue import Dialogue, TurnId
