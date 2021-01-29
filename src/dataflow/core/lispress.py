@@ -432,7 +432,7 @@ def unnest_line(
             value = loads(s)
             known_value_types = {
                 str: "String",
-                int: "Int",
+                int: "Number",
             }
             schema = known_value_types[type(value)]
             expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
