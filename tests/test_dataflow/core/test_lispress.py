@@ -143,7 +143,7 @@ def test_program_to_lispress_with_quotes_inside_string():
     v, _ = mk_value_op(value='i got quotes"', schema="String", idx=0)
     program = Program(expressions=[v])
     rendered_lispress = render_pretty(program_to_lispress(program))
-    assert rendered_lispress == '(#(String "i got quotes\\""))'
+    assert rendered_lispress == '#(String "i got quotes\\"")'
     round_tripped, _ = lispress_to_program(parse_lispress(rendered_lispress), 0)
     assert round_tripped == program
 
@@ -151,4 +151,4 @@ def test_program_to_lispress_with_quotes_inside_string():
 def test_bare_values():
     surface_string = "0"
     round_tripped = try_round_trip(surface_string)
-    assert round_tripped == "(#(Number 0))"
+    assert round_tripped == "#(Number 0)"
