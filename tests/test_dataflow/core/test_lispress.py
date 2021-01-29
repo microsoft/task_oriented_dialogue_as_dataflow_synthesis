@@ -3,6 +3,7 @@ from dataflow.core.lispress import (
     parse_lispress,
     program_to_lispress,
     render_pretty,
+    try_round_trip,
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import mk_value_op
@@ -145,3 +146,9 @@ def test_program_to_lispress_with_quotes_inside_string():
     assert rendered_lispress == '(#(String "i got quotes\\""))'
     round_tripped, _ = lispress_to_program(parse_lispress(rendered_lispress), 0)
     assert round_tripped == program
+
+
+def test_bare_values():
+    surface_string = "0"
+    round_tripped = try_round_trip(surface_string)
+    assert round_tripped == "(#(Number 0))"
