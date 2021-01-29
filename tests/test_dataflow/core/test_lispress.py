@@ -3,6 +3,7 @@ from dataflow.core.lispress import (
     parse_lispress,
     program_to_lispress,
     render_pretty,
+    try_round_trip,
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import mk_value_op
@@ -110,14 +111,6 @@ surface_strings = [
 ]
 
 
-def round_trip(surface_str: str) -> str:
-    """Parses and rerenders a Lispress string."""
-    lispress = parse_lispress(surface_str)
-    program, _ = lispress_to_program(lispress, 0)
-    round_tripped = program_to_lispress(program)
-    return render_pretty(round_tripped, max_width=60)
-
-
 def test_surface_to_sexp_round_trips():
     """
     Tests that parsing a Lispress surface string into an S-expression
@@ -157,5 +150,5 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 def test_bare_values():
     surface_string = "0"
-    round_tripped = round_trip(surface_string)
+    round_tripped = try_round_trip(surface_string)
     assert round_tripped == "(#(Number 0))"
