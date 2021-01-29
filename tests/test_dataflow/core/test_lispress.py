@@ -158,4 +158,4 @@ def test_program_to_lispress_with_quotes_inside_string():
 def test_bare_values():
     surface_string = "0"
     round_tripped = round_trip(surface_string)
-    assert round_tripped == "#(Number 0)"
+    assert round_tripped == "(#(Number 0))"
