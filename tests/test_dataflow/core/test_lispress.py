@@ -110,6 +110,14 @@ surface_strings = [
 ]
 
 
+def round_trip(surface_str: str) -> str:
+    """Parses and rerenders a Lispress string."""
+    lispress = parse_lispress(surface_str)
+    program, _ = lispress_to_program(lispress, 0)
+    round_tripped = program_to_lispress(program)
+    return render_pretty(round_tripped, max_width=60)
+
+
 def test_surface_to_sexp_round_trips():
     """
     Tests that parsing a Lispress surface string into an S-expression
@@ -145,3 +153,9 @@ def test_program_to_lispress_with_quotes_inside_string():
     assert rendered_lispress == '(#(String "i got quotes\\""))'
     round_tripped, _ = lispress_to_program(parse_lispress(rendered_lispress), 0)
     assert round_tripped == program
+
+
+def test_bare_values():
+    surface_string = "0"
+    round_tripped = round_trip(surface_string)
+    assert round_tripped == "#(Number 0)"
