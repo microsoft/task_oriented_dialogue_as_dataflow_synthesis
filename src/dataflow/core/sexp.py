@@ -50,7 +50,6 @@ def parse_sexp(sexp_string: str, clean_singletons=False) -> Sexp:
         return []
     if sexp_string[-1] == ";":
         sexp_string = sexp_string[:-1]
-
     # find and group top-level parentheses (that are not inside quoted strings)
     num_open_brackets = 0
     open_bracket_idxs = []
@@ -103,9 +102,12 @@ def parse_sexp(sexp_string: str, clean_singletons=False) -> Sexp:
     else:
         sexp_tmp = result
 
+    # special-case top-level values because they need an extra level
+    # of parens in the Sexp:
+    if isinstance(result, list) and len(result) >= 1 and result[0] == "#":
+        return [result]
     if clean_singletons and len(sexp_tmp) == 1:
         return sexp_tmp[0]
-
     return sexp_tmp
 
 

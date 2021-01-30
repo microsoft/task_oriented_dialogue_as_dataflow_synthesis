@@ -92,7 +92,7 @@ def run_paired_permutation_test(
     xs: List[int],
     ys: List[int],
     samples: int = 10000,
-    statistic: Callable[[List[int]], float] = np.mean,
+    statistic: Callable[[List[int]], float] = np.mean,  # type: ignore
 ) -> float:
     """Runs the two-sample permutation test to check whether the paired data xs and ys are from the same distribution (null hypothesis).
 
