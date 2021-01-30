@@ -104,11 +104,7 @@ def parse_sexp(sexp_string: str, clean_singletons=False) -> Sexp:
 
     # special-case top-level values because they need an extra level
     # of parens in the Sexp:
-    if (
-        isinstance(result, list)
-        and len(result) >= 1
-        and result[0] == "#"
-    ):
+    if isinstance(result, list) and len(result) >= 1 and result[0] == "#":
         return [result]
     if clean_singletons and len(sexp_tmp) == 1:
         return sexp_tmp[0]

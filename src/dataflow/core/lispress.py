@@ -175,11 +175,11 @@ def _render_value_expressions(sexp: Sexp) -> Sexp:
         # special-case top-level values because we can't strip out the last level
         # of parens in the Sexp:
         if (
-                isinstance(result, list)
-                # value has been turned into a single str already here by _render_value_expressions
-                and len(result) == 1
-                and isinstance(result[0], str)
-                and result[0].startswith(VALUE_CHAR)
+            isinstance(result, list)
+            # value has been turned into a single str already here by _render_value_expressions
+            and len(result) == 1
+            and isinstance(result[0], str)
+            and result[0].startswith(VALUE_CHAR)
         ):
             return result[0]
 
