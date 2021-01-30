@@ -88,8 +88,8 @@ surface_strings = [
             :subject (?= #(String "dinner at foo"))))))))""",
     # tests that whitespace is preserved inside a quoted string,
     # as opposed to tokenized and then joined with a single space.
-    '(#(String "multi\\tword  quoted\\nstring"))',
-    '(#(String "i got quotes\\""))',
+    '#(String "multi\\tword  quoted\\nstring")',
+    '#(String "i got quotes\\"")',
     # tests that empty plans are handled correctly
     "()",
     # regression test that no whitespace is inserted between "#" and "(".
@@ -144,11 +144,11 @@ def test_program_to_lispress_with_quotes_inside_string():
     program = Program(expressions=[v])
     rendered_lispress = render_pretty(program_to_lispress(program))
     assert rendered_lispress == '#(String "i got quotes\\"")'
-    round_tripped, _ = lispress_to_program(parse_lispress(rendered_lispress), 0)
+    sexp = parse_lispress(rendered_lispress)
+    round_tripped, _ = lispress_to_program(sexp, 0)
     assert round_tripped == program
 
 
 def test_bare_values():
-    surface_string = "0"
-    round_tripped = try_round_trip(surface_string)
-    assert round_tripped == "#(Number 0)"
+    assert try_round_trip("0") == "#(Number 0)"
+    assert try_round_trip("#(Number 0)") == "#(Number 0)"
