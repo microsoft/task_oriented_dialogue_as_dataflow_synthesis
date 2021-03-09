@@ -60,7 +60,7 @@ If you use your own evaluation script, please pay attention to the notes in Step
    cd "${dataflow_dialogues_dir}"
    # Download the dataset `smcalflow.full.data.tgz` or `smcalflow.inlined.data.tgz`
    # The `PATH_TO_DATA_TGZ` is the path to the tgz file of the corresponding dataset.
-   untar -xvzf PATH_TO_DATA_TGZ
+   tar -xvzf PATH_TO_DATA_TGZ
    ```
 2. Compute data statistics:
     ```bash
