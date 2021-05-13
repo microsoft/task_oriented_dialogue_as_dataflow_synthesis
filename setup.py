@@ -15,7 +15,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "jsons==0.10.1",
-        "pydantic==1.4",
+        "pydantic==1.6.2",
         "more-itertools==8.2.0",
         "sexpdata==0.0.3",
         "pandas==1.0.0",
