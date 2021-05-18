@@ -150,5 +150,5 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 
 def test_bare_values():
-    assert try_round_trip("0") == "#(Number 0)"
-    assert try_round_trip("#(Number 0)") == "#(Number 0)"
+    assert try_round_trip("0") == "#(Number 0.0)"
+    assert try_round_trip("#(Number 0)") == "#(Number 0.0)"
