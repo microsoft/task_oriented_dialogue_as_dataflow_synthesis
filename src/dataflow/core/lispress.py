@@ -59,7 +59,7 @@ def try_round_trip(lispress_str: str) -> str:
         program, _ = lispress_to_program(lispress, 0)
         round_tripped = program_to_lispress(program)
 
-        def normalizeNumbers(exp: Lispress) -> "Lispress":
+        def normalize_numbers(exp: Lispress) -> "Lispress":
             if isinstance(exp, str):
                 try:
                     num = float(exp)
@@ -67,9 +67,9 @@ def try_round_trip(lispress_str: str) -> str:
                 except ValueError:
                     return exp
             else:
-                return [normalizeNumbers(e) for e in exp]
+                return [normalize_numbers(e) for e in exp]
 
-        return render_compact(normalizeNumbers(round_tripped))
+        return render_compact(normalize_numbers(round_tripped))
     except Exception:  # pylint: disable=W0703
         return lispress_str
 
