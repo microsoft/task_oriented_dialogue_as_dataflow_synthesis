@@ -20,7 +20,9 @@ def evaluate_prediction_exact_match(pred: TurnPrediction, gold: TurnAnswer) -> b
     pred_lispress = try_round_trip(pred.lispress)
     gold_lispress = try_round_trip(gold.lispress)
     if pred_lispress != gold_lispress:
-        print(f'Misprediction on {gold.datum_id.dialogue_id}:{gold.datum_id.turn_index} | {gold.user_utterance}\nPred: {pred_lispress}\nGold: {gold_lispress}\n')
+        print(
+            f"Misprediction on {gold.datum_id.dialogue_id}:{gold.datum_id.turn_index} | {gold.user_utterance}\nPred: {pred_lispress}\nGold: {gold_lispress}\n"
+        )
     return (
         pred_lispress == gold_lispress
         and gold.program_execution_oracle.refer_are_correct
