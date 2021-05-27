@@ -23,6 +23,8 @@ def evaluate_prediction_exact_match(pred: TurnPrediction, gold: TurnAnswer) -> b
         print(
             f"Misprediction on {gold.datum_id.dialogue_id}:{gold.datum_id.turn_index} | {gold.user_utterance}\nPred: {pred_lispress}\nGold: {gold_lispress}\n"
         )
+    elif not gold.program_execution_oracle.refer_are_correct:
+        print(f"Example {gold.datum_id.dialogue_id}:{gold.datum_id.turn_index} can't be correct because the refer call is not correct.\n")
     return (
         pred_lispress == gold_lispress
         and gold.program_execution_oracle.refer_are_correct
