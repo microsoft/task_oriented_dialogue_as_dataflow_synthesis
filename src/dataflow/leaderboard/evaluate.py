@@ -15,7 +15,9 @@ from dataflow.core.lispress import try_round_trip
 from dataflow.core.turn_prediction import TurnAnswer, TurnPrediction, missing_prediction
 
 
-def evaluate_prediction_exact_match(pred: TurnPrediction, gold: TurnAnswer) -> bool:
+def evaluate_prediction_exact_match(
+    pred: TurnPrediction, gold: TurnAnswer
+) -> Tuple[bool, bool]:
     assert pred.datum_id == gold.datum_id, f"mismatched data: {pred}, {gold}"
     pred_lispress = try_round_trip(pred.lispress)
     gold_lispress = try_round_trip(gold.lispress)
@@ -23,22 +25,33 @@ def evaluate_prediction_exact_match(pred: TurnPrediction, gold: TurnAnswer) -> b
         print(
             f"Misprediction on {gold.datum_id.dialogue_id}:{gold.datum_id.turn_index} | {gold.user_utterance}\nPred: {pred_lispress}\nGold: {gold_lispress}\n"
         )
+    elif not gold.program_execution_oracle.refer_are_correct:
+        print(
+            f"Example {gold.datum_id.dialogue_id}:{gold.datum_id.turn_index} can't be correct because the refer call is not correct.\n"
+        )
     return (
         pred_lispress == gold_lispress
-        and gold.program_execution_oracle.refer_are_correct
+        and gold.program_execution_oracle.refer_are_correct,
+        pred_lispress == gold_lispress,
     )
 
 
 def evaluate_predictions_exact_match(
     preds_and_golds: Iterable[Tuple[TurnPrediction, TurnAnswer]]
-) -> float:
+) -> Tuple[float, float]:
     correct = 0
+    correct_ignoring_refer = 0
     total = 0
     for pred, gold in preds_and_golds:
         total += 1
-        correct += int(evaluate_prediction_exact_match(pred, gold))
+        (right, right_ignoring_refer) = evaluate_prediction_exact_match(pred, gold)
+        correct += int(right)
+        correct_ignoring_refer += int(right_ignoring_refer)
 
-    return correct / total if total else 0
+    return (
+        correct / total if total else 0,
+        correct_ignoring_refer / total if total else 0,
+    )
 
 
 def collate(
@@ -73,7 +86,7 @@ def collate(
 
 def evaluate_prediction_file(
     predictions_jsonl: str, gold_jsonl: str, datum_ids_jsonl: Optional[str]
-) -> float:
+) -> Tuple[float, float]:
     preds = list(load_jsonl_file(predictions_jsonl, TurnPrediction, verbose=False))
     golds = list(load_jsonl_file(gold_jsonl, TurnAnswer, verbose=False))
     datum_ids = (
@@ -97,9 +110,19 @@ def add_arguments(argument_parser: argparse.ArgumentParser) -> None:
     argument_parser.add_argument("--scores_json", help="output scores json file")
 
 
-def write_accuracy_json(accuracy: float, scores_json_filename: str) -> None:
+def write_accuracy_json(
+    accuracies: Tuple[float, float], scores_json_filename: str
+) -> None:
+    (accuracy, accuracy_ignoring_refer) = accuracies
     with open(scores_json_filename, mode="w", encoding="utf8") as scores_json_file:
-        scores_json_file.write(json.dumps({"accuracy": accuracy}))
+        scores_json_file.write(
+            json.dumps(
+                {
+                    "accuracy": accuracy,
+                    "accuracy_ignorning_refer": accuracy_ignoring_refer,
+                }
+            )
+        )
 
 
 def main():
@@ -109,12 +132,12 @@ def main():
     add_arguments(cmdline_parser)
     args = cmdline_parser.parse_args()
 
-    accuracy = evaluate_prediction_file(
+    accuracies = evaluate_prediction_file(
         predictions_jsonl=args.predictions_jsonl,
         gold_jsonl=args.gold_jsonl,
         datum_ids_jsonl=args.datum_ids_jsonl,
     )
-    write_accuracy_json(accuracy, args.scores_json)
+    write_accuracy_json(accuracies, args.scores_json)
 
 
 if __name__ == "__main__":
