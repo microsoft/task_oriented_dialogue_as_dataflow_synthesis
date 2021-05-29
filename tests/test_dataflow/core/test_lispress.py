@@ -7,7 +7,6 @@ from dataflow.core.lispress import (
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import mk_value_op
-from dataflow.core.sexp import parse_sexp, sexp_to_str
 
 surface_strings = [
     """
@@ -156,9 +155,8 @@ def test_bare_values():
 
 
 def test_meta():
-    lispress = parse_sexp("^Number 1")
-    roundtrip = sexp_to_str(lispress)
-    assert roundtrip == "^Number 1"
+    roundtrip = try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
+    assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
 
 
 def test_simple():

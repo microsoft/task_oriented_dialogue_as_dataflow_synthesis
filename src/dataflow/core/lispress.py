@@ -2,6 +2,7 @@
 #  Licensed under the MIT license.
 import json
 from collections import Counter
+from dataclasses import replace
 from json import JSONDecodeError, loads
 from typing import Dict, List, Set, Tuple
 
@@ -41,6 +42,7 @@ VAR_PREFIX = "x"
 NAMED_ARG_PREFIX = ":"
 # values are rendered as `#(MySchema "json_dump_of_my_value")`
 VALUE_CHAR = "#"
+META_CHAR = "^"
 
 # Lispress has lisp syntax, and we represent it as an s-expression
 Lispress = Sexp
@@ -331,8 +333,16 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
                 else:
                     # external reference (should not happen)
                     curr += [[EXTERNAL_LABEL, arg_id]]
+            if expression.type_args:
+                curr[0] = [
+                    META_CHAR,
+                    [parse_sexp(targ) for targ in expression.type_args],
+                    curr[0],
+                ]
         else:
             curr = op_lispress  # value
+        if expression.type:
+            curr = [META_CHAR, parse_sexp(expression.type), curr]
         # add it to results
         if idx in reentrancies:
             # give reentrancies fresh ids as they are encountered
@@ -393,9 +403,22 @@ def unnest_line(
         s = [x for x in s if x != EXTERNAL_LABEL]
         hd, *tl = s
         if not isinstance(hd, str):
-            # we don't know how to handle this case, so we just pack the whole thing into a generic value
-            expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
-            return [expr], idx, idx, var_id_bindings
+            if len(hd) == 3 and hd[0] == META_CHAR:
+                # type args
+                without_type_args = [hd[2]]
+                without_type_args.extend(tl)
+                exprs, arg_idx, idx, var_id_bindings = unnest_line(
+                    without_type_args, idx=idx, var_id_bindings=var_id_bindings
+                )
+                exprs[-1] = replace(
+                    exprs[-1], type_args=[render_compact(targ) for targ in hd[1]]
+                )
+                return exprs, arg_idx, idx, var_id_bindings
+            else:
+                # we don't know how to handle this case, so we just pack the whole thing
+                # into a generic value
+                expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
+                return [expr], idx, idx, var_id_bindings
         elif _is_idx_str(hd):
             # argId pointer
             var_id_dict = dict(var_id_bindings)
@@ -435,6 +458,16 @@ def unnest_line(
                 )
                 result_exprs.extend(exprs)
             return result_exprs, arg_idx, idx, var_id_bindings
+        elif hd == META_CHAR:
+            # type ascription
+            assert (
+                len(tl) == 2
+            ), f"Type ascriptions with ^ must have two arguments, but got {str(tl)}"
+            exprs, arg_idx, idx, var_id_bindings = unnest_line(
+                tl[1], idx=idx, var_id_bindings=var_id_bindings
+            )
+            exprs[-1] = replace(exprs[-1], type=render_compact(tl[0]))
+            return exprs, arg_idx, idx, var_id_bindings
         elif hd == OpType.Value.value:
             assert (
                 len(tl) >= 1 and len(tl[0]) >= 1

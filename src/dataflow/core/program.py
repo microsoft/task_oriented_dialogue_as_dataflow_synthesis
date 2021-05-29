@@ -1,7 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 from dataclasses import field
-from typing import List, Union
+from typing import List, Optional, Union
 
 from pydantic.dataclasses import dataclass
 
@@ -37,6 +37,10 @@ class Expression:
     id: str
     op: Op
     arg_ids: List[str] = field(default_factory=list)
+    # TODO maybe parse into a more friendly format than Sexp str
+    type_args: Optional[List[str]] = None  # type: ignore # Recursive type
+    # TODO maybe parse into a more friendly format than Sexp str
+    type: Optional[str] = None  # type: ignore # Recursive type
 
 
 @dataclass(frozen=True)
