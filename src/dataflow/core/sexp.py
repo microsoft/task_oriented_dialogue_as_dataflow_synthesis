@@ -47,7 +47,8 @@ def _split_respecting_quotes(s: str) -> List[str]:
 def parse_sexp(s: str) -> Sexp:
     offset = 0
 
-    def isEOI():
+    # eoi = end of input
+    def is_eoi():
         nonlocal offset
         return offset == len(s)
 
@@ -55,28 +56,28 @@ def parse_sexp(s: str) -> Sexp:
         nonlocal offset
         return s[offset]
 
-    def nextChar():
+    def next_char():
         # pylint: disable=used-before-assignment
         nonlocal offset
         cn = s[offset]
         offset += 1
         return cn
 
-    def skipWhitespace():
-        while (not isEOI()) and peek().isspace():
-            nextChar()
+    def skip_whitespace():
+        while (not is_eoi()) and peek().isspace():
+            next_char()
 
-    def skipThenPeek():
-        skipWhitespace()
+    def skip_then_peek():
+        skip_whitespace()
         return peek()
 
     def read() -> Sexp:
-        skipWhitespace()
-        c = nextChar()
+        skip_whitespace()
+        c = next_char()
         if c == LEFT_PAREN:
-            return readList()
+            return read_list()
         elif c == DOUBLE_QUOTE:
-            return readString()
+            return read_string()
         elif c == META:
             meta = read()
             expr = read()
@@ -84,48 +85,50 @@ def parse_sexp(s: str) -> Sexp:
         elif c == READER:
             return [READER, read()]
         else:
-            outInner = ""
+            out_inner = ""
             if c != "\\":
-                outInner += c
+                out_inner += c
 
             # TODO: is there a better loop idiom here?
-            if not isEOI():
-                nextC = peek()
+            if not is_eoi():
+                next_c = peek()
                 escaped = c == "\\"
-                while (not isEOI()) and (escaped or not _isBeginningControlChar(nextC)):
-                    if (not escaped) and nextC == "\\":
-                        nextChar()
+                while (not is_eoi()) and (
+                    escaped or not _is_beginning_control_char(next_c)
+                ):
+                    if (not escaped) and next_c == "\\":
+                        next_char()
                         escaped = True
                     else:
-                        outInner += nextChar()
+                        out_inner += next_char()
                         escaped = False
-                    if not isEOI():
-                        nextC = peek()
-            return outInner
+                    if not is_eoi():
+                        next_c = peek()
+            return out_inner
 
-    def readList():
-        outList = []
-        while skipThenPeek() != RIGHT_PAREN:
-            outList.append(read())
-        nextChar()
-        return outList
+    def read_list():
+        out_list = []
+        while skip_then_peek() != RIGHT_PAREN:
+            out_list.append(read())
+        next_char()
+        return out_list
 
-    def readString():
-        outStr = ""
+    def read_string():
+        out_str = ""
         while peek() != '"':
-            cString = nextChar()
-            outStr += cString
-            if cString == "\\":
-                outStr += nextChar()
-        nextChar()
-        return f'"{outStr}"'
+            c_string = next_char()
+            out_str += c_string
+            if c_string == "\\":
+                out_str += next_char()
+        next_char()
+        return f'"{out_str}"'
 
     out = read()
-    skipWhitespace()
+    skip_whitespace()
     return out
 
 
-def _isBeginningControlChar(nextC):
+def _is_beginning_control_char(nextC):
     return (
         nextC.isspace()
         or nextC == LEFT_PAREN
