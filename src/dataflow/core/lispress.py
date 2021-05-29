@@ -78,7 +78,7 @@ def program_to_lispress(program: Program) -> Lispress:
     """ Converts a Program to Lispress. """
     unsugared = _program_to_unsugared_lispress(program)
     sugared_gets = _sugar_gets(unsugared)
-    return _strip_extra_parens_around_values(sugared_gets)
+    return sugared_gets
 
 
 def lispress_to_program(lispress: Lispress, idx: Idx) -> Tuple[Program, Idx]:
@@ -87,7 +87,7 @@ def lispress_to_program(lispress: Lispress, idx: Idx) -> Tuple[Program, Idx]:
     Returns the last id used along with the Program.
     """
     desugared_gets = _desugar_gets(lispress)
-    with_parens_around_values = _add_extra_parens_around_values(desugared_gets)
+    with_parens_around_values = desugared_gets
     return _unsugared_lispress_to_program(with_parens_around_values, idx)
 
 
@@ -109,7 +109,6 @@ def render_pretty(lispress: Lispress, max_width: int = 60) -> str:
                 (Constraint[Recipient])
                 #(PersonName "Elaine")))))))
     """
-    lispress = _render_value_expressions(lispress)
     result = "\n".join(_render_lines(sexp=lispress, max_width=max_width))
     return result
 
@@ -122,7 +121,7 @@ def render_compact(lispress: Lispress) -> str:
     >>> print(render_compact(lispress))
     (describe (:start (findNextEvent (Constraint[Event] :attendees (attendeeListHasRecipientConstraint (recipientWithNameLike (Constraint[Recipient]) #(PersonName "Elaine")))))))
     """
-    return sexp_to_str(_render_value_expressions(lispress))
+    return sexp_to_str(lispress)
 
 
 def parse_lispress(s: str) -> Lispress:
@@ -142,7 +141,7 @@ def parse_lispress(s: str) -> Lispress:
     >>> parse_lispress(s)
     ['describe', [':start', ['findNextEvent', ['Constraint[Event]', ':attendees', ['attendeeListHasRecipientConstraint', ['recipientWithNameLike', ['Constraint[Recipient]'], '#', ['PersonName', '"Elaine"']]]]]]]
     """
-    return parse_sexp(s, clean_singletons=False)[0]
+    return parse_sexp(s)
 
 
 def _group_named_args(lines: List[str]) -> List[str]:
@@ -161,41 +160,6 @@ def _group_named_args(lines: List[str]) -> List[str]:
             result.append(line)
             i += 1
     return result
-
-
-def _render_value_expressions(sexp: Sexp) -> Sexp:
-    """
-    Finds Value sub-expressions within `sexp` and replaces them in place
-    with their rendered str.
-    This ensures that values are always atomically rendered on the same line,
-    and also allows us to render "#(" without a space between them.
-    """
-    if isinstance(sexp, str):
-        return sexp
-    else:
-        result: List[Lispress] = []
-        i = 0
-        while i < len(sexp):
-            s = sexp[i]
-            if s == VALUE_CHAR and i + 1 < len(sexp):
-                # merge "#" and the following (rendered) subexpression
-                result.append(VALUE_CHAR + render_compact(sexp[i + 1]))
-                i += 2
-            else:
-                result.append(_render_value_expressions(s))
-                i += 1
-        # special-case top-level values because we can't strip out the last level
-        # of parens in the Sexp:
-        if (
-            isinstance(result, list)
-            # value has been turned into a single str already here by _render_value_expressions
-            and len(result) == 1
-            and isinstance(result[0], str)
-            and result[0].startswith(VALUE_CHAR)
-        ):
-            return result[0]
-
-        return result
 
 
 def _render_lines(sexp: Lispress, max_width: int) -> List[str]:
@@ -313,49 +277,9 @@ def _desugar_gets(sexp: Lispress) -> Lispress:
             return [
                 DataflowFn.Get.value,
                 _desugar_gets(obj),
-                OpType.Value.value,
-                ["Path", f'"{key}"'],
+                [OpType.Value.value, ["Path", f'"{key}"']],
             ]
         return [_desugar_gets(s) for s in sexp]
-
-
-def _strip_extra_parens_around_values(sexp: Lispress) -> Lispress:
-    """Removes one level of parens around value sexps"""
-    if isinstance(sexp, list) and len(sexp) >= 1 and sexp[0] == OpType.Value.value:
-        # top-level value, can't remove any parens
-        return sexp
-
-    def helper(s: Sexp) -> List[Sexp]:
-        if isinstance(s, str) or len(s) == 0:
-            return [s]
-        else:
-            unnested_one_level = [y for x in s for y in helper(x)]
-            if s[0] == OpType.Value.value:
-                # unnest one level
-                return unnested_one_level
-            else:
-                return [unnested_one_level]
-
-    return [y for x in helper(sexp) for y in x]
-
-
-def _add_extra_parens_around_values(sexp: Lispress) -> Lispress:
-    """Adds an extra level of parens around value sexps"""
-    if isinstance(sexp, str) or len(sexp) == 0:
-        return sexp
-    else:
-        result: List[Sexp] = []
-        i = 0
-        while i < len(sexp):
-            curr = sexp[i]
-            if curr == OpType.Value.value and i + 1 < len(sexp):
-                # Add an extra level of parens
-                result.append([curr, sexp[i + 1]])
-                i += 2
-            else:
-                result.append(_add_extra_parens_around_values(curr))
-                i += 1
-        return result
 
 
 def _roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
