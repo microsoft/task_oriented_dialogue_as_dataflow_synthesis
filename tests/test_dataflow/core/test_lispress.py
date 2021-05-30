@@ -3,14 +3,11 @@ from dataflow.core.lispress import (
     parse_lispress,
     program_to_lispress,
     render_pretty,
-    try_round_trip,
+    _try_round_trip,
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import mk_value_op
 
-
-def _try_round_trip(lispress_str: str,) -> str:
-    return try_round_trip(lispress_str, backoff=False)
 
 surface_strings = [
     """
@@ -173,9 +170,9 @@ def test_simple():
 
 
 def test_meta():
-    roundtrip = try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
+    roundtrip = _try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
     assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
 
 
 def test_simple():
-    assert try_round_trip('(+ (a) #(String "b")') == '(+ (a) #(String "b")'
+    assert _try_round_trip('(+ (a) #(String "b"))') == '(+ (a) #(String "b"))'
