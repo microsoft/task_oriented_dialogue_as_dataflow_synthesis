@@ -160,7 +160,7 @@ def test_meta():
 
 
 def test_meta_real():
-    lispress = "(Yield (> (size (QueryEventResponse.results (FindEventWrapperWithDefaults (EventDuringRange (^(Event) EmptyStructConstraint) (ThisWeekend))))) 0L))"
+    lispress = "(Yield (> (size (QueryEventResponse.results (FindEventWrapperWithDefaults (EventDuringRange (^(Event) EmptyStructConstraint) (ThisWeekend))))) #(Number 0.0)))"
     assert lispress == _try_round_trip(lispress)
 
 

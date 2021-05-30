@@ -94,8 +94,7 @@ def lispress_to_program(lispress: Lispress, idx: Idx) -> Tuple[Program, Idx]:
     Returns the last id used along with the Program.
     """
     desugared_gets = _desugar_gets(lispress)
-    with_parens_around_values = desugared_gets
-    return _unsugared_lispress_to_program(with_parens_around_values, idx)
+    return _unsugared_lispress_to_program(desugared_gets, idx)
 
 
 def render_pretty(lispress: Lispress, max_width: int = 60) -> str:
@@ -396,6 +395,9 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     return [LET, let_bindings, result] if len(let_bindings) > 0 else result
 
 
+_number_regex = re.compile('^([0-9]+)(?:L)?$')
+
+
 def unnest_line(
     s: Lispress, idx: Idx, var_id_bindings: Tuple[Tuple[str, int], ...],
 ) -> Tuple[List[Expression], Idx, Idx, Tuple[Tuple[str, int], ...]]:
@@ -413,6 +415,9 @@ def unnest_line(
     a map from variable names to their idx.
     """
     if not isinstance(s, list):
+        m = _number_regex.match(s)
+        if m is not None:
+            s = m.group(1)
         try:
             # bare value
             value = loads(s)
@@ -532,9 +537,9 @@ def unnest_line(
             # CallOp
             result = []
             args = []
-            for a in tl:
+            for arg in tl:
                 arg_exprs, arg_idx, idx, var_id_bindings = unnest_line(
-                    a, idx, var_id_bindings
+                    arg, idx, var_id_bindings
                 )
                 result.extend(arg_exprs)
                 args.append(arg_idx)
