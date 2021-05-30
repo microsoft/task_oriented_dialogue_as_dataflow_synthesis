@@ -8,6 +8,10 @@ from dataflow.core.lispress import (
 from dataflow.core.program import Program
 from dataflow.core.program_utils import mk_value_op
 
+
+def _try_round_trip(lispress_str: str,) -> str:
+    return try_round_trip(lispress_str, backoff=False)
+
 surface_strings = [
     """
 (Yield
@@ -150,8 +154,22 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 
 def test_bare_values():
-    assert try_round_trip("0") == "#(Number 0.0)"
-    assert try_round_trip("#(Number 0)") == "#(Number 0.0)"
+    assert _try_round_trip("0") == "#(Number 0.0)"
+    assert _try_round_trip("#(Number 0)") == "#(Number 0.0)"
+
+
+def test_meta():
+    roundtrip = _try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
+    assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
+
+
+def test_meta_real():
+    lispress = "(Yield (> (size (QueryEventResponse.results (FindEventWrapperWithDefaults (EventDuringRange (^(Event) EmptyStructConstraint) (ThisWeekend))))) 0L))"
+    assert lispress == _try_round_trip(lispress)
+
+
+def test_simple():
+    assert _try_round_trip('(+ (a) #(String "b")') == '(+ (a) #(String "b")'
 
 
 def test_meta():

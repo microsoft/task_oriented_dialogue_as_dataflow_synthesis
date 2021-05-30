@@ -48,7 +48,7 @@ META_CHAR = "^"
 Lispress = Sexp
 
 
-def try_round_trip(lispress_str: str) -> str:
+def try_round_trip(lispress_str: str, backoff: bool = True) -> str:
     """
     If `lispress_str` is valid lispress, round-trips it to and from `Program`.
     This puts named arguments in alphabetical order and normalizes numbers
@@ -72,8 +72,11 @@ def try_round_trip(lispress_str: str) -> str:
                 return [normalize_numbers(e) for e in exp]
 
         return render_compact(normalize_numbers(round_tripped))
-    except Exception:  # pylint: disable=W0703
-        return lispress_str
+    except Exception as e:  # pylint: disable=W0703
+        if backoff:
+            return lispress_str
+        else:
+            raise e
 
 
 def program_to_lispress(program: Program) -> Lispress:
