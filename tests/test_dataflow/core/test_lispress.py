@@ -1,13 +1,12 @@
 from dataflow.core.lispress import (
+    _try_round_trip,
     lispress_to_program,
     parse_lispress,
     program_to_lispress,
     render_pretty,
-    _try_round_trip,
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import mk_value_op
-
 
 surface_strings = [
     """

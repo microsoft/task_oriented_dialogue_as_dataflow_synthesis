@@ -23,7 +23,7 @@ def load_jsonl_file(
         desc = f"Reading {cls} from {data_jsonl}"
     else:
         desc = None
-    with open(data_jsonl, encoding='utf-8') as fp:
+    with open(data_jsonl, encoding="utf-8") as fp:
         for line in tqdm(
             fp, desc=desc, unit=unit, dynamic_ncols=True, disable=not verbose
         ):
