@@ -1,9 +1,10 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 import json
+import re
 from collections import Counter
 from json import JSONDecodeError, loads
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from more_itertools import chunked
 
@@ -24,7 +25,7 @@ from dataflow.core.program_utils import (
     mk_value_op,
     unwrap_idx_str,
 )
-from dataflow.core.sexp import LEFT_PAREN, RIGHT_PAREN, Sexp, parse_sexp, sexp_to_str
+from dataflow.core.sexp import LEFT_PAREN, META, RIGHT_PAREN, Sexp, parse_sexp, sexp_to_str
 
 # node label used for external references
 EXTERNAL_LABEL = "ExternalReference"
@@ -196,7 +197,7 @@ def _named_arg_to_key(name: str) -> str:
     assert _is_named_arg(
         name
     ), f"named arg must start with '{NAMED_ARG_PREFIX}': {name}"
-    return name[len(NAMED_ARG_PREFIX) :]
+    return name[len(NAMED_ARG_PREFIX):]
 
 
 def _key_to_named_arg(key: str) -> str:
@@ -232,6 +233,27 @@ def op_to_lispress(op: Op) -> Lispress:
         return [OpType.Value.value, [schema, underlying_json_str]]
     else:
         raise Exception(f"Op with unknown type: {op}")
+
+
+_type_name_regex = re.compile('^([a-zA-Z0-9]+)(?:\[([a-zA-Z0-9, \[\]]+)\])?$')
+
+
+def type_args_to_lispress(type_args: List[str]) -> Optional[Lispress]:
+    """Converts the provided list of type args into a Lispress expression."""
+    if len(type_args) == 0:
+        return None
+    
+    def _type_name_to_sexp(type_name: str) -> Sexp:
+        m = _type_name_regex.match(type_name)
+        base_name = m.group(1)
+        type_args = m.group(2)
+        if type_args is None:
+            return base_name
+        else:
+            type_args = list(map(_type_name_to_sexp, type_args.split(', ')))
+            return [base_name] + type_args
+    
+    return list(map(_type_name_to_sexp, type_args))
 
 
 def _sugar_gets(sexp: Lispress) -> Lispress:
@@ -314,12 +336,20 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
         # create a sexp for expression
         idx = expression.id
         op_lispress = op_to_lispress(expression.op)
+        op_type_args_lispress = type_args_to_lispress(expression.type_args)
+        # if there type args, we create a META expression
+        if op_type_args_lispress is not None:
+            op_lispress = [META, op_type_args_lispress, op_lispress]
         curr: Sexp
         if isinstance(expression.op, (BuildStructOp, CallLikeOp)):
             curr = [op_lispress]
-            named_args = sorted(get_named_args(expression))  # sort alphabetically
+            named_args = get_named_args(expression)
+            # if all args are named (i.e., not positional), sort them alphabetically
+            has_positional = next(filter(lambda _, i: i is None, named_args), None) is not None
+            if not has_positional:
+                named_args = sorted(get_named_args(expression))  # sort alphabetically
             for arg_name, arg_id in named_args:
-                if not arg_name.startswith("arg"):
+                if arg_name is not None and not arg_name.startswith("arg"):
                     # name of named argument
                     curr += [_key_to_named_arg(arg_name)]
                 if arg_id in reentrant_ids:
@@ -392,18 +422,19 @@ def unnest_line(
     else:
         s = [x for x in s if x != EXTERNAL_LABEL]
         hd, *tl = s
-        if not isinstance(hd, str):
+        # note that `hd` is not a string when META is used to provide type args for a function
+        if not isinstance(hd, str) and (not isinstance(hd, list) or not hd[0] == META):
             # we don't know how to handle this case, so we just pack the whole thing into a generic value
             expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
             return [expr], idx, idx, var_id_bindings
-        elif _is_idx_str(hd):
+        elif isinstance(hd, str) and _is_idx_str(hd):
             # argId pointer
             var_id_dict = dict(var_id_bindings)
             # look up step index for var
             assert hd in var_id_dict
             expr_id = var_id_dict[hd]
             return [], expr_id, idx, var_id_bindings
-        elif is_express_idx_str(hd):
+        elif isinstance(hd, str) and is_express_idx_str(hd):
             # external reference
             return [], unwrap_idx_str(hd), idx, var_id_bindings
         elif hd == LET:
@@ -448,20 +479,26 @@ def unnest_line(
             expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
             return [expr], idx, idx, var_id_bindings
         elif is_struct_op_schema(hd):
-            name = hd
             result = []
             kvs = []
-            for key, val in chunked(tl, 2):
-                val_exprs, val_idx, idx, var_id_bindings = unnest_line(
-                    val, idx, var_id_bindings
-                )
-                result.extend(val_exprs)
-                kvs.append((_named_arg_to_key(key), val_idx))
-            struct_op, idx = mk_struct_op(name, dict(kvs), idx)
+            # not all args are named and so positional arg names are set to `None`
+            pending_key = None
+            for arg in tl:
+                if isinstance(arg, str) and _is_named_arg(arg):
+                    pending_key = arg
+                else:
+                    val_exprs, val_idx, idx, var_id_bindings = unnest_line(
+                        arg, idx, var_id_bindings
+                    )
+                    result.extend(val_exprs)
+                    key = None
+                    if pending_key is not None:
+                        key = _named_arg_to_key(pending_key)
+                    kvs.append((key, val_idx))
+            struct_op, idx = mk_struct_op(hd, kvs, idx)
             return result + [struct_op], idx, idx, var_id_bindings
         else:
             # CallOp
-            name = hd
             result = []
             args = []
             for a in tl:
@@ -470,7 +507,7 @@ def unnest_line(
                 )
                 result.extend(arg_exprs)
                 args.append(arg_idx)
-            call_op, idx = mk_call_op(name, args=args, idx=idx)
+            call_op, idx = mk_call_op(hd, args=args, idx=idx)
             return result + [call_op], idx, idx, var_id_bindings
 
 

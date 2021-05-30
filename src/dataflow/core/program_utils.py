@@ -3,9 +3,10 @@
 import re
 from enum import Enum
 from json import dumps
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Iterable, List, Tuple, Union, Optional
 
 from dataflow.core.program import BuildStructOp, CallLikeOp, Expression, ValueOp
+from dataflow.core.sexp import Sexp, META
 
 # revise args
 ROOT_LOCATION = "rootLocation"
@@ -49,14 +50,18 @@ def unwrap_idx_str(s: str) -> int:
     return int(s[1:-1])
 
 
-def is_struct_op_schema(name: str) -> bool:
+def is_struct_op_schema(name: Union[str, List[Sexp]]) -> bool:
     """BuildStructOp schemas begin with a capital letter."""
+    # check if the provided name also contains type args and if so, remove them
+    if not isinstance(name, str):
+        assert isinstance(name, list) and name[0] == META and len(name) == 3
+        name = name[2]
     if len(name) == 0:
         return False
     return re.match(r"[A-Z]", name[0]) is not None
 
 
-def get_named_args(e: Expression) -> List[Tuple[str, str]]:
+def get_named_args(e: Expression) -> List[Tuple[str, Optional[str]]]:
     """
     Gets a list of (arg_name, arg_id) pairs.
     If `e` is a BuildStructOp, then `arg_names` are its `fields`, otherwise
@@ -161,13 +166,14 @@ def mk_revise_the_main_constraint(
 
 
 def mk_struct_op(
-    schema: str, args: Dict[str, Idx], idx: Idx,
+    name: Union[str, List[Sexp]], args: List[Tuple[Optional[str], Idx]], idx: Idx,
 ) -> Tuple[Expression, Idx]:
+    schema, type_args = mk_name_and_type_args(name)
     new_idx = idx + 1
-    args = dict(args)  # defensive copy
-    base = args.pop(NON_EMPTY_BASE, None)
+    # args = dict(args)  # defensive copy
+    base = next((v for k, v in args if k == NON_EMPTY_BASE), None)
     is_empty_base = base is None
-    pairs = sorted(args.items())  # sorts keys alphabetically
+    pairs = args  # sorted(args.items())  # sorts keys alphabetically
     arg_names = [k for k, v in pairs]
     # nonEmptyBase always comes first
     arg_vals = ([] if is_empty_base else [base]) + [v for k, v in pairs]
@@ -179,19 +185,39 @@ def mk_struct_op(
             empty_base=is_empty_base,
             push_go=True,
         ),
+        type_args=type_args,
         arg_ids=[idx_str(v) for v in arg_vals],
     )
     return flat_exp, new_idx
 
 
-def mk_call_op(name: str, args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Idx]:
+def mk_call_op(name: Union[str, List[Sexp]], args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Idx]:
+    name, type_args = mk_name_and_type_args(name)
     new_idx = idx + 1
     flat_exp = Expression(
         id=idx_str(new_idx),
         op=CallLikeOp(name=name),
+        type_args=type_args,
         arg_ids=[idx_str(v) for v in args],
     )
     return flat_exp, new_idx
+
+
+def mk_name_and_type_args(name: Union[str, List[Sexp]]) -> Tuple[str, List[str]]:
+    if name[0] == META:
+        assert len(name) == 3
+        name, *type_args = [name[2]] + name[1]
+        return name, list(map(mk_type_name, type_args))
+    return name, []
+
+
+def mk_type_name(sexp: Sexp) -> str:
+    if isinstance(sexp, str):
+        return sexp
+    hd, *tl = sexp
+    if len(tl) == 0:
+        return hd
+    return hd + '[' + ', '.join(map(mk_type_name, tl)) + ']'
 
 
 def mk_value_op(value: Any, schema: str, idx: Idx) -> Tuple[Expression, Idx]:

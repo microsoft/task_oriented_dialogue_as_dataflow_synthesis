@@ -1,7 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 from dataclasses import field
-from typing import List, Union
+from typing import List, Union, Optional
 
 from pydantic.dataclasses import dataclass
 
@@ -19,7 +19,7 @@ class CallLikeOp:
 @dataclass(frozen=True)
 class BuildStructOp:
     op_schema: str
-    op_fields: List[str]
+    op_fields: List[Optional[str]]
     empty_base: bool
     push_go: bool
 
@@ -36,6 +36,7 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 class Expression:
     id: str
     op: Op
+    type_args: List[str] = field(default_factory=list)
     arg_ids: List[str] = field(default_factory=list)
 
 
