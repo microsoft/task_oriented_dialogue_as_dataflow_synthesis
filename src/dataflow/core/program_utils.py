@@ -166,9 +166,8 @@ def mk_revise_the_main_constraint(
 
 
 def mk_struct_op(
-    name: Union[str, List[Sexp]], args: List[Tuple[Optional[str], Idx]], idx: Idx,
+        schema: str, args: List[Tuple[Optional[str], Idx]], idx: Idx,
 ) -> Tuple[Expression, Idx]:
-    schema, type_args = mk_name_and_type_args(name)
     new_idx = idx + 1
     # args = dict(args)  # defensive copy
     base = next((v for k, v in args if k == NON_EMPTY_BASE), None)
@@ -185,30 +184,19 @@ def mk_struct_op(
             empty_base=is_empty_base,
             push_go=True,
         ),
-        type_args=type_args,
         arg_ids=[idx_str(v) for v in arg_vals],
     )
     return flat_exp, new_idx
 
 
-def mk_call_op(name: Union[str, List[Sexp]], args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Idx]:
-    name, type_args = mk_name_and_type_args(name)
+def mk_call_op(name: str, args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Idx]:
     new_idx = idx + 1
     flat_exp = Expression(
         id=idx_str(new_idx),
         op=CallLikeOp(name=name),
-        type_args=type_args,
         arg_ids=[idx_str(v) for v in args],
     )
     return flat_exp, new_idx
-
-
-def mk_name_and_type_args(name: Union[str, List[Sexp]]) -> Tuple[str, List[str]]:
-    if name[0] == META:
-        assert len(name) == 3
-        name, *type_args = [name[2]] + name[1]
-        return name, list(map(mk_type_name, type_args))
-    return name, []
 
 
 def mk_type_name(sexp: Sexp) -> str:

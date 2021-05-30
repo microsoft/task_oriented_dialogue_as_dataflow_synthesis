@@ -1,7 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 from dataclasses import field
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 from pydantic.dataclasses import dataclass
 
@@ -37,6 +37,7 @@ class Expression:
     id: str
     op: Op
     type_args: List[str] = field(default_factory=list)
+    type: Optional[str] = None
     arg_ids: List[str] = field(default_factory=list)
 
 

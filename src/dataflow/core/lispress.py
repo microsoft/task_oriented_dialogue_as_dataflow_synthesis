@@ -3,6 +3,7 @@
 import json
 import re
 from collections import Counter
+from dataclasses import replace
 from json import JSONDecodeError, loads
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -16,7 +17,7 @@ from dataflow.core.program import (
     Program,
     ValueOp,
 )
-from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args
+from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args, mk_type_name
 from dataflow.core.program_utils import is_idx_str as is_express_idx_str
 from dataflow.core.program_utils import (
     is_struct_op_schema,
@@ -25,7 +26,7 @@ from dataflow.core.program_utils import (
     mk_value_op,
     unwrap_idx_str,
 )
-from dataflow.core.sexp import LEFT_PAREN, META, RIGHT_PAREN, Sexp, parse_sexp, sexp_to_str
+from dataflow.core.sexp import LEFT_PAREN, RIGHT_PAREN, Sexp, parse_sexp, sexp_to_str
 
 # node label used for external references
 EXTERNAL_LABEL = "ExternalReference"
@@ -42,6 +43,7 @@ VAR_PREFIX = "x"
 NAMED_ARG_PREFIX = ":"
 # values are rendered as `#(MySchema "json_dump_of_my_value")`
 VALUE_CHAR = "#"
+META_CHAR = "^"
 
 # Lispress has lisp syntax, and we represent it as an s-expression
 Lispress = Sexp
@@ -55,24 +57,30 @@ def try_round_trip(lispress_str: str) -> str:
     If it is not valid, returns the original string unmodified.
     """
     try:
-        # round-trip to canonicalize
-        lispress = parse_lispress(lispress_str)
-        program, _ = lispress_to_program(lispress, 0)
-        round_tripped = program_to_lispress(program)
-
-        def normalize_numbers(exp: Lispress) -> "Lispress":
-            if isinstance(exp, str):
-                try:
-                    num = float(exp)
-                    return f"{num:.1f}"
-                except ValueError:
-                    return exp
-            else:
-                return [normalize_numbers(e) for e in exp]
-
-        return render_compact(normalize_numbers(round_tripped))
+        return _try_round_trip(lispress_str)
     except Exception:  # pylint: disable=W0703
+        import traceback
+        traceback.print_exc()
         return lispress_str
+
+
+def _try_round_trip(lispress_str):
+    # round-trip to canonicalize
+    lispress = parse_lispress(lispress_str)
+    program, _ = lispress_to_program(lispress, 0)
+    round_tripped = program_to_lispress(program)
+
+    def normalize_numbers(exp: Lispress) -> "Lispress":
+        if isinstance(exp, str):
+            try:
+                num = float(exp)
+                return f"{num:.1f}"
+            except ValueError:
+                return exp
+        else:
+            return [normalize_numbers(e) for e in exp]
+
+    return render_compact(normalize_numbers(round_tripped))
 
 
 def program_to_lispress(program: Program) -> Lispress:
@@ -242,18 +250,19 @@ def type_args_to_lispress(type_args: List[str]) -> Optional[Lispress]:
     """Converts the provided list of type args into a Lispress expression."""
     if len(type_args) == 0:
         return None
-    
-    def _type_name_to_sexp(type_name: str) -> Sexp:
-        m = _type_name_regex.match(type_name)
-        base_name = m.group(1)
-        type_args = m.group(2)
-        if type_args is None:
-            return base_name
-        else:
-            type_args = list(map(_type_name_to_sexp, type_args.split(', ')))
-            return [base_name] + type_args
-    
-    return list(map(_type_name_to_sexp, type_args))
+    return list(map(type_name_to_lispress, type_args))
+
+
+def type_name_to_lispress(type_name: str) -> Lispress:
+    """Converts the provided type name into a Lispress expression."""
+    m = _type_name_regex.match(type_name)
+    base_name = m.group(1)
+    type_args = m.group(2)
+    if type_args is None:
+        return base_name
+    else:
+        type_args = list(map(type_name_to_lispress, type_args.split(', ')))
+        return [base_name] + type_args
 
 
 def _sugar_gets(sexp: Lispress) -> Lispress:
@@ -339,13 +348,13 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
         op_type_args_lispress = type_args_to_lispress(expression.type_args)
         # if there type args, we create a META expression
         if op_type_args_lispress is not None:
-            op_lispress = [META, op_type_args_lispress, op_lispress]
+            op_lispress = [META_CHAR, op_type_args_lispress, op_lispress]
         curr: Sexp
         if isinstance(expression.op, (BuildStructOp, CallLikeOp)):
             curr = [op_lispress]
             named_args = get_named_args(expression)
             # if all args are named (i.e., not positional), sort them alphabetically
-            has_positional = next(filter(lambda _, i: i is None, named_args), None) is not None
+            has_positional = next(filter(lambda p: p[0] is None, named_args), None) is not None
             if not has_positional:
                 named_args = sorted(get_named_args(expression))  # sort alphabetically
             for arg_name, arg_id in named_args:
@@ -363,6 +372,8 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
                     curr += [[EXTERNAL_LABEL, arg_id]]
         else:
             curr = op_lispress  # value
+        if expression.type:
+            curr = [META_CHAR, type_name_to_lispress(expression.type), curr]
         # add it to results
         if idx in reentrancies:
             # give reentrancies fresh ids as they are encountered
@@ -422,19 +433,31 @@ def unnest_line(
     else:
         s = [x for x in s if x != EXTERNAL_LABEL]
         hd, *tl = s
-        # note that `hd` is not a string when META is used to provide type args for a function
-        if not isinstance(hd, str) and (not isinstance(hd, list) or not hd[0] == META):
-            # we don't know how to handle this case, so we just pack the whole thing into a generic value
-            expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
-            return [expr], idx, idx, var_id_bindings
-        elif isinstance(hd, str) and _is_idx_str(hd):
+        if not isinstance(hd, str):
+            if len(hd) == 3 and hd[0] == META_CHAR:
+                # type args
+                without_type_args = [hd[2]]
+                without_type_args.extend(tl)
+                exprs, arg_idx, idx, var_id_bindings = unnest_line(
+                    without_type_args, idx=idx, var_id_bindings=var_id_bindings
+                )
+                exprs[-1] = replace(
+                    exprs[-1], type_args=[mk_type_name(targ) for targ in hd[1]]
+                )
+                return exprs, arg_idx, idx, var_id_bindings
+            else:
+                # we don't know how to handle this case, so we just pack the whole thing
+                # into a generic value
+                expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
+                return [expr], idx, idx, var_id_bindings
+        elif _is_idx_str(hd):
             # argId pointer
             var_id_dict = dict(var_id_bindings)
             # look up step index for var
             assert hd in var_id_dict
             expr_id = var_id_dict[hd]
             return [], expr_id, idx, var_id_bindings
-        elif isinstance(hd, str) and is_express_idx_str(hd):
+        elif is_express_idx_str(hd):
             # external reference
             return [], unwrap_idx_str(hd), idx, var_id_bindings
         elif hd == LET:
@@ -466,6 +489,16 @@ def unnest_line(
                 )
                 result_exprs.extend(exprs)
             return result_exprs, arg_idx, idx, var_id_bindings
+        elif hd == META_CHAR:
+            # type ascription
+            assert (
+                len(tl) == 2
+            ), f"Type ascriptions with ^ must have two arguments, but got {str(tl)}"
+            exprs, arg_idx, idx, var_id_bindings = unnest_line(
+                tl[1], idx=idx, var_id_bindings=var_id_bindings
+            )
+            exprs[-1] = replace(exprs[-1], type=mk_type_name(tl[0]))
+            return exprs, arg_idx, idx, var_id_bindings
         elif hd == OpType.Value.value:
             assert (
                 len(tl) >= 1 and len(tl[0]) >= 1
