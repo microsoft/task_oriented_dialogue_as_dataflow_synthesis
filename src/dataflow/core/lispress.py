@@ -59,8 +59,6 @@ def try_round_trip(lispress_str: str) -> str:
     try:
         return _try_round_trip(lispress_str)
     except Exception:  # pylint: disable=W0703
-        import traceback
-        traceback.print_exc()
         return lispress_str
 
 
