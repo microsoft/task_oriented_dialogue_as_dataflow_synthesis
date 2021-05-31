@@ -141,6 +141,7 @@ def _is_beginning_control_char(nextC):
 
 def sexp_to_str(sexp: Sexp) -> str:
     """ Generates string representation from S-expression """
+    # Note that some of this logic is repeated in lispress.render_pretty
     if isinstance(sexp, list):
         if len(sexp) == 3 and sexp[0] == META:
             return META + sexp_to_str(sexp[1]) + " " + sexp_to_str(sexp[2])
@@ -149,4 +150,16 @@ def sexp_to_str(sexp: Sexp) -> str:
         else:
             return "(" + " ".join(sexp_to_str(f) for f in sexp) + ")"
     else:
-        return sexp
+        if sexp.startswith('"') and sexp.endswith('"'):
+            return sexp
+        else:
+            return _escape_symbol(sexp)
+
+
+def _escape_symbol(symbol: str) -> str:
+    out = []
+    for c in symbol:
+        if _is_beginning_control_char(c):
+            out.append("\\")
+        out.append(c)
+    return "".join(out)

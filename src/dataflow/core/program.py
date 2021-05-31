@@ -33,11 +33,22 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 
 
 @dataclass(frozen=True)
+class TypeName:
+    base: str
+    type_args: List["TypeName"]
+
+
+# Seems to be necessary for cyclic types?
+# https://github.com/samuelcolvin/pydantic/issues/704
+TypeName.__pydantic_model__.update_forward_refs()  # type: ignore # pylint: disable=E1101
+
+
+@dataclass(frozen=True)
 class Expression:
     id: str
     op: Op
-    type_args: List[str] = field(default_factory=list)
-    type: Optional[str] = None
+    type_args: Optional[List[TypeName]] = None
+    type: Optional[TypeName] = None
     arg_ids: List[str] = field(default_factory=list)
 
 

@@ -18,7 +18,7 @@ surface_strings = [
           (dateAtTimeWithDefaults
             (nextDOW #(DayOfWeek "THURSDAY"))
             (numberPM #(Int 5))))
-        :subject (?= #(String "makeup artist"))))))""",
+        :subject (?= "makeup artist")))))""",
     # Contains a sugared `get` (`(:start ...)`)
     """
 (Yield
@@ -37,8 +37,7 @@ surface_strings = [
     :output (createCommitEventWrapper
       (createPreflightEventWrapper
         (eventAllDayOnDate
-          (Constraint[Event]
-            :subject (?= #(String "sales conference")))
+          (Constraint[Event] :subject (?= "sales conference"))
           (nextDayOfMonth (today) #(Int 29)))))))""",
     """
 (Yield
@@ -66,7 +65,7 @@ surface_strings = [
               (:results
                 (findEventWrapperWithDefaults
                   (eventOnDateAfterTime
-                    (Constraint[Event] :subject (?~= #(String "lunch")))
+                    (Constraint[Event] :subject (?~= "lunch"))
                     (:date x1)
                     (:time x1)))))))))))""",
     # Includes a `get` that should not be desugared,
@@ -84,12 +83,14 @@ surface_strings = [
             :start (?=
               (adjustByPeriodDuration
                 (:end (get x0 #(Path "item two")))
-                (PeriodDuration :duration (toHours #(Number 4)))))
-            :subject (?= #(String "dinner at foo"))))))))""",
+                (PeriodDuration :duration (toHours 4))))
+            :subject (?= "dinner at foo")))))))""",
     # tests that whitespace is preserved inside a quoted string,
     # as opposed to tokenized and then joined with a single space.
-    '#(String "multi\\tword  quoted\\nstring")',
-    '#(String "i got quotes\\"")',
+    '"multi\\tword  quoted\\nstring"',
+    '"i got quotes\\""',
+    '#(PersonName "multi\\tword  quoted\\nstring")',
+    '#(PersonName "i got quotes\\"")',
     # tests that empty plans are handled correctly
     "()",
     # regression test that no whitespace is inserted between "#" and "(".
@@ -107,7 +108,27 @@ surface_strings = [
                   (RecipientWithNameLike
                     :constraint (Constraint[Recipient])
                     :name #(PersonName "Tom"))))))))
-      :number #(Number 1))))""",
+      :number 1)))""",
+    # META_CHAR expression
+    """
+(Yield
+  (^(Long) >
+    ^Long
+    (size
+      (QueryEventResponse.results
+        (FindEventWrapperWithDefaults
+          (EventDuringRange
+            (^(Event) EmptyStructConstraint)
+            (ThisWeekend)))))
+    0L))""",
+    # Long VALUE_CHAR expression
+    """
+(Yield
+  (==
+    #(PersonName
+      "veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerylong")
+    #(PersonName "short")))
+""",
 ]
 
 
@@ -143,7 +164,7 @@ def test_program_to_lispress_with_quotes_inside_string():
     v, _ = mk_value_op(value='i got quotes"', schema="String", idx=0)
     program = Program(expressions=[v])
     rendered_lispress = render_pretty(program_to_lispress(program))
-    assert rendered_lispress == '#(String "i got quotes\\"")'
+    assert rendered_lispress == '"i got quotes\\""'
     sexp = parse_lispress(rendered_lispress)
     round_tripped, _ = lispress_to_program(sexp, 0)
     assert round_tripped == program
@@ -151,27 +172,32 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 def test_bare_values():
     assert _try_round_trip("0L") == "0L"
-    assert _try_round_trip("#(Number 0)") == "#(Number 0.0)"
+    assert _try_round_trip("#(Number 0)") == "0.0"
 
 
-def test_meta():
+def test_typenames():
     roundtrip = _try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
     assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
 
 
-def test_meta_real():
-    lispress = "(Yield (> (size (QueryEventResponse.results (FindEventWrapperWithDefaults (EventDuringRange (^(Event) EmptyStructConstraint) (ThisWeekend))))) #(Number 0.0)))"
-    assert lispress == _try_round_trip(lispress)
+def test_typename_with_args():
+    roundtrip = _try_round_trip("^(Number Foo) (^(String) foo (bar) ^Bar (bar))")
+    assert roundtrip == "^(Number Foo) (^(String) foo (bar) ^Bar (bar))"
+
+
+def test_number_float():
+    lispress = "(Yield (> (a) 0.0))"
+    assert _try_round_trip(lispress) == lispress
+    assert _try_round_trip("(Yield (> (a) 0))") == lispress
+    assert _try_round_trip("(toHours 4)") == "(toHours 4.0)"
 
 
 def test_simple():
-    assert _try_round_trip('(+ (a) #(String "b")') == '(+ (a) #(String "b")'
+    assert _try_round_trip('(+ (a) #(String "b"))') == '(+ (a) "b")'
+    assert _try_round_trip('(+ (a) #(PersonName "b"))') == '(+ (a) #(PersonName "b"))'
 
 
-def test_meta():
-    roundtrip = _try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
-    assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
-
-
-def test_simple():
-    assert _try_round_trip('(+ (a) #(String "b"))') == '(+ (a) #(String "b"))'
+def test_escaped_name():
+    string = "(a\\ b)"
+    assert parse_lispress(string) == ["a b"]
+    assert _try_round_trip(string) == string
