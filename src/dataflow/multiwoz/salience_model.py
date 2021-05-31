@@ -1,9 +1,8 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple
-
-from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)

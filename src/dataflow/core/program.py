@@ -1,9 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import List, Optional, Union
-
-from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -36,11 +34,6 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 class TypeName:
     base: str
     type_args: List["TypeName"]
-
-
-# Seems to be necessary for cyclic types?
-# https://github.com/samuelcolvin/pydantic/issues/704
-TypeName.__pydantic_model__.update_forward_refs()  # type: ignore # pylint: disable=E1101
 
 
 @dataclass(frozen=True)

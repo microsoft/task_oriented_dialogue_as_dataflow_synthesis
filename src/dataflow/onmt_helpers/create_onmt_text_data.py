@@ -7,10 +7,10 @@ Creates text data (source-target pairs) to be used for training OpenNMT models."
 import argparse
 import dataclasses
 import re
+from dataclasses import dataclass
 from typing import Dict, Iterator, List, TextIO
 
 import jsons
-from pydantic.dataclasses import dataclass
 from tqdm import tqdm
 
 from dataflow.core.constants import SpecialStrings

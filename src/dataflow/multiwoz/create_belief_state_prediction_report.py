@@ -8,9 +8,8 @@ TRADE predictions (trade) or dataflow execution results (dataflow).
 """
 import argparse
 import json
+from dataclasses import dataclass
 from typing import Any, Dict, List, Union
-
-from pydantic.dataclasses import dataclass
 
 from dataflow.core.io import load_jsonl_file_and_build_lookup, save_jsonl_file
 from dataflow.core.prediction_report import (
