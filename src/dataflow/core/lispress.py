@@ -231,11 +231,16 @@ def op_to_lispress(op: Op) -> Lispress:
         value = json.loads(op.value)
         schema = value.get("schema")
         underlying = value.get("underlying")
-        # this json formatter makes it easier (than other json formatters) to tokenize the string
-        underlying_json_str = " ".join(
-            json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
-        )
-        return [OpType.Value.value, [schema, underlying_json_str]]
+        # Long literals look like 2L, but Number literals look like #(Number 2.0)
+        # for backwards compatibility with Lispress 1.0
+        if schema == "Long":
+            return str(underlying) + "L"
+        else:
+            # this json formatter makes it easier (than other json formatters) to tokenize the string
+            underlying_json_str = " ".join(
+                json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
+            )
+            return [OpType.Value.value, [schema, underlying_json_str]]
     else:
         raise Exception(f"Op with unknown type: {op}")
 
@@ -395,7 +400,7 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     return [LET, let_bindings, result] if len(let_bindings) > 0 else result
 
 
-_number_regex = re.compile('^([0-9]+)(?:L)?$')
+_long_number_regex = re.compile('^([0-9]+)L$')
 
 
 def unnest_line(
@@ -415,19 +420,23 @@ def unnest_line(
     a map from variable names to their idx.
     """
     if not isinstance(s, list):
-        m = _number_regex.match(s)
-        if m is not None:
-            s = m.group(1)
         try:
-            # bare value
-            value = loads(s)
-            known_value_types = {
-                str: "String",
-                int: "Number",
-            }
-            schema = known_value_types[type(value)]
-            expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
-            return [expr], idx, idx, var_id_bindings
+            m = _long_number_regex.match(s)
+            if m is not None:
+                n = m.group(1)
+                expr, idx = mk_value_op(value=int(n), schema="Long", idx=idx)
+                return [expr], idx, idx, var_id_bindings
+            else:
+
+                # bare value
+                value = loads(s)
+                known_value_types = {
+                    str: "String",
+                    int: "Number",
+                }
+                schema = known_value_types[type(value)]
+                expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
+                return [expr], idx, idx, var_id_bindings
         except (JSONDecodeError, KeyError):
             return unnest_line([s], idx=idx, var_id_bindings=var_id_bindings)
     elif len(s) == 0:
