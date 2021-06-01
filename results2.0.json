@@ -1,1 +1,21 @@
-[{"user":"Subhro","model_name":"Seq2Seq (single model)","institution":"Semantic Machines","date":1597638329,"accuracy":0.6678288729739917,"rank":1}]
+[
+    {
+	"user":"Subhro",
+	"model_name":"Value-Agnostic Conversational Semantic Parsing (single model)",
+	"institution":"Semantic Machines",
+	"date":1622502846,
+	"accuracy":0.7375141349415756,
+	"accuracy_ignoring_refer": 0.7526856388993592,
+	"rank":1
+    },
+    {
+	"user":"Subhro",
+	"model_name":"Seq2Seq (single model)",
+	"institution":"Semantic Machines",
+	"date":1597638329,
+	"accuracy":0.6678288729739917,
+	"accuracy_ignoring_refer": 0.6820580474934037,
+	"rank":2
+    }
+
+]

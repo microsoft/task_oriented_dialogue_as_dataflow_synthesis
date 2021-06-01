@@ -19,7 +19,9 @@ mixin model_display(group, is_test)
         th Rank
       th Model
       th Test Accuracy
+      th Test Accuracy Ignoring Refer
     - var largest_accuracy = Math.max.apply(null, group.map(function (model) { return model.accuracy; }))
+    - var largest_accuracy_ignoring_refer = Math.max.apply(null, group.map(function (model) { return model.accuracy_ignoring_refer; }))
 
     each model in group
       tr
@@ -37,6 +39,11 @@ mixin model_display(group, is_test)
             b #{model.accuracy.toPrecision(5)}
           else
             | #{model.accuracy.toPrecision(5)}
+        td
+          if model.accuracy_ignoring_refer == largest_accuracy_ignoring_refer
+            b #{model.accuracy_ignoring_refer.toPrecision(5)}
+          else
+            | #{model.accuracy_ignoring_refer.toPrecision(5)}
 
 
 block content
