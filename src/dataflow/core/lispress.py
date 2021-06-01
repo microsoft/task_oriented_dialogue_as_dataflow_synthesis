@@ -62,7 +62,7 @@ def try_round_trip(lispress_str: str) -> str:
         return lispress_str
 
 
-def _try_round_trip(lispress_str):
+def _try_round_trip(lispress_str: str) -> str:
     # round-trip to canonicalize
     lispress = parse_lispress(lispress_str)
     program, _ = lispress_to_program(lispress, 0)
