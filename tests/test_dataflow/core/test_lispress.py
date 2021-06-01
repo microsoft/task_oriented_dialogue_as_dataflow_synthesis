@@ -172,7 +172,10 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 def test_bare_values():
     assert _try_round_trip("0L") == "0L"
+    assert _try_round_trip("0") == "0.0"
+    assert _try_round_trip("0.0") == "0.0"
     assert _try_round_trip("#(Number 0)") == "0.0"
+    assert _try_round_trip("#(Number 0.0)") == "0.0"
 
 
 def test_typenames():
