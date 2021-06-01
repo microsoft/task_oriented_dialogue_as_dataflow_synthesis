@@ -247,7 +247,7 @@ def type_args_to_lispress(type_args: List[str]) -> Optional[Lispress]:
     """Converts the provided list of type args into a Lispress expression."""
     if len(type_args) == 0:
         return None
-    return list(map(type_name_to_lispress, type_args))
+    return [type_name_to_lispress(targ) for targ in type_args]
 
 
 def type_name_to_lispress(type_name: str) -> Lispress:
@@ -258,7 +258,7 @@ def type_name_to_lispress(type_name: str) -> Lispress:
     if type_args is None:
         return base_name
     else:
-        type_args = list(map(type_name_to_lispress, type_args.split(', ')))
+        type_args = [type_name_to_lispress(targ) for targ in type_args.split(', ')]
         return [base_name] + type_args
 
 
@@ -439,13 +439,13 @@ def unnest_line(
         if not isinstance(hd, str):
             if len(hd) == 3 and hd[0] == META_CHAR:
                 # type args
-                without_type_args = [hd[2]]
-                without_type_args.extend(tl)
+                _meta_char, type_args, function = hd
+                without_type_args = [function] + tl
                 exprs, arg_idx, idx, var_id_bindings = unnest_line(
                     without_type_args, idx=idx, var_id_bindings=var_id_bindings
                 )
                 exprs[-1] = replace(
-                    exprs[-1], type_args=[mk_type_name(targ) for targ in hd[1]]
+                    exprs[-1], type_args=[mk_type_name(targ) for targ in type_args]
                 )
                 return exprs, arg_idx, idx, var_id_bindings
             else:
@@ -493,14 +493,20 @@ def unnest_line(
                 result_exprs.extend(exprs)
             return result_exprs, arg_idx, idx, var_id_bindings
         elif hd == META_CHAR:
-            # type ascription
+            # type ascriptions look like (^ T Expr), e.g. (^ Number (+ 1 2))
+            # would be (1 + 2): Number in Scala.
+            # Note that there is sugar in sexp.py to parse/render `(^ T Expr)`
+            # as just `^T Expr`.
             assert (
                 len(tl) == 2
             ), f"Type ascriptions with ^ must have two arguments, but got {str(tl)}"
+            (type_declaration, sexpr) = tl
+            # Recurse on the underlying expression
             exprs, arg_idx, idx, var_id_bindings = unnest_line(
-                tl[1], idx=idx, var_id_bindings=var_id_bindings
+                sexpr, idx=idx, var_id_bindings=var_id_bindings
             )
-            exprs[-1] = replace(exprs[-1], type=mk_type_name(tl[0]))
+            # Update is type declaration.
+            exprs[-1] = replace(exprs[-1], type=mk_type_name(type_declaration))
             return exprs, arg_idx, idx, var_id_bindings
         elif hd == OpType.Value.value:
             assert (
