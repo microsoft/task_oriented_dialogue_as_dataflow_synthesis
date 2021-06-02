@@ -69,7 +69,16 @@ def try_round_trip(lispress_str: str) -> str:
             else:
                 return [normalize_numbers(e) for e in exp]
 
-        return render_compact(normalize_numbers(round_tripped))
+        def strip_copy_strings(exp: Lispress) -> "Lispress":
+            if isinstance(exp, str):
+                if len(exp) > 2 and exp[0] == '"' and exp[-1] == '"':
+                    return '"' + exp[1:-1].strip() + '"'
+                else:
+                    return exp
+            else:
+                return [strip_copy_strings(e) for e in exp]
+
+        return render_compact(strip_copy_strings(normalize_numbers(round_tripped)))
     except Exception:  # pylint: disable=W0703
         return lispress_str
 
