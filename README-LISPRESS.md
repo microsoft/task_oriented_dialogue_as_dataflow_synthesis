@@ -96,8 +96,6 @@ In updated Lispress, accessor functions contain the name of the type they access
 (Event.attendees (refer (^(Event) StructConstraint)))
 ```
 
-`Path`s have been removed completely from SMCalflow 2.0.
-
 
 
 
