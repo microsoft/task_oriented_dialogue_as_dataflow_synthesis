@@ -19,7 +19,7 @@ Here is an example program in Lispress (a response to the utterance
             (AttendeeListHasRecipientConstraint 
               (RecipientWithNameLike 
                 (^(Recipient) EmptyStructConstraint) 
-                (PersonName.apply \"janice kang\")))))))))
+                (PersonName.apply "janice kang")))))))))
 ```
 
 
