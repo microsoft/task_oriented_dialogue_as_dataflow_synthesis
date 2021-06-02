@@ -1,4 +1,4 @@
-This is an out-dated description of Lispress, left here to document the SMCalFLow
+This is an outdated description of Lispress ("Lispress 1.0"), left here to document the SMCalFLow
 1.x datasets. For the more current description of Lispress, 
 ee [this REAMDE](README-LISPRESS.md).
 
