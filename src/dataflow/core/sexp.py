@@ -125,6 +125,9 @@ def parse_sexp(s: str) -> Sexp:
 
     out = read()
     skip_whitespace()
+    assert offset == len(
+        s
+    ), f"Failed to exhaustively parse {s}, maybe you are missing a close paren?"
     return out
 
 
@@ -141,12 +144,27 @@ def _is_beginning_control_char(nextC):
 
 def sexp_to_str(sexp: Sexp) -> str:
     """ Generates string representation from S-expression """
+    # Note that some of this logic is repeated in lispress.render_pretty
     if isinstance(sexp, list):
         if len(sexp) == 3 and sexp[0] == META:
-            return META + sexp_to_str(sexp[1]) + " " + sexp_to_str(sexp[2])
+            (_meta, type_expr, underlying_expr) = sexp
+            return META + sexp_to_str(type_expr) + " " + sexp_to_str(underlying_expr)
         elif len(sexp) == 2 and sexp[0] == READER:
-            return READER + sexp_to_str(sexp[1])
+            (_reader, expr) = sexp
+            return READER + sexp_to_str(expr)
         else:
             return "(" + " ".join(sexp_to_str(f) for f in sexp) + ")"
     else:
-        return sexp
+        if sexp.startswith('"') and sexp.endswith('"'):
+            return sexp
+        else:
+            return _escape_symbol(sexp)
+
+
+def _escape_symbol(symbol: str) -> str:
+    out = []
+    for c in symbol:
+        if _is_beginning_control_char(c):
+            out.append("\\")
+        out.append(c)
+    return "".join(out)

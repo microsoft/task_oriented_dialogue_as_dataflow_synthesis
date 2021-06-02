@@ -3,10 +3,16 @@
 import re
 from enum import Enum
 from json import dumps
-from typing import Any, Iterable, List, Tuple, Union, Optional
+from typing import Any, List, Optional, Tuple
 
-from dataflow.core.program import BuildStructOp, CallLikeOp, Expression, ValueOp
-from dataflow.core.sexp import Sexp, META
+from dataflow.core.program import (
+    BuildStructOp,
+    CallLikeOp,
+    Expression,
+    TypeName,
+    ValueOp,
+)
+from dataflow.core.sexp import Sexp
 
 # revise args
 ROOT_LOCATION = "rootLocation"
@@ -50,12 +56,8 @@ def unwrap_idx_str(s: str) -> int:
     return int(s[1:-1])
 
 
-def is_struct_op_schema(name: Union[str, List[Sexp]]) -> bool:
+def is_struct_op_schema(name: str) -> bool:
     """BuildStructOp schemas begin with a capital letter."""
-    # check if the provided name also contains type args and if so, remove them
-    if not isinstance(name, str):
-        assert isinstance(name, list) and name[0] == META and len(name) == 3
-        name = name[2]
     if len(name) == 0:
         return False
     return re.match(r"[A-Z]", name[0]) is not None
@@ -78,11 +80,9 @@ def get_named_args(e: Expression) -> List[Tuple[str, Optional[str]]]:
 
 
 def mk_constraint(
-    tpe: str, args: Iterable[Tuple[str, int]], idx: Idx,
+    tpe: str, args: List[Tuple[Optional[str], int]], idx: Idx,
 ) -> Tuple[Expression, Idx]:
-    return mk_struct_op(
-        schema=f"Constraint[{tpe.capitalize()}]", args=dict(args), idx=idx
-    )
+    return mk_struct_op(schema=f"Constraint[{tpe.capitalize()}]", args=args, idx=idx)
 
 
 def mk_equality_constraint(val: int, idx: Idx) -> Tuple[Expression, Idx]:
@@ -90,11 +90,11 @@ def mk_equality_constraint(val: int, idx: Idx) -> Tuple[Expression, Idx]:
 
 
 def mk_unset_constraint(idx: Idx) -> Tuple[Expression, Idx]:
-    return mk_struct_op(schema="EmptyConstraint", args={}, idx=idx)
+    return mk_struct_op(schema="EmptyConstraint", args=[], idx=idx)
 
 
 def mk_salience(tpe: str, idx: Idx) -> Tuple[List[Expression], Idx]:
-    constraint_expr, constraint_idx = mk_constraint(tpe=tpe, args={}, idx=idx)
+    constraint_expr, constraint_idx = mk_constraint(tpe=tpe, args=[], idx=idx)
     salience_expr, idx = mk_call_op(
         name=DataflowFn.Refer.value, args=[constraint_idx], idx=constraint_idx
     )
@@ -126,11 +126,11 @@ def mk_revise(
     """
     return mk_struct_op(
         schema=DataflowFn.Revise.value,
-        args={
-            ROOT_LOCATION: root_location_idx,
-            OLD_LOCATION: old_location_idx,
-            NEW: new_idx,
-        },
+        args=[
+            (ROOT_LOCATION, root_location_idx),
+            (OLD_LOCATION, old_location_idx),
+            (NEW, new_idx),
+        ],
         idx=idx,
     )
 
@@ -153,7 +153,7 @@ def mk_revise_the_main_constraint(
     salient_action_exprs, salient_action_idx = mk_salient_action(new_idx)
     old_loc_expr, old_loc_idx = mk_struct_op(
         schema=f"Constraint[Constraint[{tpe.capitalize()}]]",
-        args={},
+        args=[],
         idx=salient_action_idx,
     )
     revise_expr, revise_idx = mk_revise(
@@ -166,16 +166,15 @@ def mk_revise_the_main_constraint(
 
 
 def mk_struct_op(
-        schema: str, args: List[Tuple[Optional[str], Idx]], idx: Idx,
+    schema: str, args: List[Tuple[Optional[str], Idx]], idx: Idx,
 ) -> Tuple[Expression, Idx]:
     new_idx = idx + 1
     # args = dict(args)  # defensive copy
     base = next((v for k, v in args if k == NON_EMPTY_BASE), None)
     is_empty_base = base is None
-    pairs = args  # sorted(args.items())  # sorts keys alphabetically
-    arg_names = [k for k, v in pairs]
+    arg_names = [k for k, v in args]
     # nonEmptyBase always comes first
-    arg_vals = ([] if is_empty_base else [base]) + [v for k, v in pairs]
+    arg_vals = ([] if is_empty_base else [base]) + [v for k, v in args]
     flat_exp = Expression(
         id=idx_str(new_idx),
         op=BuildStructOp(
@@ -199,13 +198,11 @@ def mk_call_op(name: str, args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Id
     return flat_exp, new_idx
 
 
-def mk_type_name(sexp: Sexp) -> str:
+def mk_type_name(sexp: Sexp) -> TypeName:
     if isinstance(sexp, str):
-        return sexp
+        return TypeName(sexp, [])
     hd, *tl = sexp
-    if len(tl) == 0:
-        return hd
-    return hd + '[' + ', '.join(map(mk_type_name, tl)) + ']'
+    return TypeName(hd, [mk_type_name(e) for e in tl])
 
 
 def mk_value_op(value: Any, schema: str, idx: Idx) -> Tuple[Expression, Idx]:

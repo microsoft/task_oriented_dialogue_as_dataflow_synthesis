@@ -1,9 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import List, Optional, Union
-
-from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -33,11 +31,17 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 
 
 @dataclass(frozen=True)
+class TypeName:
+    base: str
+    type_args: List["TypeName"]
+
+
+@dataclass(frozen=True)
 class Expression:
     id: str
     op: Op
-    type_args: List[str] = field(default_factory=list)
-    type: Optional[str] = None
+    type_args: Optional[List[TypeName]] = None
+    type: Optional[TypeName] = None
     arg_ids: List[str] = field(default_factory=list)
 
 

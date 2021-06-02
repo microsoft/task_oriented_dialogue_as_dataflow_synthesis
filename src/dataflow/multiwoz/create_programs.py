@@ -299,7 +299,7 @@ def generate_express_for_topic(
             pointer_count_for_slot[slot_name] = pointer_count
 
     expression, pointer_count = mk_constraint(
-        tpe=topic, args=pointer_count_for_slot.items(), idx=pointer_count
+        tpe=topic, args=list(pointer_count_for_slot.items()), idx=pointer_count
     )
     expressions.append(expression)
 
