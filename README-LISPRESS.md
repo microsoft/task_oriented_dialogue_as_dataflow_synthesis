@@ -36,7 +36,7 @@ bit of special syntax:
   ```
   will pass the symbol `"this is a (quoted) string with a \" in it"` to `MyFunc`. 
 * The meta character (`^`) 
-  (borrowed from [Clojure](https://clojure.org/reference/metadata))
+  ([borrowed from Clojure](https://clojure.org/reference/metadata))
   can be used for type ascriptions and type arguments. For example,
   ```clojure
   ^Number 1
@@ -48,8 +48,9 @@ bit of special syntax:
   (^(Number) MyFunc 1)
   ```
   would be written as `MyFunc[Number](1)` in Scala or `MyFunc<Number>(1)` in Swift and Rust.
-* (Deprecated) The reader macro character (`#`), borrowed from 
-  [Common Lisp](https://gist.github.com/chaitanyagupta/9324402) marks literal values.
+* (Deprecated) The reader macro character (`#`), 
+  [borrowed from Common Lisp](https://gist.github.com/chaitanyagupta/9324402) 
+  marks literal values.
   For example, `#(PersonName "John")` marks a value of type `PersonName` with 
   content `"John"`. Reader macros are no longer in Lispress 2.0. Instead, 
   standard literals like booleans, longs, numbers, and strings, can be written directly,
