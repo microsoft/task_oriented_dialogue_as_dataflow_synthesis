@@ -59,7 +59,7 @@ bit of special syntax:
   `Number`s and `String`s as their bare equivalents, so `#(String "foo")` and `"foo"`
   will be interpreted as the same program. Similarly, `#(Number 1)` and `1` will
   be interpreted as the same program.
-* Literals of type Long are written as an integer literal followed by an `L` (e.g. `12L) 
+* Literals of type Long are written as an integer literal followed by an `L` (e.g. `12L`) 
   as in Java/Scala.
 
 ### Function application
@@ -76,7 +76,7 @@ uppercase letter for the first character may take named arguments.
 
 ### (Deprecated) Sugared `get`
 
-There is a common construct in the 1.x dataset in our programs where the `get` function
+There is a common construct in the SMCalFLow 1.x dataset where the `get` function
 retrieves a field (specified by a `Path`) from a structured object.
 For example,
 ```clojure
@@ -85,8 +85,7 @@ For example,
   #(Path "attendees"))
 ```
 returns the `attendees` field of the salient `Event`.
-When the path is a valid identifier (i.e. contains no whitespace or special
-characters). For backwards compatibility with Lispress 1.0, the parser will accept
+For backwards compatibility with Lispress 1.0, the parser will accept
 the following equivalent form. 
 ```clojure
 (:attendees
@@ -98,6 +97,8 @@ In updated Lispress, accessor functions contain the name of the type they access
 (Event.attendees
   (refer (StructConstraint[Event])))
 ```
+
+`Path`s have been removed completely from SMCalflow 2.0.
 
 
 
