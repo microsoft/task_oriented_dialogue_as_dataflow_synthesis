@@ -35,6 +35,8 @@ bit of special syntax:
   (MyFunc "this is a (quoted) string with a \" in it")
   ```
   will pass the symbol `"this is a (quoted) string with a \" in it"` to `MyFunc`. 
+  Note that when converting to a Program, we trim the whitespace from either side of a 
+  string, so `(MyFunc " a ")` and `(MyFunc "a")` are the same program.
 * The meta character (`^`) 
   ([borrowed from Clojure](https://clojure.org/reference/metadata))
   can be used for type ascriptions and type arguments. For example,
@@ -58,7 +60,8 @@ bit of special syntax:
   like `PersonName.apply`. The current code will interpret Lispress 1.0
   `Number`s and `String`s as their bare equivalents, so `#(String "foo")` and `"foo"`
   will be interpreted as the same program. Similarly, `#(Number 1)` and `1` will
-  be interpreted as the same program.
+  be interpreted as the same program, and `#(Boolean true)` and `true` are the same 
+  program.
 * Literals of type Long are written as an integer literal followed by an `L` (e.g. `12L`) 
   as in Java/Scala.
 
