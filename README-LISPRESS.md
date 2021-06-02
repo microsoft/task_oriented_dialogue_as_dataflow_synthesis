@@ -146,10 +146,10 @@ In
 (do
   (ConfirmAndReturnAction)
   (yield
-    (:start
+    (Event.start
       (FindNumNextEvent
-        :constraint (StructConstraint[Event])
-        :number #(Number 1)))))
+        (^(Event) StructConstraint)
+        1L))))
 ```
 for example, `ConfirmAndReturnAction` is guaranteed to execute before `FindNumNextEvent`.
 
