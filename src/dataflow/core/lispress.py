@@ -283,7 +283,7 @@ def type_name_to_lispress(type_name: TypeName) -> Lispress:
     if len(type_name.type_args) == 0:
         return type_name.base
     else:
-        type_args = [type_name_to_lispress(targ) for targ in type_args.split(', ')]
+        type_args = [type_name_to_lispress(targ) for targ in type_name.type_args]
         return [type_name.base] + type_args
 
 

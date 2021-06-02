@@ -125,7 +125,9 @@ def parse_sexp(s: str) -> Sexp:
 
     out = read()
     skip_whitespace()
-    assert offset == len(s), f"Failed to exhaustively parse {s}, maybe you are missing a close paren?"
+    assert offset == len(
+        s
+    ), f"Failed to exhaustively parse {s}, maybe you are missing a close paren?"
     return out
 
 
