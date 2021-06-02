@@ -52,15 +52,13 @@ Follow the steps below to reproduce the results reported in the paper (Table 2).
 [the leaderboard](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/) to report your results for consistency.**
 If you use your own evaluation script, please pay attention to the notes in Step 2 and Step 7.
 
-1. Download the SMCalFlow dataset on [this page](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/).
+1. Download the SMCalFlow dataset on [this page](https://github.com/microsoft/task_oriented_dialogue_as_dataflow_synthesis/tree/master/datasets/SMCalFlow%202.0).
    ```bash
    dataflow_dialogues_dir="output/dataflow_dialogues"
    mkdir -p "${dataflow_dialogues_dir}"
    
    cd "${dataflow_dialogues_dir}"
-   # Download the dataset `smcalflow.full.data.tgz` or `smcalflow.inlined.data.tgz`
-   # The `PATH_TO_DATA_TGZ` is the path to the tgz file of the corresponding dataset.
-   tar -xvzf PATH_TO_DATA_TGZ
+   # Place the data files in this folder and unzip them.
    ```
 2. Compute data statistics:
     ```bash
