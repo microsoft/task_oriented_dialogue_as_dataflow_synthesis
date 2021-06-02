@@ -188,6 +188,18 @@ def test_typename_with_args():
     assert roundtrip == "^(Number Foo) (^(String) foo (bar) ^Bar (bar))"
 
 
+def test_sorts_named_args():
+    # TODO: scary: named
+    roundtrip = _try_round_trip("(Foo :foo 1.0 :bar 3.0)")
+    assert roundtrip == "(Foo :bar 3.0 :foo 1.0)"
+
+
+def test_mixed_named_and_positional_args():
+    # TODO: scary: named
+    roundtrip = _try_round_trip("(Foo 1.0 2.0 :bar 3)")
+    assert roundtrip == "(Foo 1.0 2.0 :bar 3.0)"
+
+
 def test_number_float():
     lispress = "(Yield (> (a) 0.0))"
     assert _try_round_trip(lispress) == lispress

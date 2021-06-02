@@ -377,9 +377,12 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
             curr = [op_lispress]
             named_args = get_named_args(expression)
             # if all args are named (i.e., not positional), sort them alphabetically
-            has_positional = (
-                next(filter(lambda p: p[0] is None, named_args), None) is not None
-            )
+            # TODO in principle, we could get mixed positional and names arguments,
+            #   but for now that doesn't happen in SMCalFlow 2.0 so this code is good
+            #   enough. This code also only works for functions with named arguments
+            #   that have upper case names, which again happens to work for SMCalFlow
+            #   2.0.
+            has_positional = any(k is None for k, _ in named_args)
             if not has_positional:
                 named_args = sorted(get_named_args(expression))  # sort alphabetically
             for arg_name, arg_id in named_args:

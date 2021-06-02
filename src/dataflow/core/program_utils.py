@@ -172,10 +172,9 @@ def mk_struct_op(
     # args = dict(args)  # defensive copy
     base = next((v for k, v in args if k == NON_EMPTY_BASE), None)
     is_empty_base = base is None
-    pairs = args  # sorted(args.items())  # sorts keys alphabetically
-    arg_names = [k for k, v in pairs]
+    arg_names = [k for k, v in args]
     # nonEmptyBase always comes first
-    arg_vals = ([] if is_empty_base else [base]) + [v for k, v in pairs]
+    arg_vals = ([] if is_empty_base else [base]) + [v for k, v in args]
     flat_exp = Expression(
         id=idx_str(new_idx),
         op=BuildStructOp(
