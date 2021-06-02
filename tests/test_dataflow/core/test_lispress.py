@@ -207,7 +207,11 @@ def test_number_float():
     assert _try_round_trip("(toHours 4)") == "(toHours 4.0)"
 
 
-def test_simple():
+def test_bool():
+    assert _try_round_trip("(toHours true)") == "(toHours true)"
+
+
+def test_string():
     assert _try_round_trip('(+ (a) #(String "b"))') == '(+ (a) "b")'
     assert _try_round_trip('(+ (a) #(PersonName "b"))') == '(+ (a) #(PersonName "b"))'
 

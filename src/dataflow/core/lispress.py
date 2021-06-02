@@ -258,7 +258,7 @@ def op_to_lispress(op: Op) -> Lispress:
             underlying_json_str = " ".join(
                 json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
             )
-            if schema in ("Number", "String"):
+            if schema in ("Number", "String", "Boolean"):
                 # Numbers and strings were typed in Calflow 1.0 (e.g. #(Number 1),
                 # #(String "foo"), in Calflow 2.0, any bare number parseable as a float
                 # or int is interpreted as Number and any quoted string is interpreted
@@ -456,7 +456,7 @@ def unnest_line(
 
                 # bare value
                 value = loads(s)
-                known_value_types = {str: "String", float: "Number", int: "Number"}
+                known_value_types = {str: "String", float: "Number", int: "Number", bool: "Boolean"}
                 schema = known_value_types[type(value)]
                 expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
                 return [expr], idx, idx, var_id_bindings
