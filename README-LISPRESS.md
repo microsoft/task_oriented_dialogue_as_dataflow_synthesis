@@ -56,9 +56,9 @@ bit of special syntax:
   standard literals like booleans, longs, numbers, and strings, can be written directly,
   while wrapper types (like `PersonName`) feature an explicit call to a constructor
   like `PersonName.apply`. The current code will interpret Lispress 1.0
-  Numbers and Strings as their bare equivalents, so `#(String "foo")` and `"foo"`
-  will be interpreted as the same program. Similarly, `#(Number 1) and `1` will
-  be inpreted as the same program.
+  `Number`s and `String`s as their bare equivalents, so `#(String "foo")` and `"foo"`
+  will be interpreted as the same program. Similarly, `#(Number 1)` and `1` will
+  be interpreted as the same program.
 * Literals of type Long are written as an integer literal followed by an `L` (e.g. `12L) 
   as in Java/Scala.
 
