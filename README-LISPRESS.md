@@ -69,9 +69,9 @@ Function application expressions are lists,
 with the first element of the list denoting the function,
 and the remainder of the elements denoting its arguments.
 We follow Common Lisp and Clojure in using `:` to denote named arguments. For example,
-`(MyFunc :foo 1)` would be `MyFunc(foo = 1)` in Scala or Python. The 2.0 dataset
-contains a mix of named and positional arguments. Optional arguments are always
-named and come after any required arguments, which are always positional.
+`(MyFunc :foo 1)` would be `MyFunc(foo = 1)` in Scala or Python. At present, functions 
+must either be entirely positional or entirely named, and only functions with an
+uppercase letter for the first character may take named arguments. 
 
 ### (Deprecated) Sugared `get`
 
