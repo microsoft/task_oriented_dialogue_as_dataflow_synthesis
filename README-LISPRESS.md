@@ -88,14 +88,12 @@ returns the `attendees` field of the salient `Event`.
 For backwards compatibility with Lispress 1.0, the parser will accept
 the following equivalent form. 
 ```clojure
-(:attendees
-  (refer (StructConstraint[Event])))
+(:attendees (refer (StructConstraint[Event])))
 ```
 
 In updated Lispress, accessor functions contain the name of the type they access:
 ```clojure
-(Event.attendees
-  (refer (StructConstraint[Event])))
+(Event.attendees (refer (^(Event) StructConstraint)))
 ```
 
 `Path`s have been removed completely from SMCalflow 2.0.
