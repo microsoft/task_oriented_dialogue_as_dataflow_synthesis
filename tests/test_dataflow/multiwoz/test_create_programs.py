@@ -119,15 +119,15 @@ def test_create_programs_with_revise(trade_dialogue_1: Dict[str, Any]):
     salience_model = VanillaSalienceModel()
     expected_plans: List[str] = [
         # turn 1
-        """(find (Constraint[Hotel] :name (?= #(String "none")) :type (?= #(String "none"))))""",
+        """(find (Constraint[Hotel] :name (?= "none") :type (?= "none")))""",
         #  turn 2
-        """(ReviseConstraint :new (Constraint[Hotel] :name (?= #(String "hilton")) :pricerange (?= #(String "cheap")) :type (?= #(String "guest house"))) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Hotel] :name (?= "hilton") :pricerange (?= "cheap") :type (?= "guest house")) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 3
-        """(ReviseConstraint :new (Constraint[Hotel] :name (?= #(String "none"))) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Hotel] :name (?= "none")) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 4
         """(abandon (Constraint[Hotel]))""",
         # turn 5
-        """(find (Constraint[Hotel] :area (?= #(String "west"))))""",
+        """(find (Constraint[Hotel] :area (?= "west")))""",
         # turn 6
         """(find (Constraint[Restaurant] :area (refer (Constraint[Area]))))""",
         # turn 7
@@ -135,7 +135,7 @@ def test_create_programs_with_revise(trade_dialogue_1: Dict[str, Any]):
         # turn 8
         "()",
         # turn 9
-        """(find (Constraint[Taxi] :departure (?= #(String "none"))))""",
+        """(find (Constraint[Taxi] :departure (?= "none")))""",
         # turn 10
         "()",
     ]
@@ -160,23 +160,23 @@ def test_create_programs_with_revise_with_fill_none(trade_dialogue_1: Dict[str, 
 
     expected_plans: List[str] = [
         # turn 1
-        """(find (Constraint[Hotel] :area (?= #(String "none")) :book-day (?= #(String "none")) :book-people (?= #(String "none")) :book-stay (?= #(String "none")) :internet (?= #(String "none")) :name (?= #(String "none")) :parking (?= #(String "none")) :pricerange (?= #(String "none")) :stars (?= #(String "none")) :type (?= #(String "none"))))""",
+        """(find (Constraint[Hotel] :area (?= "none") :book-day (?= "none") :book-people (?= "none") :book-stay (?= "none") :internet (?= "none") :name (?= "none") :parking (?= "none") :pricerange (?= "none") :stars (?= "none") :type (?= "none")))""",
         #  turn 2
-        """(ReviseConstraint :new (Constraint[Hotel] :name (?= #(String "hilton")) :pricerange (?= #(String "cheap")) :type (?= #(String "guest house"))) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Hotel] :name (?= "hilton") :pricerange (?= "cheap") :type (?= "guest house")) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 3
-        """(ReviseConstraint :new (Constraint[Hotel] :name (?= #(String "none"))) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Hotel] :name (?= "none")) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 4
         """(abandon (Constraint[Hotel]))""",
         # turn 5
-        """(find (Constraint[Hotel] :area (?= #(String "west")) :book-day (?= #(String "none")) :book-people (?= #(String "none")) :book-stay (?= #(String "none")) :internet (?= #(String "none")) :name (?= #(String "none")) :parking (?= #(String "none")) :pricerange (?= #(String "none")) :stars (?= #(String "none")) :type (?= #(String "none"))))""",
+        """(find (Constraint[Hotel] :area (?= "west") :book-day (?= "none") :book-people (?= "none") :book-stay (?= "none") :internet (?= "none") :name (?= "none") :parking (?= "none") :pricerange (?= "none") :stars (?= "none") :type (?= "none")))""",
         # turn 6
-        """(find (Constraint[Restaurant] :area (refer (Constraint[Area])) :book-day (?= #(String "none")) :book-people (?= #(String "none")) :book-time (?= #(String "none")) :food (?= #(String "none")) :name (?= #(String "none")) :pricerange (?= #(String "none"))))""",
+        """(find (Constraint[Restaurant] :area (refer (Constraint[Area])) :book-day (?= "none") :book-people (?= "none") :book-time (?= "none") :food (?= "none") :name (?= "none") :pricerange (?= "none")))""",
         # turn 7
         """(ReviseConstraint :new (Constraint[Restaurant] :pricerange (refer (Constraint[Pricerange]))) :oldLocation (Constraint[Constraint[Restaurant]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 8
         "()",
         # turn 9
-        """(find (Constraint[Taxi] :arriveby (?= #(String "none")) :departure (?= #(String "none")) :destination (?= #(String "none")) :leaveat (?= #(String "none"))))""",
+        """(find (Constraint[Taxi] :arriveby (?= "none") :departure (?= "none") :destination (?= "none") :leaveat (?= "none")))""",
         # turn 10
         "()",
     ]
@@ -204,15 +204,15 @@ def test_create_programs_with_revise_with_avoid_empty_plan(
     salience_model = VanillaSalienceModel()
     expected_plans: List[str] = [
         # turn 1
-        """(find (Constraint[Hotel] :name (?= #(String "none")) :type (?= #(String "none"))))""",
+        """(find (Constraint[Hotel] :name (?= "none") :type (?= "none")))""",
         #  turn 2
-        """(ReviseConstraint :new (Constraint[Hotel] :name (?= #(String "hilton")) :pricerange (?= #(String "cheap")) :type (?= #(String "guest house"))) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Hotel] :name (?= "hilton") :pricerange (?= "cheap") :type (?= "guest house")) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 3
-        """(ReviseConstraint :new (Constraint[Hotel] :name (?= #(String "none"))) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Hotel] :name (?= "none")) :oldLocation (Constraint[Constraint[Hotel]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 4
         """(abandon (Constraint[Hotel]))""",
         # turn 5
-        """(find (Constraint[Hotel] :area (?= #(String "west"))))""",
+        """(find (Constraint[Hotel] :area (?= "west")))""",
         # turn 6
         """(find (Constraint[Restaurant] :area (refer (Constraint[Area]))))""",
         # turn 7
@@ -220,9 +220,9 @@ def test_create_programs_with_revise_with_avoid_empty_plan(
         # turn 8
         """(ReviseConstraint :new (Constraint[Restaurant] :pricerange (refer (Constraint[Pricerange]))) :oldLocation (Constraint[Constraint[Restaurant]]) :rootLocation (roleConstraint #(Path "output")))""",
         # turn 9
-        """(find (Constraint[Taxi] :departure (?= #(String "none"))))""",
+        """(find (Constraint[Taxi] :departure (?= "none")))""",
         # turn 10
-        """(ReviseConstraint :new (Constraint[Taxi] :departure (?= #(String "none"))) :oldLocation (Constraint[Constraint[Taxi]]) :rootLocation (roleConstraint #(Path "output")))""",
+        """(ReviseConstraint :new (Constraint[Taxi] :departure (?= "none")) :oldLocation (Constraint[Constraint[Taxi]]) :rootLocation (roleConstraint #(Path "output")))""",
     ]
     dataflow_dialogue, _, _ = create_programs_for_trade_dialogue(
         trade_dialogue=trade_dialogue_1,

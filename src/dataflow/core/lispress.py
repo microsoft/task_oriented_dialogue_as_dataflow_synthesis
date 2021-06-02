@@ -15,14 +15,16 @@ from dataflow.core.program import (
     Expression,
     Op,
     Program,
+    TypeName,
     ValueOp,
 )
-from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args, mk_type_name
+from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args
 from dataflow.core.program_utils import is_idx_str as is_express_idx_str
 from dataflow.core.program_utils import (
     is_struct_op_schema,
     mk_call_op,
     mk_struct_op,
+    mk_type_name,
     mk_value_op,
     unwrap_idx_str,
 )
@@ -175,14 +177,31 @@ def _render_lines(sexp: Lispress, max_width: int) -> List[str]:
         return [compact]
     else:
         fn, *args = sexp
-        prefix = " " * NUM_INDENTATION_SPACES
-        fn_line = LEFT_PAREN + render_compact(fn)
-        arg_lines = _group_named_args(
-            [line for arg in args for line in _render_lines(arg, max_width=max_width)]
-        )
-        lines = [fn_line] + [prefix + line for line in arg_lines]
-        lines[-1] = lines[-1] + RIGHT_PAREN
-        return lines
+        if fn == VALUE_CHAR:
+            assert len(args) == 1, "# Value expressions must have one argument"
+            lines = _render_lines(args[0], max_width=max_width)
+            lines[0] = VALUE_CHAR + lines[0]
+            return lines
+        elif fn == META_CHAR:
+            assert len(args) == 2, "^ Meta expressions must have one argument"
+            lines = _render_lines(args[0], max_width=max_width)
+            lines.extend(_render_lines(args[1], max_width=max_width))
+            lines[0] = META_CHAR + lines[0]
+            return lines
+        else:
+            prefix = " " * NUM_INDENTATION_SPACES
+            fn_lines = _render_lines(fn, max_width=max_width)
+            arg_lines = _group_named_args(
+                [
+                    line
+                    for arg in args
+                    for line in _render_lines(arg, max_width=max_width)
+                ]
+            )
+            lines = fn_lines + [prefix + line for line in arg_lines]
+            lines[0] = LEFT_PAREN + lines[0]
+            lines[-1] = lines[-1] + RIGHT_PAREN
+            return lines
 
 
 def _idx_to_var_str(idx: int) -> str:
@@ -202,7 +221,7 @@ def _named_arg_to_key(name: str) -> str:
     assert _is_named_arg(
         name
     ), f"named arg must start with '{NAMED_ARG_PREFIX}': {name}"
-    return name[len(NAMED_ARG_PREFIX):]
+    return name[len(NAMED_ARG_PREFIX) :]
 
 
 def _key_to_named_arg(key: str) -> str:
@@ -231,35 +250,42 @@ def op_to_lispress(op: Op) -> Lispress:
         value = json.loads(op.value)
         schema = value.get("schema")
         underlying = value.get("underlying")
-        # this json formatter makes it easier (than other json formatters) to tokenize the string
-        underlying_json_str = " ".join(
-            json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
-        )
-        return [OpType.Value.value, [schema, underlying_json_str]]
+        # Long literals look like 2L
+        if schema == "Long":
+            return str(underlying) + "L"
+        else:
+            # this json formatter makes it easier (than other json formatters) to tokenize the string
+            underlying_json_str = " ".join(
+                json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
+            )
+            if schema in ("Number", "String"):
+                # Numbers and strings were typed in Calflow 1.0 (e.g. #(Number 1),
+                # #(String "foo"), in Calflow 2.0, any bare number parseable as a float
+                # or int is interpreted as Number and any quoted string is interpreted
+                # as a string. This means that we drop the explicit String and Number
+                # annotations from Calflow 1.0 when roundtripping.
+                return underlying_json_str
+            else:
+                return [OpType.Value.value, [schema, underlying_json_str]]
     else:
         raise Exception(f"Op with unknown type: {op}")
 
 
-_type_name_regex = re.compile('^([a-zA-Z0-9]+)(?:\[([a-zA-Z0-9, \[\]]+)\])?$')
-
-
-def type_args_to_lispress(type_args: List[str]) -> Optional[Lispress]:
+def type_args_to_lispress(type_args: List[TypeName]) -> Optional[Lispress]:
     """Converts the provided list of type args into a Lispress expression."""
     if len(type_args) == 0:
         return None
     return [type_name_to_lispress(targ) for targ in type_args]
 
 
-def type_name_to_lispress(type_name: str) -> Lispress:
+def type_name_to_lispress(type_name: TypeName) -> Lispress:
     """Converts the provided type name into a Lispress expression."""
-    m = _type_name_regex.match(type_name)
-    base_name = m.group(1)
-    type_args = m.group(2)
-    if type_args is None:
-        return base_name
+    if len(type_name.type_args) == 0:
+        return type_name.base
     else:
-        type_args = [type_name_to_lispress(targ) for targ in type_args.split(', ')]
-        return [base_name] + type_args
+        base: List[Sexp] = [type_name.base]
+        type_args = [type_name_to_lispress(targ) for targ in type_name.type_args]
+        return base + type_args
 
 
 def _sugar_gets(sexp: Lispress) -> Lispress:
@@ -342,16 +368,21 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
         # create a sexp for expression
         idx = expression.id
         op_lispress = op_to_lispress(expression.op)
-        op_type_args_lispress = type_args_to_lispress(expression.type_args)
         # if there type args, we create a META expression
-        if op_type_args_lispress is not None:
+        if expression.type_args is not None:
+            op_type_args_lispress = type_args_to_lispress(expression.type_args)
             op_lispress = [META_CHAR, op_type_args_lispress, op_lispress]
         curr: Sexp
         if isinstance(expression.op, (BuildStructOp, CallLikeOp)):
             curr = [op_lispress]
             named_args = get_named_args(expression)
             # if all args are named (i.e., not positional), sort them alphabetically
-            has_positional = next(filter(lambda p: p[0] is None, named_args), None) is not None
+            # TODO in principle, we could get mixed positional and names arguments,
+            #   but for now that doesn't happen in SMCalFlow 2.0 so this code is good
+            #   enough. This code also only works for functions with named arguments
+            #   that have upper case names, which again happens to work for SMCalFlow
+            #   2.0.
+            has_positional = any(k is None for k, _ in named_args)
             if not has_positional:
                 named_args = sorted(get_named_args(expression))  # sort alphabetically
             for arg_name, arg_id in named_args:
@@ -395,7 +426,7 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     return [LET, let_bindings, result] if len(let_bindings) > 0 else result
 
 
-_number_regex = re.compile('^([0-9]+)(?:L)?$')
+_long_number_regex = re.compile("^([0-9]+)L$")
 
 
 def unnest_line(
@@ -415,19 +446,20 @@ def unnest_line(
     a map from variable names to their idx.
     """
     if not isinstance(s, list):
-        m = _number_regex.match(s)
-        if m is not None:
-            s = m.group(1)
         try:
-            # bare value
-            value = loads(s)
-            known_value_types = {
-                str: "String",
-                int: "Number",
-            }
-            schema = known_value_types[type(value)]
-            expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
-            return [expr], idx, idx, var_id_bindings
+            m = _long_number_regex.match(s)
+            if m is not None:
+                n = m.group(1)
+                expr, idx = mk_value_op(value=int(n), schema="Long", idx=idx)
+                return [expr], idx, idx, var_id_bindings
+            else:
+
+                # bare value
+                value = loads(s)
+                known_value_types = {str: "String", float: "Number", int: "Number"}
+                schema = known_value_types[type(value)]
+                expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
+                return [expr], idx, idx, var_id_bindings
         except (JSONDecodeError, KeyError):
             return unnest_line([s], idx=idx, var_id_bindings=var_id_bindings)
     elif len(s) == 0:

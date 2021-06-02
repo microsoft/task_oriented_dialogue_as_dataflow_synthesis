@@ -7,11 +7,11 @@ Creates the prediction report from onmt_translate output.
 """
 import argparse
 import dataclasses
+from dataclasses import dataclass
 from typing import Dict, Iterator, List, Union
 
 import jsons
 from more_itertools import chunked
-from pydantic.dataclasses import dataclass
 
 from dataflow.core.dialogue import (
     AgentUtterance,
