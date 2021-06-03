@@ -80,7 +80,16 @@ def _try_round_trip(lispress_str: str) -> str:
         else:
             return [normalize_numbers(e) for e in exp]
 
-    return render_compact(normalize_numbers(round_tripped))
+    def strip_copy_strings(exp: Lispress) -> "Lispress":
+        if isinstance(exp, str):
+            if len(exp) > 2 and exp[0] == '"' and exp[-1] == '"':
+                return '"' + exp[1:-1].strip() + '"'
+            else:
+                return exp
+        else:
+            return [strip_copy_strings(e) for e in exp]
+
+    return render_compact(strip_copy_strings(normalize_numbers(round_tripped)))
 
 
 def program_to_lispress(program: Program) -> Lispress:
@@ -456,7 +465,12 @@ def unnest_line(
 
                 # bare value
                 value = loads(s)
-                known_value_types = {str: "String", float: "Number", int: "Number", bool: "Boolean"}
+                known_value_types = {
+                    str: "String",
+                    float: "Number",
+                    int: "Number",
+                    bool: "Boolean",
+                }
                 schema = known_value_types[type(value)]
                 expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
                 return [expr], idx, idx, var_id_bindings

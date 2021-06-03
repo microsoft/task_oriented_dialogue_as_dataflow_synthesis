@@ -220,3 +220,7 @@ def test_escaped_name():
     string = "(a\\ b)"
     assert parse_lispress(string) == ["a b"]
     assert _try_round_trip(string) == string
+
+
+def test_strip_copy_strings():
+    assert try_round_trip('#(String " Tom ")') == '#(String "Tom")'
