@@ -223,4 +223,4 @@ def test_escaped_name():
 
 
 def test_strip_copy_strings():
-    assert try_round_trip('#(String " Tom ")') == '#(String "Tom")'
+    assert _try_round_trip('#(String " Tom ")') == '#(String "Tom")'
