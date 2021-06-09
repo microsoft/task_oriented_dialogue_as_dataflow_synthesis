@@ -3,9 +3,16 @@
 import re
 from enum import Enum
 from json import dumps
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, List, Optional, Tuple
 
-from dataflow.core.program import BuildStructOp, CallLikeOp, Expression, ValueOp
+from dataflow.core.program import (
+    BuildStructOp,
+    CallLikeOp,
+    Expression,
+    TypeName,
+    ValueOp,
+)
+from dataflow.core.sexp import Sexp
 
 # revise args
 ROOT_LOCATION = "rootLocation"
@@ -56,7 +63,7 @@ def is_struct_op_schema(name: str) -> bool:
     return re.match(r"[A-Z]", name[0]) is not None
 
 
-def get_named_args(e: Expression) -> List[Tuple[str, str]]:
+def get_named_args(e: Expression) -> List[Tuple[str, Optional[str]]]:
     """
     Gets a list of (arg_name, arg_id) pairs.
     If `e` is a BuildStructOp, then `arg_names` are its `fields`, otherwise
@@ -73,11 +80,9 @@ def get_named_args(e: Expression) -> List[Tuple[str, str]]:
 
 
 def mk_constraint(
-    tpe: str, args: Iterable[Tuple[str, int]], idx: Idx,
+    tpe: str, args: List[Tuple[Optional[str], int]], idx: Idx,
 ) -> Tuple[Expression, Idx]:
-    return mk_struct_op(
-        schema=f"Constraint[{tpe.capitalize()}]", args=dict(args), idx=idx
-    )
+    return mk_struct_op(schema=f"Constraint[{tpe.capitalize()}]", args=args, idx=idx)
 
 
 def mk_equality_constraint(val: int, idx: Idx) -> Tuple[Expression, Idx]:
@@ -85,11 +90,11 @@ def mk_equality_constraint(val: int, idx: Idx) -> Tuple[Expression, Idx]:
 
 
 def mk_unset_constraint(idx: Idx) -> Tuple[Expression, Idx]:
-    return mk_struct_op(schema="EmptyConstraint", args={}, idx=idx)
+    return mk_struct_op(schema="EmptyConstraint", args=[], idx=idx)
 
 
 def mk_salience(tpe: str, idx: Idx) -> Tuple[List[Expression], Idx]:
-    constraint_expr, constraint_idx = mk_constraint(tpe=tpe, args={}, idx=idx)
+    constraint_expr, constraint_idx = mk_constraint(tpe=tpe, args=[], idx=idx)
     salience_expr, idx = mk_call_op(
         name=DataflowFn.Refer.value, args=[constraint_idx], idx=constraint_idx
     )
@@ -121,11 +126,11 @@ def mk_revise(
     """
     return mk_struct_op(
         schema=DataflowFn.Revise.value,
-        args={
-            ROOT_LOCATION: root_location_idx,
-            OLD_LOCATION: old_location_idx,
-            NEW: new_idx,
-        },
+        args=[
+            (ROOT_LOCATION, root_location_idx),
+            (OLD_LOCATION, old_location_idx),
+            (NEW, new_idx),
+        ],
         idx=idx,
     )
 
@@ -148,7 +153,7 @@ def mk_revise_the_main_constraint(
     salient_action_exprs, salient_action_idx = mk_salient_action(new_idx)
     old_loc_expr, old_loc_idx = mk_struct_op(
         schema=f"Constraint[Constraint[{tpe.capitalize()}]]",
-        args={},
+        args=[],
         idx=salient_action_idx,
     )
     revise_expr, revise_idx = mk_revise(
@@ -161,16 +166,15 @@ def mk_revise_the_main_constraint(
 
 
 def mk_struct_op(
-    schema: str, args: Dict[str, Idx], idx: Idx,
+    schema: str, args: List[Tuple[Optional[str], Idx]], idx: Idx,
 ) -> Tuple[Expression, Idx]:
     new_idx = idx + 1
-    args = dict(args)  # defensive copy
-    base = args.pop(NON_EMPTY_BASE, None)
+    # args = dict(args)  # defensive copy
+    base = next((v for k, v in args if k == NON_EMPTY_BASE), None)
     is_empty_base = base is None
-    pairs = sorted(args.items())  # sorts keys alphabetically
-    arg_names = [k for k, v in pairs]
+    arg_names = [k for k, v in args]
     # nonEmptyBase always comes first
-    arg_vals = ([] if is_empty_base else [base]) + [v for k, v in pairs]
+    arg_vals = ([] if is_empty_base else [base]) + [v for k, v in args]
     flat_exp = Expression(
         id=idx_str(new_idx),
         op=BuildStructOp(
@@ -192,6 +196,13 @@ def mk_call_op(name: str, args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Id
         arg_ids=[idx_str(v) for v in args],
     )
     return flat_exp, new_idx
+
+
+def mk_type_name(sexp: Sexp) -> TypeName:
+    if isinstance(sexp, str):
+        return TypeName(sexp, [])
+    hd, *tl = sexp
+    return TypeName(hd, [mk_type_name(e) for e in tl])
 
 
 def mk_value_op(value: Any, schema: str, idx: Idx) -> Tuple[Expression, Idx]:

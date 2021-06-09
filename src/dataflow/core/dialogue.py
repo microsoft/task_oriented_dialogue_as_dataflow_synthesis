@@ -1,8 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
+from dataclasses import dataclass
 from typing import List, Optional
-
-from pydantic.dataclasses import dataclass
 
 from dataflow.core.linearize import lispress_to_seq
 from dataflow.core.lispress import lispress_to_program, parse_lispress

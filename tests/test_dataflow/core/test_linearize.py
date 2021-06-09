@@ -1,6 +1,7 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 import json
+from typing import List
 
 from dataflow.core.linearize import (
     program_to_seq,
@@ -12,7 +13,7 @@ from dataflow.core.linearize import (
 )
 from dataflow.core.lispress import unnest_line
 from dataflow.core.program import Expression, Program, ValueOp
-from dataflow.core.sexp import flatten
+from dataflow.core.sexp import Sexp
 
 
 def test_plan_to_seq_strict():
@@ -49,6 +50,13 @@ def test_plan_to_seq_strict():
         "} } "
         ") )"
     )
+
+    def flatten(form: Sexp) -> List[str]:
+        return (
+            [form]
+            if not isinstance(form, list)
+            else [s for subexp in form for s in flatten(subexp)]
+        )
 
     linearized_plan_tokens = program_to_seq(program=original_program)
     assert all(" " not in tok for tok in flatten(linearized_plan_tokens))

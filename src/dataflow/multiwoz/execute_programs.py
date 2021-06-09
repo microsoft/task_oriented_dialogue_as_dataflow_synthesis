@@ -8,11 +8,11 @@ Executes programs to produce TRADE belief states.
 import argparse
 import copy
 import json
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import jsons
 import numpy as np
-from pydantic.dataclasses import dataclass
 
 from dataflow.core.dialogue import Dialogue, Turn
 from dataflow.core.io import load_jsonl_file, load_jsonl_file_and_build_lookup

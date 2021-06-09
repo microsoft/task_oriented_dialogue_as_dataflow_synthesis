@@ -1,9 +1,11 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
 import json
+import re
 from collections import Counter
+from dataclasses import replace
 from json import JSONDecodeError, loads
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from more_itertools import chunked
 
@@ -13,6 +15,7 @@ from dataflow.core.program import (
     Expression,
     Op,
     Program,
+    TypeName,
     ValueOp,
 )
 from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args
@@ -21,6 +24,7 @@ from dataflow.core.program_utils import (
     is_struct_op_schema,
     mk_call_op,
     mk_struct_op,
+    mk_type_name,
     mk_value_op,
     unwrap_idx_str,
 )
@@ -41,6 +45,7 @@ VAR_PREFIX = "x"
 NAMED_ARG_PREFIX = ":"
 # values are rendered as `#(MySchema "json_dump_of_my_value")`
 VALUE_CHAR = "#"
+META_CHAR = "^"
 
 # Lispress has lisp syntax, and we represent it as an s-expression
 Lispress = Sexp
@@ -54,40 +59,44 @@ def try_round_trip(lispress_str: str) -> str:
     If it is not valid, returns the original string unmodified.
     """
     try:
-        # round-trip to canonicalize
-        lispress = parse_lispress(lispress_str)
-        program, _ = lispress_to_program(lispress, 0)
-        round_tripped = program_to_lispress(program)
-
-        def normalize_numbers(exp: Lispress) -> "Lispress":
-            if isinstance(exp, str):
-                try:
-                    num = float(exp)
-                    return f"{num:.1f}"
-                except ValueError:
-                    return exp
-            else:
-                return [normalize_numbers(e) for e in exp]
-
-        def strip_copy_strings(exp: Lispress) -> "Lispress":
-            if isinstance(exp, str):
-                if len(exp) > 2 and exp[0] == '"' and exp[-1] == '"':
-                    return '"' + exp[1:-1].strip() + '"'
-                else:
-                    return exp
-            else:
-                return [strip_copy_strings(e) for e in exp]
-
-        return render_compact(strip_copy_strings(normalize_numbers(round_tripped)))
+        return _try_round_trip(lispress_str)
     except Exception:  # pylint: disable=W0703
         return lispress_str
+
+
+def _try_round_trip(lispress_str: str) -> str:
+    # round-trip to canonicalize
+    lispress = parse_lispress(lispress_str)
+    program, _ = lispress_to_program(lispress, 0)
+    round_tripped = program_to_lispress(program)
+
+    def normalize_numbers(exp: Lispress) -> "Lispress":
+        if isinstance(exp, str):
+            try:
+                num = float(exp)
+                return f"{num:.1f}"
+            except ValueError:
+                return exp
+        else:
+            return [normalize_numbers(e) for e in exp]
+
+    def strip_copy_strings(exp: Lispress) -> "Lispress":
+        if isinstance(exp, str):
+            if len(exp) > 2 and exp[0] == '"' and exp[-1] == '"':
+                return '"' + exp[1:-1].strip() + '"'
+            else:
+                return exp
+        else:
+            return [strip_copy_strings(e) for e in exp]
+
+    return render_compact(strip_copy_strings(normalize_numbers(round_tripped)))
 
 
 def program_to_lispress(program: Program) -> Lispress:
     """ Converts a Program to Lispress. """
     unsugared = _program_to_unsugared_lispress(program)
     sugared_gets = _sugar_gets(unsugared)
-    return _strip_extra_parens_around_values(sugared_gets)
+    return sugared_gets
 
 
 def lispress_to_program(lispress: Lispress, idx: Idx) -> Tuple[Program, Idx]:
@@ -96,8 +105,7 @@ def lispress_to_program(lispress: Lispress, idx: Idx) -> Tuple[Program, Idx]:
     Returns the last id used along with the Program.
     """
     desugared_gets = _desugar_gets(lispress)
-    with_parens_around_values = _add_extra_parens_around_values(desugared_gets)
-    return _unsugared_lispress_to_program(with_parens_around_values, idx)
+    return _unsugared_lispress_to_program(desugared_gets, idx)
 
 
 def render_pretty(lispress: Lispress, max_width: int = 60) -> str:
@@ -118,7 +126,6 @@ def render_pretty(lispress: Lispress, max_width: int = 60) -> str:
                 (Constraint[Recipient])
                 #(PersonName "Elaine")))))))
     """
-    lispress = _render_value_expressions(lispress)
     result = "\n".join(_render_lines(sexp=lispress, max_width=max_width))
     return result
 
@@ -131,7 +138,7 @@ def render_compact(lispress: Lispress) -> str:
     >>> print(render_compact(lispress))
     (describe (:start (findNextEvent (Constraint[Event] :attendees (attendeeListHasRecipientConstraint (recipientWithNameLike (Constraint[Recipient]) #(PersonName "Elaine")))))))
     """
-    return sexp_to_str(_render_value_expressions(lispress))
+    return sexp_to_str(lispress)
 
 
 def parse_lispress(s: str) -> Lispress:
@@ -151,7 +158,7 @@ def parse_lispress(s: str) -> Lispress:
     >>> parse_lispress(s)
     ['describe', [':start', ['findNextEvent', ['Constraint[Event]', ':attendees', ['attendeeListHasRecipientConstraint', ['recipientWithNameLike', ['Constraint[Recipient]'], '#', ['PersonName', '"Elaine"']]]]]]]
     """
-    return parse_sexp(s, clean_singletons=False)[0]
+    return parse_sexp(s)
 
 
 def _group_named_args(lines: List[str]) -> List[str]:
@@ -172,41 +179,6 @@ def _group_named_args(lines: List[str]) -> List[str]:
     return result
 
 
-def _render_value_expressions(sexp: Sexp) -> Sexp:
-    """
-    Finds Value sub-expressions within `sexp` and replaces them in place
-    with their rendered str.
-    This ensures that values are always atomically rendered on the same line,
-    and also allows us to render "#(" without a space between them.
-    """
-    if isinstance(sexp, str):
-        return sexp
-    else:
-        result: List[Lispress] = []
-        i = 0
-        while i < len(sexp):
-            s = sexp[i]
-            if s == VALUE_CHAR and i + 1 < len(sexp):
-                # merge "#" and the following (rendered) subexpression
-                result.append(VALUE_CHAR + render_compact(sexp[i + 1]))
-                i += 2
-            else:
-                result.append(_render_value_expressions(s))
-                i += 1
-        # special-case top-level values because we can't strip out the last level
-        # of parens in the Sexp:
-        if (
-            isinstance(result, list)
-            # value has been turned into a single str already here by _render_value_expressions
-            and len(result) == 1
-            and isinstance(result[0], str)
-            and result[0].startswith(VALUE_CHAR)
-        ):
-            return result[0]
-
-        return result
-
-
 def _render_lines(sexp: Lispress, max_width: int) -> List[str]:
     """Helper function for `render_pretty`."""
     compact = render_compact(sexp)
@@ -214,14 +186,31 @@ def _render_lines(sexp: Lispress, max_width: int) -> List[str]:
         return [compact]
     else:
         fn, *args = sexp
-        prefix = " " * NUM_INDENTATION_SPACES
-        fn_line = LEFT_PAREN + render_compact(fn)
-        arg_lines = _group_named_args(
-            [line for arg in args for line in _render_lines(arg, max_width=max_width)]
-        )
-        lines = [fn_line] + [prefix + line for line in arg_lines]
-        lines[-1] = lines[-1] + RIGHT_PAREN
-        return lines
+        if fn == VALUE_CHAR:
+            assert len(args) == 1, "# Value expressions must have one argument"
+            lines = _render_lines(args[0], max_width=max_width)
+            lines[0] = VALUE_CHAR + lines[0]
+            return lines
+        elif fn == META_CHAR:
+            assert len(args) == 2, "^ Meta expressions must have one argument"
+            lines = _render_lines(args[0], max_width=max_width)
+            lines.extend(_render_lines(args[1], max_width=max_width))
+            lines[0] = META_CHAR + lines[0]
+            return lines
+        else:
+            prefix = " " * NUM_INDENTATION_SPACES
+            fn_lines = _render_lines(fn, max_width=max_width)
+            arg_lines = _group_named_args(
+                [
+                    line
+                    for arg in args
+                    for line in _render_lines(arg, max_width=max_width)
+                ]
+            )
+            lines = fn_lines + [prefix + line for line in arg_lines]
+            lines[0] = LEFT_PAREN + lines[0]
+            lines[-1] = lines[-1] + RIGHT_PAREN
+            return lines
 
 
 def _idx_to_var_str(idx: int) -> str:
@@ -270,13 +259,42 @@ def op_to_lispress(op: Op) -> Lispress:
         value = json.loads(op.value)
         schema = value.get("schema")
         underlying = value.get("underlying")
-        # this json formatter makes it easier (than other json formatters) to tokenize the string
-        underlying_json_str = " ".join(
-            json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
-        )
-        return [OpType.Value.value, [schema, underlying_json_str]]
+        # Long literals look like 2L
+        if schema == "Long":
+            return str(underlying) + "L"
+        else:
+            # this json formatter makes it easier (than other json formatters) to tokenize the string
+            underlying_json_str = " ".join(
+                json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
+            )
+            if schema in ("Number", "String", "Boolean"):
+                # Numbers and strings were typed in Calflow 1.0 (e.g. #(Number 1),
+                # #(String "foo"), in Calflow 2.0, any bare number parseable as a float
+                # or int is interpreted as Number and any quoted string is interpreted
+                # as a string. This means that we drop the explicit String and Number
+                # annotations from Calflow 1.0 when roundtripping.
+                return underlying_json_str
+            else:
+                return [OpType.Value.value, [schema, underlying_json_str]]
     else:
         raise Exception(f"Op with unknown type: {op}")
+
+
+def type_args_to_lispress(type_args: List[TypeName]) -> Optional[Lispress]:
+    """Converts the provided list of type args into a Lispress expression."""
+    if len(type_args) == 0:
+        return None
+    return [type_name_to_lispress(targ) for targ in type_args]
+
+
+def type_name_to_lispress(type_name: TypeName) -> Lispress:
+    """Converts the provided type name into a Lispress expression."""
+    if len(type_name.type_args) == 0:
+        return type_name.base
+    else:
+        base: List[Sexp] = [type_name.base]
+        type_args = [type_name_to_lispress(targ) for targ in type_name.type_args]
+        return base + type_args
 
 
 def _sugar_gets(sexp: Lispress) -> Lispress:
@@ -322,49 +340,9 @@ def _desugar_gets(sexp: Lispress) -> Lispress:
             return [
                 DataflowFn.Get.value,
                 _desugar_gets(obj),
-                OpType.Value.value,
-                ["Path", f'"{key}"'],
+                [OpType.Value.value, ["Path", f'"{key}"']],
             ]
         return [_desugar_gets(s) for s in sexp]
-
-
-def _strip_extra_parens_around_values(sexp: Lispress) -> Lispress:
-    """Removes one level of parens around value sexps"""
-    if isinstance(sexp, list) and len(sexp) >= 1 and sexp[0] == OpType.Value.value:
-        # top-level value, can't remove any parens
-        return sexp
-
-    def helper(s: Sexp) -> List[Sexp]:
-        if isinstance(s, str) or len(s) == 0:
-            return [s]
-        else:
-            unnested_one_level = [y for x in s for y in helper(x)]
-            if s[0] == OpType.Value.value:
-                # unnest one level
-                return unnested_one_level
-            else:
-                return [unnested_one_level]
-
-    return [y for x in helper(sexp) for y in x]
-
-
-def _add_extra_parens_around_values(sexp: Lispress) -> Lispress:
-    """Adds an extra level of parens around value sexps"""
-    if isinstance(sexp, str) or len(sexp) == 0:
-        return sexp
-    else:
-        result: List[Sexp] = []
-        i = 0
-        while i < len(sexp):
-            curr = sexp[i]
-            if curr == OpType.Value.value and i + 1 < len(sexp):
-                # Add an extra level of parens
-                result.append([curr, sexp[i + 1]])
-                i += 2
-            else:
-                result.append(_add_extra_parens_around_values(curr))
-                i += 1
-        return result
 
 
 def _roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
@@ -399,12 +377,25 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
         # create a sexp for expression
         idx = expression.id
         op_lispress = op_to_lispress(expression.op)
+        # if there type args, we create a META expression
+        if expression.type_args is not None:
+            op_type_args_lispress = type_args_to_lispress(expression.type_args)
+            op_lispress = [META_CHAR, op_type_args_lispress, op_lispress]
         curr: Sexp
         if isinstance(expression.op, (BuildStructOp, CallLikeOp)):
             curr = [op_lispress]
-            named_args = sorted(get_named_args(expression))  # sort alphabetically
+            named_args = get_named_args(expression)
+            # if all args are named (i.e., not positional), sort them alphabetically
+            # TODO in principle, we could get mixed positional and names arguments,
+            #   but for now that doesn't happen in SMCalFlow 2.0 so this code is good
+            #   enough. This code also only works for functions with named arguments
+            #   that have upper case names, which again happens to work for SMCalFlow
+            #   2.0.
+            has_positional = any(k is None for k, _ in named_args)
+            if not has_positional:
+                named_args = sorted(get_named_args(expression))  # sort alphabetically
             for arg_name, arg_id in named_args:
-                if not arg_name.startswith("arg"):
+                if arg_name is not None and not arg_name.startswith("arg"):
                     # name of named argument
                     curr += [_key_to_named_arg(arg_name)]
                 if arg_id in reentrant_ids:
@@ -418,6 +409,8 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
                     curr += [[EXTERNAL_LABEL, arg_id]]
         else:
             curr = op_lispress  # value
+        if expression.type:
+            curr = [META_CHAR, type_name_to_lispress(expression.type), curr]
         # add it to results
         if idx in reentrancies:
             # give reentrancies fresh ids as they are encountered
@@ -442,6 +435,9 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     return [LET, let_bindings, result] if len(let_bindings) > 0 else result
 
 
+_long_number_regex = re.compile("^([0-9]+)L$")
+
+
 def unnest_line(
     s: Lispress, idx: Idx, var_id_bindings: Tuple[Tuple[str, int], ...],
 ) -> Tuple[List[Expression], Idx, Idx, Tuple[Tuple[str, int], ...]]:
@@ -460,15 +456,24 @@ def unnest_line(
     """
     if not isinstance(s, list):
         try:
-            # bare value
-            value = loads(s)
-            known_value_types = {
-                str: "String",
-                int: "Number",
-            }
-            schema = known_value_types[type(value)]
-            expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
-            return [expr], idx, idx, var_id_bindings
+            m = _long_number_regex.match(s)
+            if m is not None:
+                n = m.group(1)
+                expr, idx = mk_value_op(value=int(n), schema="Long", idx=idx)
+                return [expr], idx, idx, var_id_bindings
+            else:
+
+                # bare value
+                value = loads(s)
+                known_value_types = {
+                    str: "String",
+                    float: "Number",
+                    int: "Number",
+                    bool: "Boolean",
+                }
+                schema = known_value_types[type(value)]
+                expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
+                return [expr], idx, idx, var_id_bindings
         except (JSONDecodeError, KeyError):
             return unnest_line([s], idx=idx, var_id_bindings=var_id_bindings)
     elif len(s) == 0:
@@ -478,9 +483,22 @@ def unnest_line(
         s = [x for x in s if x != EXTERNAL_LABEL]
         hd, *tl = s
         if not isinstance(hd, str):
-            # we don't know how to handle this case, so we just pack the whole thing into a generic value
-            expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
-            return [expr], idx, idx, var_id_bindings
+            if len(hd) == 3 and hd[0] == META_CHAR:
+                # type args
+                _meta_char, type_args, function = hd
+                without_type_args = [function] + tl
+                exprs, arg_idx, idx, var_id_bindings = unnest_line(
+                    without_type_args, idx=idx, var_id_bindings=var_id_bindings
+                )
+                exprs[-1] = replace(
+                    exprs[-1], type_args=[mk_type_name(targ) for targ in type_args]
+                )
+                return exprs, arg_idx, idx, var_id_bindings
+            else:
+                # we don't know how to handle this case, so we just pack the whole thing
+                # into a generic value
+                expr, idx = mk_value_op(value=s, schema="Object", idx=idx)
+                return [expr], idx, idx, var_id_bindings
         elif _is_idx_str(hd):
             # argId pointer
             var_id_dict = dict(var_id_bindings)
@@ -520,6 +538,22 @@ def unnest_line(
                 )
                 result_exprs.extend(exprs)
             return result_exprs, arg_idx, idx, var_id_bindings
+        elif hd == META_CHAR:
+            # type ascriptions look like (^ T Expr), e.g. (^ Number (+ 1 2))
+            # would be (1 + 2): Number in Scala.
+            # Note that there is sugar in sexp.py to parse/render `(^ T Expr)`
+            # as just `^T Expr`.
+            assert (
+                len(tl) == 2
+            ), f"Type ascriptions with ^ must have two arguments, but got {str(tl)}"
+            (type_declaration, sexpr) = tl
+            # Recurse on the underlying expression
+            exprs, arg_idx, idx, var_id_bindings = unnest_line(
+                sexpr, idx=idx, var_id_bindings=var_id_bindings
+            )
+            # Update is type declaration.
+            exprs[-1] = replace(exprs[-1], type=mk_type_name(type_declaration))
+            return exprs, arg_idx, idx, var_id_bindings
         elif hd == OpType.Value.value:
             assert (
                 len(tl) >= 1 and len(tl[0]) >= 1
@@ -533,29 +567,35 @@ def unnest_line(
             expr, idx = mk_value_op(value=value, schema=schema, idx=idx)
             return [expr], idx, idx, var_id_bindings
         elif is_struct_op_schema(hd):
-            name = hd
             result = []
             kvs = []
-            for key, val in chunked(tl, 2):
-                val_exprs, val_idx, idx, var_id_bindings = unnest_line(
-                    val, idx, var_id_bindings
-                )
-                result.extend(val_exprs)
-                kvs.append((_named_arg_to_key(key), val_idx))
-            struct_op, idx = mk_struct_op(name, dict(kvs), idx)
+            # not all args are named and so positional arg names are set to `None`
+            pending_key = None
+            for arg in tl:
+                if isinstance(arg, str) and _is_named_arg(arg):
+                    pending_key = arg
+                else:
+                    val_exprs, val_idx, idx, var_id_bindings = unnest_line(
+                        arg, idx, var_id_bindings
+                    )
+                    result.extend(val_exprs)
+                    key = None
+                    if pending_key is not None:
+                        key = _named_arg_to_key(pending_key)
+                    kvs.append((key, val_idx))
+            struct_op, idx = mk_struct_op(hd, kvs, idx)
             return result + [struct_op], idx, idx, var_id_bindings
         else:
             # CallOp
-            name = hd
             result = []
             args = []
-            for a in tl:
+            for arg in tl:
                 arg_exprs, arg_idx, idx, var_id_bindings = unnest_line(
-                    a, idx, var_id_bindings
+                    arg, idx, var_id_bindings
                 )
                 result.extend(arg_exprs)
                 args.append(arg_idx)
-            call_op, idx = mk_call_op(name, args=args, idx=idx)
+            call_op, idx = mk_call_op(hd, args=args, idx=idx)
             return result + [call_op], idx, idx, var_id_bindings
 
 

@@ -15,7 +15,6 @@ setup(
     zip_safe=False,
     install_requires=[
         "jsons==0.10.1",
-        "pydantic==1.4",
         "more-itertools==8.2.0",
         "sexpdata==0.0.3",
         "pandas==1.0.0",
@@ -25,5 +24,5 @@ setup(
     extra_requires={
         "OpenNMT-py": ["OpenNMT-py==1.0.0", "pytorch>=1.2.0,<=1.4.0"]
     },
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )

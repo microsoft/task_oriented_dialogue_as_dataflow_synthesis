@@ -7,6 +7,8 @@ LEFT_PAREN = "("
 RIGHT_PAREN = ")"
 ESCAPE = "\\"
 DOUBLE_QUOTE = '"'
+META = "^"
+READER = "#"
 
 # we unwrap Symbols into strings for convenience
 Sexp = Union[str, List["Sexp"]]  # type: ignore # Recursive type
@@ -42,86 +44,127 @@ def _split_respecting_quotes(s: str) -> List[str]:
     return result
 
 
-def parse_sexp(sexp_string: str, clean_singletons=False) -> Sexp:
-    """ Parses an S-expression from a string """
-    sexp_string = sexp_string.strip()
-    # handle some special cases
-    if sexp_string == "":
-        return []
-    if sexp_string[-1] == ";":
-        sexp_string = sexp_string[:-1]
-    # find and group top-level parentheses (that are not inside quoted strings)
-    num_open_brackets = 0
-    open_bracket_idxs = []
-    close_bracket_idxs = []
-    result: List[Sexp] = []
-    state = QuoteState.Outside
-    for index, ch in enumerate(sexp_string):
-        if ch == DOUBLE_QUOTE and (index < 1 or sexp_string[index - 1] != ESCAPE):
-            state = state.flipped()
-        if ch == LEFT_PAREN and state == QuoteState.Outside:
-            num_open_brackets += 1
-            if num_open_brackets == 1:
-                open_bracket_idxs.append(index)
-        elif ch == RIGHT_PAREN and state == QuoteState.Outside:
-            num_open_brackets -= 1
-            if num_open_brackets == 0:
-                close_bracket_idxs.append(index)
+def parse_sexp(s: str) -> Sexp:
+    offset = 0
 
-    assert len(open_bracket_idxs) == len(
-        close_bracket_idxs
-    ), f"Mismatched parentheses: {sexp_string}"
-    assert state == QuoteState.Outside, f"Mismatched double quotes: {sexp_string}"
+    # eoi = end of input
+    def is_eoi():
+        nonlocal offset
+        return offset == len(s)
 
-    start = 0
-    for index, (open_bracket_idx, close_bracket_idx) in enumerate(
-        zip(open_bracket_idxs, close_bracket_idxs)
-    ):
-        if start < open_bracket_idx:
-            preparen = sexp_string[start:open_bracket_idx].strip()
-            if preparen != "":
-                tokens = _split_respecting_quotes(preparen)
-                result.extend(tokens)
-        result.append(
-            parse_sexp(
-                sexp_string[open_bracket_idx + 1 : close_bracket_idx],
-                clean_singletons=clean_singletons,
-            )
-        )
-        start = close_bracket_idx + 1
+    def peek():
+        nonlocal offset
+        return s[offset]
 
-    if start < len(sexp_string):
-        # tokens after the last ')'
-        postparen = sexp_string[start:].strip()
-        if postparen != "":
-            tokens = _split_respecting_quotes(postparen)
-            result.extend(tokens)
+    def next_char():
+        # pylint: disable=used-before-assignment
+        nonlocal offset
+        cn = s[offset]
+        offset += 1
+        return cn
 
-    if len(result) == 2 and result[-1] == ";":
-        sexp_tmp = result[0]
-    else:
-        sexp_tmp = result
+    def skip_whitespace():
+        while (not is_eoi()) and peek().isspace():
+            next_char()
 
-    # special-case top-level values because they need an extra level
-    # of parens in the Sexp:
-    if isinstance(result, list) and len(result) >= 1 and result[0] == "#":
-        return [result]
-    if clean_singletons and len(sexp_tmp) == 1:
-        return sexp_tmp[0]
-    return sexp_tmp
+    def skip_then_peek():
+        skip_whitespace()
+        return peek()
+
+    def read() -> Sexp:
+        skip_whitespace()
+        c = next_char()
+        if c == LEFT_PAREN:
+            return read_list()
+        elif c == DOUBLE_QUOTE:
+            return read_string()
+        elif c == META:
+            meta = read()
+            expr = read()
+            return [META, meta, expr]
+        elif c == READER:
+            return [READER, read()]
+        else:
+            out_inner = ""
+            if c != "\\":
+                out_inner += c
+
+            # TODO: is there a better loop idiom here?
+            if not is_eoi():
+                next_c = peek()
+                escaped = c == "\\"
+                while (not is_eoi()) and (
+                    escaped or not _is_beginning_control_char(next_c)
+                ):
+                    if (not escaped) and next_c == "\\":
+                        next_char()
+                        escaped = True
+                    else:
+                        out_inner += next_char()
+                        escaped = False
+                    if not is_eoi():
+                        next_c = peek()
+            return out_inner
+
+    def read_list():
+        out_list = []
+        while skip_then_peek() != RIGHT_PAREN:
+            out_list.append(read())
+        next_char()
+        return out_list
+
+    def read_string():
+        out_str = ""
+        while peek() != '"':
+            c_string = next_char()
+            out_str += c_string
+            if c_string == "\\":
+                out_str += next_char()
+        next_char()
+        return f'"{out_str}"'
+
+    out = read()
+    skip_whitespace()
+    assert offset == len(
+        s
+    ), f"Failed to exhaustively parse {s}, maybe you are missing a close paren?"
+    return out
+
+
+def _is_beginning_control_char(nextC):
+    return (
+        nextC.isspace()
+        or nextC == LEFT_PAREN
+        or nextC == RIGHT_PAREN
+        or nextC == DOUBLE_QUOTE
+        or nextC == READER
+        or nextC == META
+    )
 
 
 def sexp_to_str(sexp: Sexp) -> str:
     """ Generates string representation from S-expression """
+    # Note that some of this logic is repeated in lispress.render_pretty
     if isinstance(sexp, list):
-        return "(" + " ".join(sexp_to_str(f) for f in sexp) + ")"
+        if len(sexp) == 3 and sexp[0] == META:
+            (_meta, type_expr, underlying_expr) = sexp
+            return META + sexp_to_str(type_expr) + " " + sexp_to_str(underlying_expr)
+        elif len(sexp) == 2 and sexp[0] == READER:
+            (_reader, expr) = sexp
+            return READER + sexp_to_str(expr)
+        else:
+            return "(" + " ".join(sexp_to_str(f) for f in sexp) + ")"
     else:
-        return sexp
+        if sexp.startswith('"') and sexp.endswith('"'):
+            return sexp
+        else:
+            return _escape_symbol(sexp)
 
 
-def flatten(form: Sexp) -> List[str]:
-    return (
-        [form]
-        if not isinstance(form, list)
-        else [s for subexp in form for s in flatten(subexp)]
-    )
+def _escape_symbol(symbol: str) -> str:
+    out = []
+    for c in symbol:
+        if _is_beginning_control_char(c):
+            out.append("\\")
+        out.append(c)
+    return "".join(out)

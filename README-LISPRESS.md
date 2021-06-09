@@ -2,22 +2,24 @@
 
 *Lispress* is a lisp-like serialization format for programs.
 It is intended to be human-readable, easy to work with in Python, and easy to
-tokenize and predict with a standard seq2seq model.
+tokenize and predict with a standard seq2seq model. An older version, Lispress 1.0,
+is described in [this README](README-LISPRESS-1.0.md). The current code is backwards
+compatible with Lispress 1.0 programs. 
 
 
 Here is an example program in Lispress (a response to the utterance
 `"what is my appointment with janice kang"`):
 ```clojure
-(yield
-  (:id
-    (singleton
-      (:results
-        (FindEventWrapperWithDefaults
-          :constraint (StructConstraint[Event]
-            :attendees (AttendeeListHasRecipientConstraint
-              :recipientConstraint (RecipientWithNameLike
-                :constraint (StructConstraint[Recipient])
-                :name #(PersonName "janice kang")))))))))
+(Yield 
+  (Event.id 
+    (singleton 
+      (QueryEventResponse.results 
+        (FindEventWrapperWithDefaults 
+          (Event.attendees? 
+            (AttendeeListHasRecipientConstraint 
+              (RecipientWithNameLike 
+                (^(Recipient) EmptyStructConstraint) 
+                (PersonName.apply "janice kang")))))))))
 ```
 
 
@@ -25,15 +27,43 @@ Here is an example program in Lispress (a response to the utterance
 
 A Lispress program is an s-expression: either
 a bare symbol, or
-a whitespace-separated list of s-expressions, surrounded by parentheses.
-
-### Values
-
-Value literals are represented with a hash character followed by an
-s-expression containing the name of the schema (i.e. type) of the data, followed by a
-json-encoded string literal of the data surrounded by double-quotes.
-For example: `#(PersonName "janice kang")`.
-A `Number` may omit the double-quotes, e.g. `#(Number 4)`.
+a whitespace-separated list of s-expressions, surrounded by parentheses. There is a little
+bit of special syntax:
+* Strings surrounded by double-quotes (`"`) are treated parsed as a single are symbol
+  (including the quotes), with standard JSON escaping for strings. For example,
+  ```clojure
+  (MyFunc "this is a (quoted) string with a \" in it")
+  ```
+  will pass the symbol `"this is a (quoted) string with a \" in it"` to `MyFunc`. 
+  Note that when converting to a Program, we trim the whitespace from either side of a 
+  string, so `(MyFunc " a ")` and `(MyFunc "a")` are the same program.
+* The meta character (`^`) 
+  ([borrowed from Clojure](https://clojure.org/reference/metadata))
+  can be used for type ascriptions and type arguments. For example,
+  ```clojure
+  ^Number 1
+  ```
+  would be written as `1: Number` in Scala. A list marked by the meta character
+  in the first argument of an s-expression is interpreted as a list of type arguments.
+  For example,
+  ```clojure
+  (^(Number) MyFunc 1)
+  ```
+  would be written as `MyFunc[Number](1)` in Scala or `MyFunc<Number>(1)` in Swift and Rust.
+* (Deprecated) The reader macro character (`#`), 
+  [borrowed from Common Lisp](https://gist.github.com/chaitanyagupta/9324402) 
+  marks literal values.
+  For example, `#(PersonName "John")` marks a value of type `PersonName` with 
+  content `"John"`. Reader macros are no longer in Lispress 2.0. Instead, 
+  standard literals like booleans, longs, numbers, and strings, can be written directly,
+  while wrapper types (like `PersonName`) feature an explicit call to a constructor
+  like `PersonName.apply`. The current code will interpret Lispress 1.0
+  `Number`s and `String`s as their bare equivalents, so `#(String "foo")` and `"foo"`
+  will be interpreted as the same program. Similarly, `#(Number 1)` and `1` will
+  be interpreted as the same program, and `#(Boolean true)` and `true` are the same 
+  program.
+* Literals of type Long are written as an integer literal followed by an `L` (e.g. `12L`) 
+  as in Java/Scala.
 
 ### Function application
 
@@ -42,47 +72,14 @@ arguments.
 Function application expressions are lists,
 with the first element of the list denoting the function,
 and the remainder of the elements denoting its arguments.
-There are two kinds of function application:
+We follow Common Lisp and Clojure in using `:` to denote named arguments. For example,
+`(MyFunc :foo 1)` would be `MyFunc(foo = 1)` in Scala or Python. At present, functions 
+must either be entirely positional or entirely named, and only functions with an
+uppercase letter for the first character may take named arguments. 
 
-#### Named arguments
-If the name of a function begins with a capitalized letter (`[A-Z]`),
-then it accepts named arguments (and only named arguments).
-The name of each named argument is prefixed with a colon character,
-and named arguments are written after the function as alternating
-`:name value` pairs.
-Named arguments can be given in any order (when rendering, we alphabetize named arguments).
+### (Deprecated) Sugared `get`
 
-For example, in
-```clojure
-(DateAtTimeWithDefaults
-  :date (Tomorrow)
-  :time (NumberAM :number #(Number 10))
-```
-the `DateAtTimeWithDefaults` function is a applied to two named arguments.
-`(Tomorrow)` is passed to the function as the `date` argument, and
-`(NumberAM :number #(Number 10)` is passed in as the `time` argument.
-`(Tomorrow)` is an example of a function applied to zero named arguments.
-Some functions accepting named arguments may not require all arguments to be present.
-You will often see the `StructConstraint[Event]` function being called without
-a `:subject` or an `:end`, for example.
-
-#### Positional arguments
-If the name of a function does not begin with a capitalized letter
-(i.e. it is lowercase or symbolic), then it accepts positional
-arguments (and only positional arguments).
-For example,
-```clojure
-(?= #(String "soccer game"))
-```
-represents the function `?=` being
-applied to the single argument `#(String "soccer game")`.
-And `(toDays #(Number 10))` is the function `toDays` applied to the single
-argument `#(Number 10)`.
-
-
-### Sugared `get`
-
-There is a common construct in our programs where the `get` function
+There is a common construct in the SMCalFLow 1.x dataset where the `get` function
 retrieves a field (specified by a `Path`) from a structured object.
 For example,
 ```clojure
@@ -91,11 +88,15 @@ For example,
   #(Path "attendees"))
 ```
 returns the `attendees` field of the salient `Event`.
-When the path is a valid identifier (i.e. contains no whitespace or special
-characters), the following sugared version is equivalent and preferred:
+For backwards compatibility with Lispress 1.0, the parser will accept
+the following equivalent form. 
 ```clojure
-(:attendees
-  (refer (StructConstraint[Event])))
+(:attendees (refer (StructConstraint[Event])))
+```
+
+In updated Lispress, accessor functions contain the name of the type they access:
+```clojure
+(Event.attendees (refer (^(Event) StructConstraint)))
 ```
 
 
@@ -113,27 +114,27 @@ referenced.
 
 For example, in the following response to `"Can you find some past events on my calendar?"`,
 ```clojure
-(let
-  (x0 (Now))
-  (yield
-    (FindEventWrapperWithDefaults
-      :constraint (EventOnDateBeforeTime
-        :date (:date x0)
-        :event (StructConstraint[Event])
-        :time (:time x0)))))
+(let 
+  (x0 (Now)) 
+  (Yield 
+    (FindEventWrapperWithDefaults 
+      (EventOnDateBeforeTime 
+        (DateTime.date x0) 
+        (^(Event) EmptyStructConstraint) 
+        (DateTime.time x0)))))
 ```
 the variable `x0` is assigned the value `(Now)` and then used twice in the body.
 Note that `(Now)` is only evaluated once.
 `let` bindings are an important mechanism to reuse the result of a
 side-effecting computation.
 For example, depending on the implementation of `Now`, the
-following program may be referencing different values in the `:date` and `:time` fields:
+following program may be produce different values in the `:date` and `:time` fields:
 ```clojure
-(FindEventWrapperWithDefaults
-  :constraint (EventOnDateBeforeTime
-    :date (:date (Now))
-    :event (StructConstraint[Event])
-    :time (:time (Now)))))
+(FindEventWrapperWithDefaults 
+  (EventOnDateBeforeTime 
+    (DateTime.date (Now))) 
+    (^(Event) EmptyStructConstraint) 
+    (DateTime.time (Now)))))
 ```
 
 ### Performing multiple actions in a turn with `do`
@@ -146,10 +147,10 @@ In
 (do
   (ConfirmAndReturnAction)
   (yield
-    (:start
+    (Event.start
       (FindNumNextEvent
-        :constraint (StructConstraint[Event])
-        :number #(Number 1)))))
+        (^(Event) StructConstraint)
+        1L))))
 ```
 for example, `ConfirmAndReturnAction` is guaranteed to execute before `FindNumNextEvent`.
 
