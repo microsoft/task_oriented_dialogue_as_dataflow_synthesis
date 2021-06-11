@@ -539,7 +539,7 @@ def unnest_line(
                 result_exprs.extend(exprs)
             return result_exprs, arg_idx, idx, var_id_bindings
         elif hd == META_CHAR:
-            # type ascriptions look like (^ T Expr), e.g. (^ Number (+ 1 2))
+            # type ascriptions look like (^T Expr), e.g. (^Number (+ 1 2))
             # would be (1 + 2): Number in Scala.
             # Note that there is sugar in sexp.py to parse/render `(^ T Expr)`
             # as just `^T Expr`.
