@@ -8,6 +8,7 @@ from typing import List, Tuple
 
 from dataflow.core.lispress import (
     LEFT_PAREN,
+    META_CHAR,
     RIGHT_PAREN,
     Lispress,
     lispress_to_program,
@@ -96,6 +97,8 @@ def sexp_formatter(sexp_tokens: List[str]) -> List[str]:
 
 def sexp_to_seq(s: Sexp) -> List[str]:
     if isinstance(s, list):
+        if len(s) == 3 and s[0] == META_CHAR:
+            return [META_CHAR] + [y for x in [s[1], s[2]] for y in sexp_to_seq(x)]
         return [LEFT_PAREN] + [y for x in s for y in sexp_to_seq(x)] + [RIGHT_PAREN]
     else:
         return [s]

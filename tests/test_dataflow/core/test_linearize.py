@@ -4,6 +4,7 @@ import json
 from typing import List
 
 from dataflow.core.linearize import (
+    lispress_to_seq,
     program_to_seq,
     seq_to_program,
     seq_to_sexp,
@@ -11,7 +12,7 @@ from dataflow.core.linearize import (
     sexp_formatter,
     sexp_to_seq,
 )
-from dataflow.core.lispress import unnest_line
+from dataflow.core.lispress import parse_lispress, unnest_line
 from dataflow.core.program import Expression, Program, ValueOp
 from dataflow.core.sexp import Sexp
 
@@ -121,3 +122,20 @@ def test_sexp_formatter_and_deformatter():
     for raw_sexp, formatted_sexp in data:
         assert sexp_formatter(raw_sexp.split()) == formatted_sexp.split()
         assert sexp_deformatter(formatted_sexp.split()) == raw_sexp.split()
+
+
+def test_meta():
+    assert lispress_to_seq(
+        parse_lispress("(refer (^(Dynamic) ActionIntensionConstraint))")
+    ) == [
+        "(",
+        "refer",
+        "(",
+        "^",
+        "(",
+        "Dynamic",
+        ")",
+        "ActionIntensionConstraint",
+        ")",
+        ")",
+    ]
