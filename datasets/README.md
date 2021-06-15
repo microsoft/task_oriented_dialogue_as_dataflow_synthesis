@@ -21,3 +21,5 @@ There are two datasets:
 
 Furthermore, compared to the original release of the SMCalFlow dataset, these two datasets also provide programs which have been fully annotated with types for all nodes, after running a Hindley-Milner based type inference algorithm (also described in the aforementioned paper). These programs are included in the new `fully_typed_lispress` field in the JSON objects that correspond to dialogue turns. It is not recommended to use these programs directly with simple Seq2Seq baselines because they are very verbose and the information they additional information they contain can be derived directly from the `lispress` programs by running type inference. That is also why the `lispress` programs are the ones used by the official evaluation script in SMCalFlow leaderboard.
 
+Note that the version uploaded before June 15, 2021 contained some minor errors. You should
+re-download the datasets if you downloaded the datasets before that date.
