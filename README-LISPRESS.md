@@ -15,7 +15,7 @@ Here is an example program in Lispress (a response to the utterance
     (singleton 
       (QueryEventResponse.results 
         (FindEventWrapperWithDefaults 
-          (Event.attendees? 
+          (Event.attendees_? 
             (AttendeeListHasRecipientConstraint 
               (RecipientWithNameLike 
                 (^(Recipient) EmptyStructConstraint) 
@@ -58,7 +58,7 @@ bit of special syntax:
   standard literals like booleans, longs, numbers, and strings, can be written directly,
   while wrapper types (like `PersonName`) feature an explicit call to a constructor
   like `PersonName.apply`. The current code will interpret Lispress 1.0
-  `Number`s and `String`s as their bare equivalents, so `#(String "foo")` and `"foo"`
+  `Number`s, `Boolean`s, and `String`s as their bare equivalents, so `#(String "foo")` and `"foo"`
   will be interpreted as the same program. Similarly, `#(Number 1)` and `1` will
   be interpreted as the same program, and `#(Boolean true)` and `true` are the same 
   program.
