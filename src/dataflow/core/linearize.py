@@ -102,30 +102,3 @@ def sexp_to_seq(s: Sexp) -> List[str]:
         return [LEFT_PAREN] + [y for x in s for y in sexp_to_seq(x)] + [RIGHT_PAREN]
     else:
         return [s]
-
-
-# def seq_to_sexp(seq: List[str], sloppy: bool = False) -> Sexp:
-#     stack: List[List[Sexp]] = []
-#     for i, s in enumerate(seq):
-#         if s == LEFT_PAREN:
-#             stack.append([])
-#         elif s == RIGHT_PAREN:
-#             if stack:
-#                 closed = stack.pop()
-#             elif sloppy:
-#                 break
-#             else:
-#                 raise Exception(f"too many close parens (token {i} in {seq})")
-#             if stack:
-#                 stack[-1].append(closed)
-#             else:
-#                 return closed
-#         # TODO somewhat confusingly, VALUE_CHAR is handled in sexp_formatter
-#         elif s == META_CHAR:
-#             stack.append([META_CHAR])
-#         else:
-#             if stack:
-#                 stack[-1].append(s)
-#             else:
-#                 return s
-#     return stack
