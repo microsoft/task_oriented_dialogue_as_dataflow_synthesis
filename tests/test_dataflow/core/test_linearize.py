@@ -6,11 +6,12 @@ from typing import List
 from dataflow.core.linearize import (
     lispress_to_seq,
     program_to_seq,
+    seq_to_lispress,
     seq_to_program,
-    seq_to_sexp,
     sexp_deformatter,
     sexp_formatter,
     sexp_to_seq,
+    to_canonical_form,
 )
 from dataflow.core.lispress import parse_lispress, unnest_line
 from dataflow.core.program import Expression, Program, ValueOp
@@ -76,7 +77,7 @@ def test_sexp_to_seq_is_invertible():
     ]
     for orig in sexps:
         seq = sexp_to_seq(orig)
-        result = seq_to_sexp(seq)
+        result = seq_to_lispress(seq)
         assert result == orig
 
 
@@ -139,3 +140,11 @@ def test_meta():
         ")",
         ")",
     ]
+
+
+def test_meta_to_canonical():
+    s = """( Yield ( Execute ( ReviseConstraint ( refer ( ^ ( Dynamic ) roleConstraint ( Path.apply "output" ) ) ) ( ^ ( Event ) ConstraintTypeIntension ) ( Event.showAs_? ( ?= ( ShowAsStatus.OutOfOffice ) ) ) ) ) )"""
+    assert (
+        to_canonical_form(s)
+        == """(Yield (Execute (ReviseConstraint (refer (^(Dynamic) roleConstraint (Path.apply "output"))) (^(Event) ConstraintTypeIntension) (Event.showAs_? (?= (ShowAsStatus.OutOfOffice))))))"""
+    )

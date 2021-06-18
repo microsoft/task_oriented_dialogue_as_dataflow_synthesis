@@ -17,7 +17,7 @@ from dataflow.core.lispress import (
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import Idx, OpType
-from dataflow.core.sexp import Sexp
+from dataflow.core.sexp import Sexp, parse_sexp
 
 
 def to_canonical_form(tokenized_lispress: str) -> str:
@@ -48,7 +48,7 @@ def lispress_to_seq(lispress: Lispress) -> List[str]:
 
 def seq_to_lispress(seq: List[str]) -> Lispress:
     deformatted = sexp_deformatter(seq)
-    return seq_to_sexp(deformatted)
+    return parse_sexp(" ".join(deformatted))
 
 
 def sexp_deformatter(sexp_tokens: List[str]) -> List[str]:
@@ -104,25 +104,28 @@ def sexp_to_seq(s: Sexp) -> List[str]:
         return [s]
 
 
-def seq_to_sexp(seq: List[str], sloppy: bool = False) -> Sexp:
-    stack: List[List[Sexp]] = []
-    for i, s in enumerate(seq):
-        if s == LEFT_PAREN:
-            stack.append([])
-        elif s == RIGHT_PAREN:
-            if stack:
-                closed = stack.pop()
-            elif sloppy:
-                break
-            else:
-                raise Exception(f"too many close parens (token {i} in {seq})")
-            if stack:
-                stack[-1].append(closed)
-            else:
-                return closed
-        else:
-            if stack:
-                stack[-1].append(s)
-            else:
-                return s
-    return stack
+# def seq_to_sexp(seq: List[str], sloppy: bool = False) -> Sexp:
+#     stack: List[List[Sexp]] = []
+#     for i, s in enumerate(seq):
+#         if s == LEFT_PAREN:
+#             stack.append([])
+#         elif s == RIGHT_PAREN:
+#             if stack:
+#                 closed = stack.pop()
+#             elif sloppy:
+#                 break
+#             else:
+#                 raise Exception(f"too many close parens (token {i} in {seq})")
+#             if stack:
+#                 stack[-1].append(closed)
+#             else:
+#                 return closed
+#         # TODO somewhat confusingly, VALUE_CHAR is handled in sexp_formatter
+#         elif s == META_CHAR:
+#             stack.append([META_CHAR])
+#         else:
+#             if stack:
+#                 stack[-1].append(s)
+#             else:
+#                 return s
+#     return stack
