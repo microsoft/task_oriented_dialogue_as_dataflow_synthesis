@@ -14,6 +14,7 @@ from dataflow.core.lispress import (
     lispress_to_program,
     program_to_lispress,
     render_compact,
+    strip_copy_strings,
 )
 from dataflow.core.program import Program
 from dataflow.core.program_utils import Idx, OpType
@@ -48,7 +49,7 @@ def lispress_to_seq(lispress: Lispress) -> List[str]:
 
 def seq_to_lispress(seq: List[str]) -> Lispress:
     deformatted = sexp_deformatter(seq)
-    return parse_sexp(" ".join(deformatted))
+    return strip_copy_strings(parse_sexp(" ".join(deformatted)))
 
 
 def sexp_deformatter(sexp_tokens: List[str]) -> List[str]:
@@ -58,11 +59,6 @@ def sexp_deformatter(sexp_tokens: List[str]) -> List[str]:
     """
     sexp_str = " ".join(sexp_tokens)
 
-    # TODO we use (?:[^"\\]*+(?:\\.)?)*+ in Scala because it's more efficient
-    #   on long quotes, but Python re doesn't support possessive quantifiers.
-    #sexp_str = re.sub(r'" ((?:[^"\\]|\\.)*) "', r'"\1"', sexp_str)
-    sexp_str = re.sub(r'" ([^"]+) "', r'"\1"', sexp_str)
-    #sexp_str = re.sub(r'" ((?:[^"](?! "))*) "', r'"\1"', sexp_str)
     return sexp_str.split()
 
 
@@ -92,7 +88,11 @@ def sexp_formatter(sexp_tokens: List[str]) -> List[str]:
 def sexp_to_seq(s: Sexp) -> List[str]:
     if isinstance(s, list):
         if len(s) == 3 and s[0] == META_CHAR:
-            return [META_CHAR] + [y for x in [s[1], s[2]] for y in sexp_to_seq(x)]
+            (_meta, type_meta, expr) = s
+            return [META_CHAR] + [y for x in [type_meta, expr] for y in sexp_to_seq(x)]
+        elif len(s) == 2 and s[0] == OpType.Value.value:
+            (_value, expr) = s
+            return [OpType.Value.value] + [y for x in [expr] for y in sexp_to_seq(x)]
         return [LEFT_PAREN] + [y for x in s for y in sexp_to_seq(x)] + [RIGHT_PAREN]
     else:
         return [s]
