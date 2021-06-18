@@ -58,17 +58,11 @@ def sexp_deformatter(sexp_tokens: List[str]) -> List[str]:
     """
     sexp_str = " ".join(sexp_tokens)
 
-    sexp_str = re.sub(
-        r'{ "schema" : "(\S+)" , "underlying" : " ([\S+\s*]+?) " }',
-        r'{ "schema" : "\1" , "underlying" : "\2" }',
-        sexp_str,
-    )
-
-    sexp_str = re.sub(
-        rf'{OpType.Value.value} \( (\S+) " ([\S+\s*]+?) " \)',
-        rf'{OpType.Value.value} ( \1 "\2" )',
-        sexp_str,
-    )
+    # TODO we use (?:[^"\\]*+(?:\\.)?)*+ in Scala because it's more efficient
+    #   on long quotes, but Python re doesn't support possessive quantifiers.
+    #sexp_str = re.sub(r'" ((?:[^"\\]|\\.)*) "', r'"\1"', sexp_str)
+    sexp_str = re.sub(r'" ([^"]+) "', r'"\1"', sexp_str)
+    #sexp_str = re.sub(r'" ((?:[^"](?! "))*) "', r'"\1"', sexp_str)
     return sexp_str.split()
 
 

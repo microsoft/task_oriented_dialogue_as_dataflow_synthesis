@@ -148,3 +148,8 @@ def test_meta_to_canonical():
         to_canonical_form(s)
         == """(Yield (Execute (ReviseConstraint (refer (^(Dynamic) roleConstraint (Path.apply "output"))) (^(Event) ConstraintTypeIntension) (Event.showAs_? (?= (ShowAsStatus.OutOfOffice))))))"""
     )
+
+
+def test_quoted():
+    s = """( foo " bar " )"""
+    assert to_canonical_form(s) == """(foo "bar")"""
