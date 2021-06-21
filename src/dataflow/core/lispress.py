@@ -270,7 +270,9 @@ def op_to_lispress(op: Op) -> Lispress:
             assert isinstance(
                 underlying, (bool, str, int, float, list)
             ), f"Can't handle JSON dicts as value literals anymore, got {underlying}"
-            assert not (isinstance(underlying, list) and len(underlying) > 0), f"Can only handle empty list JSON value literals for backwards compatbility, but got {underlying}"
+            assert not (
+                isinstance(underlying, list) and len(underlying) > 0
+            ), f"Can only handle empty list JSON value literals for backwards compatibility, but got {underlying}"
             underlying_json_str = json.dumps(underlying)
             if schema in ("Number", "String", "Boolean"):
                 # Numbers and strings were typed in Calflow 1.0 (e.g. #(Number 1),
