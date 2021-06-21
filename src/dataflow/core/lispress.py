@@ -267,16 +267,17 @@ def op_to_lispress(op: Op) -> Lispress:
         if schema == "Long":
             return str(underlying) + "L"
         else:
-            # this json formatter makes it easier (than other json formatters) to tokenize the string
-            underlying_json_str = " ".join(
-                json.dumps(underlying, separators=(" ,", " : "), indent=0).split("\n")
-            )
+            assert isinstance(
+                underlying, (bool, str, int, float)
+            ), f"Can't handle JSON dicts as value literals anymore, got {underlying}"
+            underlying_json_str = json.dumps(underlying)
             if schema in ("Number", "String", "Boolean"):
                 # Numbers and strings were typed in Calflow 1.0 (e.g. #(Number 1),
                 # #(String "foo"), in Calflow 2.0, any bare number parseable as a float
-                # or int is interpreted as Number and any quoted string is interpreted
-                # as a string. This means that we drop the explicit String and Number
-                # annotations from Calflow 1.0 when roundtripping.
+                # or int is interpreted as Number, any quoted string is interpreted
+                # as a string, and any boolean is interpreted as a boolean. This means
+                # that we drop the explicit String, Number, and Boolean annotations from
+                # Calflow 1.0 when roundtripping.
                 return underlying_json_str
             else:
                 return [OpType.Value.value, [schema, underlying_json_str]]
