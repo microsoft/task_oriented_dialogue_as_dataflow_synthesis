@@ -84,6 +84,9 @@ def _try_round_trip(lispress_str: str) -> str:
 
 
 def strip_copy_strings(exp: Lispress) -> "Lispress":
+    """
+    Strips any whitespace in quoted strings (e.g. " 1   " -> "1")
+    """
     if isinstance(exp, str):
         if len(exp) > 2 and exp[0] == '"' and exp[-1] == '"':
             return '"' + exp[1:-1].strip() + '"'
