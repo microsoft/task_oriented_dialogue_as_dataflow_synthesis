@@ -94,11 +94,11 @@ def compute_stats(
 ) -> Tuple[BasicStatistics, Dict[str, List[float]]]:
     basic_stats = BasicStatistics(
         num_dialogues=len(dialogue_report_df),
-        num_turns=dialogue_report_df.loc[:, "numTurns"].sum(),
-        num_kept_turns=dialogue_report_df.loc[:, "numKeptTurns"].sum(),
-        num_skipped_turns=dialogue_report_df.loc[:, "numSkippedTurns"].sum(),
-        num_refer_turns=dialogue_report_df.loc[:, "numReferTurns"].sum(),
-        num_revise_turns=dialogue_report_df.loc[:, "numReviseTurns"].sum(),
+        num_turns=int(dialogue_report_df.loc[:, "numTurns"].sum()),
+        num_kept_turns=int(dialogue_report_df.loc[:, "numKeptTurns"].sum()),
+        num_skipped_turns=int(dialogue_report_df.loc[:, "numSkippedTurns"].sum()),
+        num_refer_turns=int(dialogue_report_df.loc[:, "numReferTurns"].sum()),
+        num_revise_turns=int(dialogue_report_df.loc[:, "numReviseTurns"].sum()),
     )
     percentiles = list(range(0, 101, 10))
     percentile_stats = {
