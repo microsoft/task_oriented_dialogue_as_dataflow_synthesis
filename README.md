@@ -52,7 +52,7 @@ Follow the steps below to reproduce the results reported in the paper (Table 2).
 [the leaderboard](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/) to report your results for consistency.**
 If you use your own evaluation script, please pay attention to the notes in Step 2 and Step 7.
 
-1. Download the SMCalFlow dataset on [this page](https://microsoft.github.io/task_oriented_dialogue_as_dataflow_synthesis/).
+1. Download and unzip the SMCalFlow 1.0 dataset.
    ```bash
    dataflow_dialogues_dir="output/dataflow_dialogues"
    mkdir -p "${dataflow_dialogues_dir}"
@@ -62,6 +62,10 @@ If you use your own evaluation script, please pay attention to the notes in Step
    # The `PATH_TO_DATA_TGZ` is the path to the tgz file of the corresponding dataset.
    tar -xvzf PATH_TO_DATA_TGZ
    ```
+   * SMCalFlow 1.0 links
+     * [smcalflow.full.data.tgz](https://smresearchstorage.blob.core.windows.net/smcalflow-public/smcalflow.full.data.tgz)
+     * [smcalflow.inlined.data.tgz](https://smresearchstorage.blob.core.windows.net/smcalflow-public/smcalflow.inlined.data.tgz)
+   * SMCalFlow 2.0 can be found under the [datasets](./datasets) folder.
 2. Compute data statistics:
     ```bash
     dataflow_dialogues_stats_dir="output/dataflow_dialogues_stats"
