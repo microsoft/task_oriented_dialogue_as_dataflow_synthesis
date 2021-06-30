@@ -10,6 +10,7 @@ Computes both turn-level and dialogue-level accuracy.
 
 import argparse
 import csv
+import json
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
@@ -91,14 +92,10 @@ def evaluate_dialogue(turns: List[Tuple[int, bool]]) -> EvaluationScores:
 
 
 def evaluate_dataset(
-    prediction_report_df: pd.DataFrame, use_leaderboard_metric: bool
+    prediction_report_df: pd.DataFrame, field_name: str,
 ) -> EvaluationScores:
     # pylint: disable=singleton-comparison
     dataset_scores = EvaluationScores()
-    if use_leaderboard_metric:
-        field_name = "isCorrectLeaderboard"
-    else:
-        field_name = "isCorrect"
     for _dialogue_id, df_for_dialogue in prediction_report_df.groupby("dialogueId"):
         turns = [
             (int(row.get("turnIndex")), row.get(field_name))
@@ -137,9 +134,25 @@ def main(
         ]
         prediction_report_df = prediction_report_df.loc[mask_datum_id]
 
-    scores = evaluate_dataset(prediction_report_df, use_leaderboard_metric)
+    if use_leaderboard_metric:
+        scores_not_ignoring_refer = evaluate_dataset(
+            prediction_report_df, "isCorrectLeaderboard"
+        )
+        scores_ignoring_refer = evaluate_dataset(
+            prediction_report_df, "isCorrectLeaderboardIgnoringRefer"
+        )
+    else:
+        scores_not_ignoring_refer = evaluate_dataset(prediction_report_df, "isCorrect")
+        scores_ignoring_refer = evaluate_dataset(
+            prediction_report_df, "isCorrectIgnoringRefer"
+        )
+
+    scores_dict = {
+        "notIgnoringRefer": jsons.dump(scores_not_ignoring_refer),
+        "ignoringRefer": jsons.dump(scores_ignoring_refer),
+    }
     with open(scores_json, "w") as fp:
-        fp.write(jsons.dumps(scores, jdkwargs={"indent": 2}))
+        fp.write(json.dumps(scores_dict, indent=2))
         fp.write("\n")
 
 

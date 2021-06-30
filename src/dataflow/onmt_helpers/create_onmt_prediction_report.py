@@ -63,11 +63,23 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
             return _PARSE_ERROR_LISPRESS
 
     @property
+    def is_correct_ignoring_refer(self) -> bool:
+        return self.gold == self.prediction
+
+    @property
     def is_correct(self) -> bool:
         return (
-            self.gold == self.prediction
+            self.is_correct_ignoring_refer
             and self.program_execution_oracle.refer_are_correct
         )
+
+    @property
+    def is_correct_leaderboard_ignoring_refer(self) -> bool:
+        """Returns true if the gold and the prediction match after canonicalization, ignoring the `refer_are_correct`.
+
+        Use this metric is you only care about the accuracy of the semantic parser, ignoring the execution of `refer`.
+        """
+        return self.gold_canonical == self.prediction_canonical
 
     @property
     def is_correct_leaderboard(self) -> bool:
@@ -77,7 +89,7 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
         paper, since the named arguments are sorted after canonicalization.
         """
         return (
-            self.gold_canonical == self.prediction_canonical
+            self.is_correct_leaderboard_ignoring_refer
             and self.program_execution_oracle.refer_are_correct
         )
 
@@ -99,7 +111,9 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
                 "predictionCanonical": self.prediction_canonical,
                 "oracleResolveAreCorrect": self.program_execution_oracle.refer_are_correct,
                 "isCorrect": self.is_correct,
+                "isCorrectIgnoringRefer": self.is_correct_ignoring_refer,
                 "isCorrectLeaderboard": self.is_correct_leaderboard,
+                "isCorrectLeaderboardIgnoringRefer": self.is_correct_leaderboard_ignoring_refer,
             }
         )
         return flatten_datum_dict
