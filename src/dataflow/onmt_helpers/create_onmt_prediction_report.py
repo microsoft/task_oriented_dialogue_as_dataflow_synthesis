@@ -63,25 +63,13 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
             return _PARSE_ERROR_LISPRESS
 
     @property
-    def is_correct(self) -> bool:
-        return (
-            self.gold == self.prediction
-            and self.program_execution_oracle.refer_are_correct
-        )
-
-    @property
     def is_correct_ignoring_refer(self) -> bool:
         return self.gold == self.prediction
 
     @property
-    def is_correct_leaderboard(self) -> bool:
-        """Returns true if the gold and the prediction match after canonicalization.
-
-        This is the metric used in the leaderboard, which would be slightly higher than the one reported in the TACL2020
-        paper, since the named arguments are sorted after canonicalization.
-        """
+    def is_correct(self) -> bool:
         return (
-            self.gold_canonical == self.prediction_canonical
+            self.is_correct_ignoring_refer
             and self.program_execution_oracle.refer_are_correct
         )
 
@@ -92,6 +80,18 @@ class OnmtPredictionReportDatum(PredictionReportDatum):
         Use this metric is you only care about the accuracy of the semantic parser, ignoring the execution of `refer`.
         """
         return self.gold_canonical == self.prediction_canonical
+
+    @property
+    def is_correct_leaderboard(self) -> bool:
+        """Returns true if the gold and the prediction match after canonicalization.
+
+        This is the metric used in the leaderboard, which would be slightly higher than the one reported in the TACL2020
+        paper, since the named arguments are sorted after canonicalization.
+        """
+        return (
+            self.is_correct_leaderboard_ignoring_refer
+            and self.program_execution_oracle.refer_are_correct
+        )
 
     def flatten_datum_id(self) -> Dict[str, Union[str, int]]:
         return {
