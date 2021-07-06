@@ -5,7 +5,7 @@ from dataflow.core.lispress import (
     program_to_lispress,
     render_pretty,
 )
-from dataflow.core.program import Program
+from dataflow.core.program import Program, TypeName
 from dataflow.core.program_utils import mk_value_op
 
 surface_strings = [
@@ -225,3 +225,12 @@ def test_escaped_name():
 def test_strip_copy_strings():
     assert _try_round_trip('#(String " Tom ")') == '"Tom"'
     assert _try_round_trip('" Tom "') == '"Tom"'
+
+
+def test_type_args_in_program():
+    lispress_str = "(^(PleasantryCalendar) EmptyStructConstraint)"
+    lispress = parse_lispress(lispress_str)
+    program, _ = lispress_to_program(lispress, 0)
+    assert len(program.expressions) == 1
+    assert program.expressions[0].type_args == [TypeName("PleasantryCalendar", [])]
+    assert program.expressions[0].type is None
