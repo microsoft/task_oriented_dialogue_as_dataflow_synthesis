@@ -229,7 +229,7 @@ def test_strip_copy_strings():
 
 def test_type_args_in_program():
     lispress_str = '(^(PleasantryCalendar) EmptyStructConstraint)'
-    program = lispress_to_program(parse_lispress(lispress_str), 0)
+    program, _ = lispress_to_program(parse_lispress(lispress_str), 0)
     print(program)
     assert program.type_args is not None
     assert program.type is None
