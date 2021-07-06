@@ -613,12 +613,6 @@ def _unsugared_lispress_to_program(fs: Lispress, idx: Idx) -> Tuple[Program, Idx
     if isinstance(fs, list) and len(fs) == 0:
         # special-case the empty program
         return Program(expressions=[]), idx
-    elif isinstance(fs, list) and len(fs) > 0 and isinstance(fs[0], list):
-        # legacy support for programs with multiple statements
-        # (current format should use `SEQUENCE`)
-        for f in fs:
-            exprs, _, idx, arg_id_map = unnest_line(f, idx, arg_id_map)
-            expressions.extend(exprs)
     else:
         exprs, _, idx, arg_id_map = unnest_line(fs, idx, arg_id_map)
         expressions.extend(exprs)
