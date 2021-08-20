@@ -2,7 +2,6 @@
 #  Licensed under the MIT license.
 import json
 import re
-from collections import Counter
 from dataclasses import replace
 from json import JSONDecodeError, loads
 from typing import Dict, List, Optional, Set, Tuple
@@ -17,6 +16,7 @@ from dataflow.core.program import (
     Program,
     TypeName,
     ValueOp,
+    roots_and_reentrancies,
 )
 from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args
 from dataflow.core.program_utils import is_idx_str as is_express_idx_str
@@ -353,16 +353,6 @@ def _desugar_gets(sexp: Lispress) -> Lispress:
         return [_desugar_gets(s) for s in sexp]
 
 
-def _roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
-    ids = {e.id for e in program.expressions}
-    arg_counts = Counter(a for e in program.expressions for a in e.arg_ids)
-    roots = ids.difference(arg_counts)  # ids that are never used as args
-    reentrancies = {
-        i for i, c in arg_counts.items() if c >= 2
-    }  # args that are used multiple times as args
-    return roots, reentrancies
-
-
 def _program_to_unsugared_lispress(program: Program) -> Lispress:
     """
     Nests `program` into an s-expression.
@@ -374,7 +364,7 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     if len(program.expressions) == 0:
         return []
 
-    roots, reentrancies = _roots_and_reentrancies(program)
+    roots, reentrancies = roots_and_reentrancies(program)
     assert roots, "program must have at least one root"
 
     reentrant_ids: Dict[str, str] = {}

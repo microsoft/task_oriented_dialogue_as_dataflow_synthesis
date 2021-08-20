@@ -1,7 +1,8 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT license.
+from collections import Counter
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple, Set
 
 
 @dataclass(frozen=True)
@@ -33,7 +34,7 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 @dataclass(frozen=True)
 class TypeName:
     base: str
-    type_args: List["TypeName"]
+    type_args: List["TypeName"] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -48,3 +49,14 @@ class Expression:
 @dataclass(frozen=True)
 class Program:
     expressions: List[Expression]
+
+
+def roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
+    ids = {e.id for e in program.expressions}
+    arg_counts = Counter(a for e in program.expressions for a in e.arg_ids)
+    roots = ids.difference(arg_counts)  # ids that are never used as args
+    reentrancies = {
+        i for i, c in arg_counts.items() if c >= 2
+    }  # args that are used multiple times as args
+    return roots, reentrancies
+
