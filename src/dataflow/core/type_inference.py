@@ -19,8 +19,11 @@ class TypeVariable(Type):
 class NamedTypeVariable(TypeVariable):
     name: str
 
+    def __init__(self, name: str):
+        self.name = name
+
     def __repr__(self):
-        return f'{self.name}[{",".join([arg.__repr__() for arg in self.args])}]'
+        return f'$_{self.name}'
 
 
 class AnonTypeVariable(TypeVariable):
@@ -36,24 +39,28 @@ class TypeApplication(Type):
     args: List[Type]
 
     def __repr__(self):
-        return f'{self.constructor}[{",".join([arg.__repr__() for arg in self.args])}]'
+        if len(self.args) == 0:
+            return f'{self.constructor}'
+        else:
+            return f'{self.constructor}[{",".join([arg.__repr__() for arg in self.args])}]'
 
 
 @dataclass(frozen=False)
 class Computation:
     op: Optional[str]
     id: str
-    type_args: List[Type]
     args: List["Computation"]
+    type_args: List[NamedTypeVariable]
     type: Type
 
 
 def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
     id_to_expr = {expr.id: expr for expr in program.expressions}
 
-    computation = _to_computation(program, id_to_expr)
     substitutions: Dict[TypeVariable, Type] = {}
-    inferred_computation = _infer_types_rec(computation, library, AnonTypeVariable(), {}, substitutions)
+    computation = _to_computation(program, library, substitutions, id_to_expr)
+
+    inferred_computation = _infer_types_rec(computation, library, substitutions)
     closed_list: Set[str] = set()
     id_to_comp: Dict[str, Computation] = {}
 
@@ -62,45 +69,34 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
             pass
         else:
             id_to_comp[comp.id] = comp
-            closed_list.add[comp.id]
+            closed_list.add(comp.id)
             comp.type = _apply_substitutions(comp.type, substitutions)
+            for arg in comp.args:
+                set_types_rec(arg)
 
     set_types_rec(inferred_computation)
     new_expressions = []
     for expr in program.expressions:
-        new_expressions.append(replace(expr, type=computation.type, type_args=computation.type_args))
+        if expr.id not in id_to_comp:
+            print("here")
+        comp = id_to_comp[expr.id]
+        new_expressions.append(replace(expr, type=comp.type.args[-1], type_args=[_apply_substitutions(t, substitutions) for t in comp.type_args]))
     return Program(new_expressions)
 
 
 def _infer_types_rec(computation: Computation, library: Dict[str, Definition],
-                     outer_type: Type, env: Dict[str, TypeVariable],
                      substitutions: Dict[TypeVariable, Type]) -> Computation:
-    unified_outer_type = _unify(outer_type, computation.type, substitutions)
-    defn = library[computation.op]
-    declared_type_args = [(arg_name, NamedTypeVariable(arg_name)) for arg_name in
-                          defn.type_args]
-    if len(defn.type_args) == 0:
-        local_env = env
-    else:
-        local_env = env.copy()  # TODO this could be sped up if we use a persistent map
-        for declared_type_arg in defn.type_args:
-            type_var = NamedTypeVariable(declared_type_arg)
-            local_env[type_var] = type_var
-    defn_type = _definition_to_type(defn, declared_type_args)
-    inferred_args = [_infer_types_rec(arg, library, arg.type, local_env, substitutions).type for arg in computation.args]
+
+    inferred_args = [_infer_types_rec(arg, library, substitutions).type.args[-1] for arg in computation.args]
     if len(inferred_args) == 0:
         inferred_args = [TypeApplication("Unit", [])]
 
-    actual_type = TypeApplication("Lambda", inferred_args + [unified_outer_type])
-    unified = _unify(actual_type, defn_type, substitutions)
-    if computation.type:
-        computation.type = _unify(computation.type, unified.args.last)
-    else:
-        computation.type = unified.args[-1]
+    actual_type = TypeApplication("Lambda", inferred_args + [computation.type.args[-1]])
+    computation.type = _unify(actual_type, computation.type, substitutions)
     return computation
 
 
-def _to_computation(program: Program, id_to_expr: Dict[str, Expression]) -> Computation:
+def _to_computation(program: Program, library: Dict[str, Definition], substitutions: Dict[TypeVariable, Type], id_to_expr: Dict[str, Expression]) -> Computation:
     closed_list: Dict[str, Computation] = {}
 
 
@@ -115,7 +111,20 @@ def _to_computation(program: Program, id_to_expr: Dict[str, Expression]) -> Comp
             op = type_name
         elif isinstance(expression.op, BuildStructOp):
             assert f"BuildStructOp {expression.op} not supported in type inference"
-        return Computation(op, expression.id, [_type_name_to_type(type_arg) for type_arg in expression.type_args], rec_args, _type_name_to_type(expression.type))
+        defn = library[op]
+        declared_type_args_list = [NamedTypeVariable(arg_name) for arg_name in
+                              defn.type_args]
+        declared_type_args = {var.name: var for var in declared_type_args_list}
+        defn_type = _definition_to_type(defn, declared_type_args)
+        ascribed_return_type = _type_name_to_type(expression.type, {}) if expression.type else AnonTypeVariable()
+        assert expression.type_args is None or len(expression.type_args) == len(defn.type_args), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
+        if expression.type_args:
+            for (ascribed_type_arg, type_var) in zip(expression.type_args, declared_type_args_list):
+                substitutions[type_var] = _type_name_to_type(ascribed_type_arg, {})
+        ascribed_arg_types = [AnonTypeVariable() for arg in defn.args] if len(defn.args) > 0 else [TypeApplication("Unit", [])]
+        ascribed_type = TypeApplication("Lambda", ascribed_arg_types + [ascribed_return_type])
+        comp_type = _unify(ascribed_type, defn_type, substitutions)
+        return Computation(op, expression.id, rec_args, declared_type_args_list, comp_type)
     (roots, _) = roots_and_reentrancies(program)
     assert len(roots) == 1, f"Expected Program to have a single root, got {roots} in {program}"
     root_id = list(roots)[0]
@@ -126,6 +135,8 @@ def _definition_to_type(definition: Definition,
                         declared_type_args: Dict[str, TypeVariable]) -> Type:
     return_type = _type_name_to_type(definition.type, declared_type_args)
     arg_types = [_type_name_to_type(arg, declared_type_args) for arg in definition.args]
+    if len(arg_types) == 0:
+        arg_types = [TypeApplication("Unit", [])]
     return TypeApplication("Lambda", arg_types + [return_type])
 
 
@@ -150,13 +161,17 @@ def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
         else:
             return t
     if isinstance(t, TypeApplication):
-        return TypeApplication(t.constructor, [_apply_substitutions(arg) for arg in t.args])
+        return TypeApplication(t.constructor, [_apply_substitutions(arg, substitutions) for arg in t.args])
 
 
 def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
+    t1 = _apply_substitutions(t1, substitutions)
+    t2 = _apply_substitutions(t2, substitutions)
+    if t1 == t2:
+        return t1
     # If either t1 or t2 is a type variable, and it does not occur in the other type,
     # then produce the substitution that binds it to the other type.
-    if isinstance(t2, TypeVariable):
+    elif isinstance(t2, TypeVariable) and not isinstance(t1, TypeVariable):
         return _unify(t2, t1, substitutions)
     elif isinstance(t1, TypeVariable) and not _occurs(t2, t1):
         substitutions[t1] = t2
@@ -180,6 +195,6 @@ def _occurs(t: Type, var: TypeVariable) -> bool:
     if t == var:
         return True
     elif isinstance(t, TypeApplication):
-        return any(_occurs(a) for a in t.args)
+        return any(_occurs(a, var) for a in t.args)
     else:
         return False
