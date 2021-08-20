@@ -47,11 +47,26 @@ class TypeApplication(Type):
 
 @dataclass(frozen=False)
 class Computation:
+    """A representation of a single function application during type inference.
+    Value literals are treated as functions from Unit to their final value."""
+
+    # The name of the function or value literal.
     op: Optional[str]
+    # For mapping back to Expression.id
     id: str
+    # The arguments to the function
     args: List["Computation"]
+    # Declared type arguments based on the signature of op (defined in a Definition).
     type_args: List[NamedTypeVariable]
-    type: Type
+    # The type of this function, always represented as a
+    # TypeApplication("Lambda", arg_types + [return_type])
+    # Mutated during type inference.
+    type: TypeApplication
+
+    @property
+    def return_type(self) -> Type:
+        """The output type of this function. Mutated during type inference"""
+        return type.args[-1]
 
 
 def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
@@ -80,25 +95,24 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
         if expr.id not in id_to_comp:
             print("here")
         comp = id_to_comp[expr.id]
-        new_expressions.append(replace(expr, type=comp.type.args[-1], type_args=[_apply_substitutions(t, substitutions) for t in comp.type_args]))
+        new_expressions.append(replace(expr, type=comp.return_type, type_args=[_apply_substitutions(t, substitutions) for t in comp.type_args]))
     return Program(new_expressions)
 
 
 def _infer_types_rec(computation: Computation, library: Dict[str, Definition],
                      substitutions: Dict[TypeVariable, Type]) -> Computation:
 
-    inferred_args = [_infer_types_rec(arg, library, substitutions).type.args[-1] for arg in computation.args]
+    inferred_args = [_infer_types_rec(arg, library, substitutions).type.return_type for arg in computation.args]
     if len(inferred_args) == 0:
         inferred_args = [TypeApplication("Unit", [])]
 
-    actual_type = TypeApplication("Lambda", inferred_args + [computation.type.args[-1]])
+    actual_type = TypeApplication("Lambda", inferred_args + [computation.type.return_type])
     computation.type = _unify(actual_type, computation.type, substitutions)
     return computation
 
 
 def _to_computation(program: Program, library: Dict[str, Definition], substitutions: Dict[TypeVariable, Type], id_to_expr: Dict[str, Expression]) -> Computation:
     closed_list: Dict[str, Computation] = {}
-
 
     def rec(expression: Expression) -> Computation:
         if expression.id in closed_list:
@@ -125,6 +139,7 @@ def _to_computation(program: Program, library: Dict[str, Definition], substituti
         ascribed_type = TypeApplication("Lambda", ascribed_arg_types + [ascribed_return_type])
         comp_type = _unify(ascribed_type, defn_type, substitutions)
         return Computation(op, expression.id, rec_args, declared_type_args_list, comp_type)
+
     (roots, _) = roots_and_reentrancies(program)
     assert len(roots) == 1, f"Expected Program to have a single root, got {roots} in {program}"
     root_id = list(roots)[0]
