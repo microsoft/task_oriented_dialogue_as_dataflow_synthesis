@@ -231,7 +231,8 @@ def _to_computation(
 
 
 def _definition_to_type(
-    definition: Definition, declared_type_args: Dict[str, NamedTypeVariable]
+    definition: Definition,
+        declared_type_args: Dict[str, NamedTypeVariable]
 ) -> Type:
     return_type = _type_name_to_type(definition.type, declared_type_args)
     arg_types = [_type_name_to_type(arg, declared_type_args) for arg in definition.args]
