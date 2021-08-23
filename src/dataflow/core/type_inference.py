@@ -105,7 +105,11 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
     return _to_program_with_inferred_types(inferred_computation, program, substitutions)
 
 
-def _to_program_with_inferred_types(inferred_computation: Computation, orig_program: Program, substitutions: Dict[TypeVariable, Type]):
+def _to_program_with_inferred_types(
+    inferred_computation: Computation,
+    orig_program: Program,
+    substitutions: Dict[TypeVariable, Type],
+):
     closed_list: Set[str] = set()
     id_to_computation: Dict[str, Computation] = {}
 
