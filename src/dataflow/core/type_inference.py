@@ -71,7 +71,7 @@ class TypeApplication(Type):
 @dataclass(frozen=False)
 class Computation:
     """A representation of a single function application during type inference.
-    Value literals are treated as functions from Unit to their final value."""
+    Value literals are treated as functions from empty arguments to their value."""
 
     # The name of the function or value literal.
     op: Optional[str]
