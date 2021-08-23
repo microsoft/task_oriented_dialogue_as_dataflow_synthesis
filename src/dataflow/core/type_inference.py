@@ -1,11 +1,18 @@
 import json
 from abc import ABC
 from dataclasses import dataclass, replace
-from typing import Dict, Optional, List, Tuple, Set
+from typing import Dict, List, Optional, Sequence, Set, cast
 
 from dataflow.core.definition import Definition
-from dataflow.core.program import Program, Op, TypeName, roots_and_reentrancies, \
-    Expression, CallLikeOp, ValueOp, BuildStructOp
+from dataflow.core.program import (
+    BuildStructOp,
+    CallLikeOp,
+    Expression,
+    Program,
+    TypeName,
+    ValueOp,
+    roots_and_reentrancies,
+)
 
 
 class Type(ABC):
@@ -23,26 +30,28 @@ class NamedTypeVariable(TypeVariable):
         self.name = name
 
     def __repr__(self):
-        return f'$_{self.name}'
+        return f"$_{self.name}"
 
 
 class AnonTypeVariable(TypeVariable):
     pass
 
     def __repr__(self):
-        return f'$_{hex(id(self))}'
+        return f"$_{hex(id(self))}"
 
 
 @dataclass(frozen=True)
 class TypeApplication(Type):
     constructor: str
-    args: List[Type]
+    args: Sequence[Type]
 
     def __repr__(self):
         if len(self.args) == 0:
-            return f'{self.constructor}'
+            return f"{self.constructor}"
         else:
-            return f'{self.constructor}[{",".join([arg.__repr__() for arg in self.args])}]'
+            return (
+                f'{self.constructor}[{",".join([arg.__repr__() for arg in self.args])}]'
+            )
 
 
 @dataclass(frozen=False)
@@ -66,7 +75,7 @@ class Computation:
     @property
     def return_type(self) -> Type:
         """The output type of this function. Mutated during type inference"""
-        return type.args[-1]
+        return self.type.args[-1]
 
 
 def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
@@ -92,26 +101,50 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
     set_types_rec(inferred_computation)
     new_expressions = []
     for expr in program.expressions:
-        if expr.id not in id_to_comp:
-            print("here")
         comp = id_to_comp[expr.id]
-        new_expressions.append(replace(expr, type=comp.return_type, type_args=[_apply_substitutions(t, substitutions) for t in comp.type_args]))
+        new_expressions.append(
+            replace(
+                expr,
+                type=_type_to_type_name(comp.return_type),
+                type_args=[
+                    _type_to_type_name(_apply_substitutions(t, substitutions))
+                    for t in comp.type_args
+                ]
+                if len(comp.type_args) > 0
+                else None,
+            )
+        )
     return Program(new_expressions)
 
 
-def _infer_types_rec(computation: Computation, library: Dict[str, Definition],
-                     substitutions: Dict[TypeVariable, Type]) -> Computation:
+def _infer_types_rec(
+    computation: Computation,
+    library: Dict[str, Definition],
+    substitutions: Dict[TypeVariable, Type],
+) -> Computation:
 
-    inferred_args = [_infer_types_rec(arg, library, substitutions).type.return_type for arg in computation.args]
+    inferred_args = [
+        _infer_types_rec(arg, library, substitutions).return_type
+        for arg in computation.args
+    ]
     if len(inferred_args) == 0:
         inferred_args = [TypeApplication("Unit", [])]
 
-    actual_type = TypeApplication("Lambda", inferred_args + [computation.type.return_type])
-    computation.type = _unify(actual_type, computation.type, substitutions)
+    actual_type = TypeApplication("Lambda", inferred_args + [computation.return_type])
+    unified = _unify(actual_type, computation.type, substitutions)
+    assert isinstance(
+        unified, TypeApplication
+    ), "Unification of lambdas should always produce a TypeApplication"
+    computation.type = unified
     return computation
 
 
-def _to_computation(program: Program, library: Dict[str, Definition], substitutions: Dict[TypeVariable, Type], id_to_expr: Dict[str, Expression]) -> Computation:
+def _to_computation(
+    program: Program,
+    library: Dict[str, Definition],
+    substitutions: Dict[TypeVariable, Type],
+    id_to_expr: Dict[str, Expression],
+) -> Computation:
     closed_list: Dict[str, Computation] = {}
 
     def rec(expression: Expression) -> Computation:
@@ -126,28 +159,51 @@ def _to_computation(program: Program, library: Dict[str, Definition], substituti
         elif isinstance(expression.op, BuildStructOp):
             assert f"BuildStructOp {expression.op} not supported in type inference"
         defn = library[op]
-        declared_type_args_list = [NamedTypeVariable(arg_name) for arg_name in
-                              defn.type_args]
+        declared_type_args_list = [
+            NamedTypeVariable(arg_name) for arg_name in defn.type_args
+        ]
         declared_type_args = {var.name: var for var in declared_type_args_list}
         defn_type = _definition_to_type(defn, declared_type_args)
-        ascribed_return_type = _type_name_to_type(expression.type, {}) if expression.type else AnonTypeVariable()
-        assert expression.type_args is None or len(expression.type_args) == len(defn.type_args), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
+        ascribed_return_type = (
+            _type_name_to_type(expression.type, {})
+            if expression.type
+            else AnonTypeVariable()
+        )
+        assert expression.type_args is None or len(expression.type_args) == len(
+            defn.type_args
+        ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
         if expression.type_args:
-            for (ascribed_type_arg, type_var) in zip(expression.type_args, declared_type_args_list):
+            for (ascribed_type_arg, type_var) in zip(
+                expression.type_args, declared_type_args_list
+            ):
                 substitutions[type_var] = _type_name_to_type(ascribed_type_arg, {})
-        ascribed_arg_types = [AnonTypeVariable() for arg in defn.args] if len(defn.args) > 0 else [TypeApplication("Unit", [])]
-        ascribed_type = TypeApplication("Lambda", ascribed_arg_types + [ascribed_return_type])
+        ascribed_arg_types = (
+            [cast(Type, AnonTypeVariable()) for arg in defn.args]
+            if len(defn.args) > 0
+            else [cast(Type, TypeApplication("Unit", []))]
+        )
+        ascribed_type = TypeApplication(
+            "Lambda", ascribed_arg_types + [ascribed_return_type]
+        )
         comp_type = _unify(ascribed_type, defn_type, substitutions)
-        return Computation(op, expression.id, rec_args, declared_type_args_list, comp_type)
+        assert isinstance(
+            comp_type, TypeApplication
+        ), "unification of Lambdas should always produce a TypeApplication"
+        return Computation(
+            op, expression.id, rec_args, declared_type_args_list, comp_type
+        )
 
     (roots, _) = roots_and_reentrancies(program)
-    assert len(roots) == 1, f"Expected Program to have a single root, got {roots} in {program}"
+    assert (
+        len(roots) == 1
+    ), f"Expected Program to have a single root, got {roots} in {program}"
     root_id = list(roots)[0]
     return rec(id_to_expr[root_id])
 
 
-def _definition_to_type(definition: Definition,
-                        declared_type_args: Dict[str, TypeVariable]) -> Type:
+def _definition_to_type(
+    definition: Definition, declared_type_args: Dict[str, NamedTypeVariable]
+) -> Type:
     return_type = _type_name_to_type(definition.type, declared_type_args)
     arg_types = [_type_name_to_type(arg, declared_type_args) for arg in definition.args]
     if len(arg_types) == 0:
@@ -155,8 +211,9 @@ def _definition_to_type(definition: Definition,
     return TypeApplication("Lambda", arg_types + [return_type])
 
 
-def _type_name_to_type(name: TypeName,
-                       declared_type_args: Dict[str, TypeVariable]) -> Type:
+def _type_name_to_type(
+    name: TypeName, declared_type_args: Dict[str, NamedTypeVariable]
+) -> Type:
     if name is None:
         return AnonTypeVariable()
     if len(name.type_args) == 0:
@@ -169,14 +226,25 @@ def _type_name_to_type(name: TypeName,
         return TypeApplication(name.base, args)
 
 
+def _type_to_type_name(t: Type) -> TypeName:
+    assert isinstance(
+        t, TypeApplication
+    ), f"_type_to_type_name expects a Type that is fully instantiated with no variables, but got {t}"
+    return TypeName(t.constructor, [_type_to_type_name(a) for a in t.args])
+
+
 def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
     if isinstance(t, TypeVariable):
         if t in substitutions:
             return _apply_substitutions(substitutions[t], substitutions)
         else:
             return t
-    if isinstance(t, TypeApplication):
-        return TypeApplication(t.constructor, [_apply_substitutions(arg, substitutions) for arg in t.args])
+    elif isinstance(t, TypeApplication):
+        return TypeApplication(
+            t.constructor, [_apply_substitutions(arg, substitutions) for arg in t.args]
+        )
+    else:
+        raise Exception(f"Unknown type {t}")
 
 
 def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
@@ -187,6 +255,9 @@ def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
     # If either t1 or t2 is a type variable, and it does not occur in the other type,
     # then produce the substitution that binds it to the other type.
     elif isinstance(t2, TypeVariable) and not isinstance(t1, TypeVariable):
+        # Lol, pylint thinks that because t1 and t2 match the param names but are
+        # out of order, there might be a bug.
+        # pylint: disable=arguments-out-of-order
         return _unify(t2, t1, substitutions)
     elif isinstance(t1, TypeVariable) and not _occurs(t2, t1):
         substitutions[t1] = t2
@@ -195,8 +266,12 @@ def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
     # then unify the types and the corresponding type arguments.
     # The overall substitution that unifies the two applications is just the composition
     # of all the resulting substitutions together.
-    elif isinstance(t1, TypeApplication) and isinstance(t2, TypeApplication) \
-            and t1.constructor == t2.constructor and len(t1.args) == len(t2.args):
+    elif (
+        isinstance(t1, TypeApplication)
+        and isinstance(t2, TypeApplication)
+        and t1.constructor == t2.constructor
+        and len(t1.args) == len(t2.args)
+    ):
         unified_args = [
             _unify(arg1, arg2, substitutions) for (arg1, arg2) in zip(t1.args, t2.args)
         ]

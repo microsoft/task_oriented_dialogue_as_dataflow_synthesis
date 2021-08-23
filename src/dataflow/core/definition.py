@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List
+
 from dataflow.core.program import TypeName
 
 
@@ -9,4 +10,3 @@ class Definition:
     type_args: List[str]
     args: List[TypeName]
     type: TypeName
-
