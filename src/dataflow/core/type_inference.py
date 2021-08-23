@@ -68,16 +68,6 @@ class TypeApplication(Type):
             )
 
 
-@dataclass(frozen=True)
-class Unit(Type):
-    """It's simpler to have a type for an empty list of arguments so
-    that all functions, even primitives can have Type Lambda[I, O].
-    """
-
-    def __repr__(self) -> str:
-        return "Unit"
-
-
 @dataclass(frozen=False)
 class Computation:
     """A representation of a single function application during type inference.
@@ -151,8 +141,6 @@ def _infer_types_rec(
         _infer_types_rec(arg, library, substitutions).return_type
         for arg in computation.args
     ]
-    if len(inferred_args) == 0:
-        inferred_args = [Unit()]
 
     actual_type = TypeApplication("Lambda", inferred_args + [computation.return_type])
     unified = _unify(actual_type, computation.type, substitutions)
@@ -194,7 +182,7 @@ def _to_computation(
             declared_type_args_list = []
 
             def mk_primitive_constructor(p: str) -> TypeApplication:
-                return TypeApplication("Lambda", [Unit(), TypeApplication(p)])
+                return TypeApplication("Lambda", [TypeApplication(p)])
 
             if type_name in ("String", "Long", "Number", "Boolean"):
                 defn_type = mk_primitive_constructor(type_name)
@@ -218,9 +206,7 @@ def _to_computation(
             ):
                 substitutions[type_var] = _type_name_to_type(ascribed_type_arg, {})
         ascribed_arg_types = (
-            [cast(Type, AnonTypeVariable()) for arg in defn.args]
-            if defn
-            else [cast(Type, Unit())]
+            [cast(Type, AnonTypeVariable()) for arg in defn.args] if defn else []
         )
         ascribed_type = TypeApplication(
             "Lambda", ascribed_arg_types + [ascribed_return_type]
@@ -246,8 +232,7 @@ def _definition_to_type(
 ) -> Type:
     return_type = _type_name_to_type(definition.type, declared_type_args)
     arg_types = [_type_name_to_type(arg, declared_type_args) for arg in definition.args]
-    if len(arg_types) == 0:
-        arg_types = [TypeApplication("Unit", [])]
+
     return TypeApplication("Lambda", arg_types + [return_type])
 
 
@@ -283,8 +268,7 @@ def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
         return TypeApplication(
             t.constructor, [_apply_substitutions(arg, substitutions) for arg in t.args]
         )
-    elif isinstance(t, Unit):
-        return t
+
     else:
         raise TypeInferenceError(f"Unknown type {t}")
 
@@ -304,8 +288,7 @@ def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
     elif isinstance(t1, TypeVariable) and not _occurs(t2, t1):
         substitutions[t1] = t2
         return t2
-    elif isinstance(t1, Unit) and isinstance(t2, Unit):
-        return t1
+
     # If we have two type applications of the same arity,
     # then unify the types and the corresponding type arguments.
     # The overall substitution that unifies the two applications is just the composition
