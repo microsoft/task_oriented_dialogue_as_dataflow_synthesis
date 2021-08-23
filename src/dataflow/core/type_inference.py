@@ -15,6 +15,11 @@ from dataflow.core.program import (
 )
 
 
+@dataclass(frozen=True)
+class TypeInferenceError(Exception):
+    msg: str
+
+
 class Type(ABC):
     pass
 
@@ -244,7 +249,7 @@ def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
             t.constructor, [_apply_substitutions(arg, substitutions) for arg in t.args]
         )
     else:
-        raise Exception(f"Unknown type {t}")
+        raise TypeInferenceError(f"Unknown type {t}")
 
 
 def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
@@ -278,7 +283,7 @@ def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
         return TypeApplication(t1.constructor, unified_args)
     # All other cases result in a unification failure.
     else:
-        raise Exception(f"Can't unify {t1} and {t2}")
+        raise TypeInferenceError(f"Can't unify {t1} and {t2}")
 
 
 def _occurs(t: Type, var: TypeVariable) -> bool:
