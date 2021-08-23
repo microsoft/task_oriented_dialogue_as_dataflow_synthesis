@@ -93,7 +93,22 @@ class Computation:
 
 
 def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
-    """Main entry point of a Hindley-Milner type inference algorithm. """
+    """Main entry point of a Hindley-Milner like inference algorithm.
+    The high-level algorithm is :
+    • Convert each Expression in `program` to a Computation, which in turn represents
+      each function invocation as a TypeApplication of the form
+      Lambda[AnonVariable1, AnonVariable12..., Output],
+      where Output is Expression.type if defined or an AnonymousTypeVariable otherwise.
+    • Unify (see _unify) the Definition of the function (from `library`) with the
+      Computation.
+    • Recurse down the Computation tree, unifying the current Type of the Computation
+      with the "actual Type" given by Lambda[Rec1, Rec2, ..., current Type]
+      where each argument type comes from a recursive call to _infer_types_rec.
+
+    Currently, will crash if there are any free type variables after inference
+    has run.
+    """
+
     id_to_expr = {expr.id: expr for expr in program.expressions}
 
     substitutions: Dict[TypeVariable, Type] = {}
@@ -132,6 +147,7 @@ def _to_program_with_inferred_types(
                 expr,
                 type=_type_to_type_name(computation.return_type),
                 type_args=[
+                     # TODO handle the case where there remain free type variables
                     _type_to_type_name(_apply_substitutions(t, substitutions))
                     for t in computation.type_args
                 ]
@@ -216,13 +232,13 @@ def _to_computation(
                 expression.type_args, declared_type_args_list
             ):
                 substitutions[type_var] = _type_name_to_type(ascribed_type_arg, {})
-        ascribed_arg_types = (
+        anon_arg_types = (
             [cast(Type, AnonTypeVariable()) for arg in defn.args] if defn else []
         )
         ascribed_type = TypeApplication(
-            "Lambda", ascribed_arg_types + [ascribed_return_type]
+            "Lambda", anon_arg_types + [ascribed_return_type]
         )
-        comp_type = _unify(ascribed_type, defn_type, substitutions)
+        comp_type = _unify(anon_arg_types, defn_type, substitutions)
         assert isinstance(
             comp_type, TypeApplication
         ), "unification of Lambdas should always produce a TypeApplication"
