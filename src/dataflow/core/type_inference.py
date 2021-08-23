@@ -1,6 +1,6 @@
 import json
 from abc import ABC
-from dataclasses import dataclass, replace, field
+from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional, Sequence, Set, cast
 
 from dataflow.core.definition import Definition
@@ -32,6 +32,7 @@ class NamedTypeVariable(TypeVariable):
     """A named type variable like T. Note that named type variables have scope:
     several different functions might use the name T but they are distinct type
     variables. As such, reference identity for NamedTypeVariables matters."""
+
     name: str
 
     def __init__(self, name: str):
@@ -44,6 +45,7 @@ class NamedTypeVariable(TypeVariable):
 class AnonTypeVariable(TypeVariable):
     """An anonymous type variable used to represent types that need to be inferred.
     Compared by reference equality."""
+
     pass
 
     def __repr__(self):
@@ -53,6 +55,7 @@ class AnonTypeVariable(TypeVariable):
 @dataclass(frozen=True)
 class TypeApplication(Type):
     """A type constructor with some arguments."""
+
     constructor: str
     args: Sequence[Type] = field(default_factory=list)
 
@@ -73,6 +76,7 @@ class Unit(Type):
 
     def __repr__(self) -> str:
         return "Unit"
+
 
 @dataclass(frozen=False)
 class Computation:
@@ -238,8 +242,7 @@ def _to_computation(
 
 
 def _definition_to_type(
-    definition: Definition,
-        declared_type_args: Dict[str, NamedTypeVariable]
+    definition: Definition, declared_type_args: Dict[str, NamedTypeVariable]
 ) -> Type:
     return_type = _type_name_to_type(definition.type, declared_type_args)
     arg_types = [_type_name_to_type(arg, declared_type_args) for arg in definition.args]

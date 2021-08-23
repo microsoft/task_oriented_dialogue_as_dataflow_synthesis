@@ -16,6 +16,7 @@ class Definition:
 
     This class is currently only used in type_inference.py, but we might use
     it elsewhere too."""
+
     name: str
     type_args: List[str]
     args: List[TypeName]
