@@ -29,6 +29,9 @@ class TypeVariable(Type):
 
 
 class NamedTypeVariable(TypeVariable):
+    """A named type variable like T. Note that named type variables have scope:
+    several different functions might use the name T but they are distinct type
+    variables. As such, reference identity for NamedTypeVariables matters."""
     name: str
 
     def __init__(self, name: str):
@@ -39,6 +42,8 @@ class NamedTypeVariable(TypeVariable):
 
 
 class AnonTypeVariable(TypeVariable):
+    """An anonymous type variable used to represent types that need to be inferred.
+    Compared by reference equality."""
     pass
 
     def __repr__(self):
@@ -47,6 +52,7 @@ class AnonTypeVariable(TypeVariable):
 
 @dataclass(frozen=True)
 class TypeApplication(Type):
+    """A type constructor with some arguments."""
     constructor: str
     args: Sequence[Type] = field(default_factory=list)
 
@@ -61,7 +67,8 @@ class TypeApplication(Type):
 
 @dataclass(frozen=True)
 class Unit(Type):
-    """It's simpler to have a type for functions that take no arguments.
+    """It's simpler to have a type for an empty list of arguments so
+    that all functions, even primitives can have Type Lambda[I, O].
     """
 
     def __repr__(self) -> str:
