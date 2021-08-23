@@ -93,20 +93,27 @@ class Computation:
 
 
 def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
+    """Main entry point of a Hindley-Milner type inference algorithm. """
     id_to_expr = {expr.id: expr for expr in program.expressions}
 
     substitutions: Dict[TypeVariable, Type] = {}
     computation = _to_computation(program, library, substitutions, id_to_expr)
 
+    # The main work.
     inferred_computation = _infer_types_rec(computation, library, substitutions)
+
+    return _to_program_with_inferred_types(inferred_computation, program, substitutions)
+
+
+def _to_program_with_inferred_types(inferred_computation: Computation, orig_program: Program, substitutions: Dict[TypeVariable, Type]):
     closed_list: Set[str] = set()
-    id_to_comp: Dict[str, Computation] = {}
+    id_to_computation: Dict[str, Computation] = {}
 
     def set_types_rec(comp: Computation):
         if comp.id in closed_list:
             pass
         else:
-            id_to_comp[comp.id] = comp
+            id_to_computation[comp.id] = comp
             closed_list.add(comp.id)
             comp.type = _apply_substitutions(comp.type, substitutions)
             for arg in comp.args:
@@ -114,17 +121,17 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
 
     set_types_rec(inferred_computation)
     new_expressions = []
-    for expr in program.expressions:
-        comp = id_to_comp[expr.id]
+    for expr in orig_program.expressions:
+        computation = id_to_computation[expr.id]
         new_expressions.append(
             replace(
                 expr,
-                type=_type_to_type_name(comp.return_type),
+                type=_type_to_type_name(computation.return_type),
                 type_args=[
                     _type_to_type_name(_apply_substitutions(t, substitutions))
-                    for t in comp.type_args
+                    for t in computation.type_args
                 ]
-                if len(comp.type_args) > 0
+                if len(computation.type_args) > 0
                 else None,
             )
         )
@@ -274,6 +281,8 @@ def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
 
 
 def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
+    """See e.g. section 2.2 of
+    https://course.ccs.neu.edu/cs4410sp19/lec_type-inference_notes.html"""
     t1 = _apply_substitutions(t1, substitutions)
     t2 = _apply_substitutions(t2, substitutions)
     if t1 == t2:
