@@ -22,6 +22,8 @@ SIMPLE_PLUS_LIBRARY = {
     ),
     "Long": Definition("Long", [], [TypeName("Unit")], TypeName("Long")),
     "Number": Definition("Number", [], [TypeName("Unit")], TypeName("Number")),
+    "String": Definition("String", [], [TypeName("Unit")], TypeName("String")),
+    "single_element_list": Definition("single_element_list", ["T"], [TypeName("T")], TypeName("List", [TypeName("T")])),
 }
 
 
@@ -63,6 +65,31 @@ def test_let():
     expected_program, res = _do_inference_test(
         "(let (x (+ 1L 2L)) (+ x x))",
         "(let (x ^Long (^(Long) + ^Long 1L ^Long 2L)) ^Long (^(Long) + x x))",
+        SIMPLE_PLUS_LIBRARY,
+    )
+    assert res == expected_program
+
+
+def test_multi_let():
+    expected_program, res = _do_inference_test(
+        "(let (a 1L b 2L x (+ a b)) (+ x x))",
+        "(let (a ^Long 1L b ^Long 2L x ^Long (^(Long) + a b)) ^Long (^(Long) + x x))",
+        SIMPLE_PLUS_LIBRARY,
+    )
+    assert res == expected_program
+
+
+def test_parameterized():
+    expected_program, res = _do_inference_test(
+        "(single_element_list 1)",
+        "^(List Number) (^(Number) single_element_list ^Number 1)",
+        SIMPLE_PLUS_LIBRARY,
+    )
+    assert res == expected_program
+
+    expected_program, res = _do_inference_test(
+        '(single_element_list "5")',
+        '^(List String) (^(String) single_element_list ^String "5")',
         SIMPLE_PLUS_LIBRARY,
     )
     assert res == expected_program

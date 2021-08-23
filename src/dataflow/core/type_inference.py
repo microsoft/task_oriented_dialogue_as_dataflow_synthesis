@@ -163,6 +163,9 @@ def _to_computation(
             op = type_name
         elif isinstance(expression.op, BuildStructOp):
             assert f"BuildStructOp {expression.op} not supported in type inference"
+        else:
+            assert False, f"Unexpected op {expression.op}"
+        print(expression.op)
         defn = library[op]
         declared_type_args_list = [
             NamedTypeVariable(arg_name) for arg_name in defn.type_args
