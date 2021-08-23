@@ -20,9 +20,6 @@ SIMPLE_PLUS_LIBRARY = {
     "plusLong": Definition(
         "+", [], [TypeName("Long"), TypeName("Long")], TypeName("Long")
     ),
-    "Long": Definition("Long", [], [TypeName("Unit")], TypeName("Long")),
-    "Number": Definition("Number", [], [TypeName("Unit")], TypeName("Number")),
-    "String": Definition("String", [], [TypeName("Unit")], TypeName("String")),
     "single_element_list": Definition("single_element_list", ["T"], [TypeName("T")], TypeName("List", [TypeName("T")])),
 }
 

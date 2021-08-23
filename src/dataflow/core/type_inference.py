@@ -158,15 +158,25 @@ def _to_computation(
         rec_args = [rec(id_to_expr[arg_expr_id]) for arg_expr_id in expression.arg_ids]
         if isinstance(expression.op, CallLikeOp):
             op = expression.op.name
+            defn = library[op]
         elif isinstance(expression.op, ValueOp):
-            type_name = json.loads(expression.op.value)["schema"]
-            op = type_name
+            value_info = json.loads(expression.op.value)
+            type_name = value_info["schema"]
+            op = value_info["underlying"]
+
+            def mk_primitive_type_constructor(p: str) -> Definition:
+                return Definition(p, [], [TypeName("Unit")], TypeName(p))
+
+            if type_name in ("String", "Long", "Number", "Boolean"):
+                defn = mk_primitive_type_constructor(type_name)
+            else:
+                raise TypeInferenceError(f"Unknown primitive type {type_name}")
+
         elif isinstance(expression.op, BuildStructOp):
             assert f"BuildStructOp {expression.op} not supported in type inference"
         else:
             assert False, f"Unexpected op {expression.op}"
-        print(expression.op)
-        defn = library[op]
+
         declared_type_args_list = [
             NamedTypeVariable(arg_name) for arg_name in defn.type_args
         ]
