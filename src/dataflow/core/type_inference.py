@@ -1,6 +1,6 @@
 import json
 from abc import ABC
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, replace, field
 from typing import Dict, List, Optional, Sequence, Set, cast
 
 from dataflow.core.definition import Definition
@@ -48,7 +48,7 @@ class AnonTypeVariable(TypeVariable):
 @dataclass(frozen=True)
 class TypeApplication(Type):
     constructor: str
-    args: Sequence[Type]
+    args: Sequence[Type] = field(default_factory=list)
 
     def __repr__(self):
         if len(self.args) == 0:
@@ -58,6 +58,14 @@ class TypeApplication(Type):
                 f'{self.constructor}[{",".join([arg.__repr__() for arg in self.args])}]'
             )
 
+
+@dataclass(frozen=True)
+class Unit(Type):
+    """It's simpler to have a type for functions that take no arguments.
+    """
+
+    def __repr__(self) -> str:
+        return "Unit"
 
 @dataclass(frozen=False)
 class Computation:
@@ -133,7 +141,7 @@ def _infer_types_rec(
         for arg in computation.args
     ]
     if len(inferred_args) == 0:
-        inferred_args = [TypeApplication("Unit", [])]
+        inferred_args = [Unit()]
 
     actual_type = TypeApplication("Lambda", inferred_args + [computation.return_type])
     unified = _unify(actual_type, computation.type, substitutions)
@@ -159,16 +167,26 @@ def _to_computation(
         if isinstance(expression.op, CallLikeOp):
             op = expression.op.name
             defn = library[op]
+            declared_type_args_list = [
+                NamedTypeVariable(arg_name) for arg_name in defn.type_args
+            ]
+            declared_type_args = {var.name: var for var in declared_type_args_list}
+            defn_type = _definition_to_type(defn, declared_type_args)
+            assert expression.type_args is None or len(expression.type_args) == len(
+                defn.type_args
+            ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
         elif isinstance(expression.op, ValueOp):
             value_info = json.loads(expression.op.value)
             type_name = value_info["schema"]
             op = value_info["underlying"]
+            defn = None
+            declared_type_args_list = []
 
-            def mk_primitive_type_constructor(p: str) -> Definition:
-                return Definition(p, [], [TypeName("Unit")], TypeName(p))
+            def mk_primitive_constructor(p: str) -> TypeApplication:
+                return TypeApplication("Lambda", [Unit(), TypeApplication(p)])
 
             if type_name in ("String", "Long", "Number", "Boolean"):
-                defn = mk_primitive_type_constructor(type_name)
+                defn_type = mk_primitive_constructor(type_name)
             else:
                 raise TypeInferenceError(f"Unknown primitive type {type_name}")
 
@@ -177,19 +195,12 @@ def _to_computation(
         else:
             assert False, f"Unexpected op {expression.op}"
 
-        declared_type_args_list = [
-            NamedTypeVariable(arg_name) for arg_name in defn.type_args
-        ]
-        declared_type_args = {var.name: var for var in declared_type_args_list}
-        defn_type = _definition_to_type(defn, declared_type_args)
         ascribed_return_type = (
             _type_name_to_type(expression.type, {})
             if expression.type
             else AnonTypeVariable()
         )
-        assert expression.type_args is None or len(expression.type_args) == len(
-            defn.type_args
-        ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
+
         if expression.type_args:
             for (ascribed_type_arg, type_var) in zip(
                 expression.type_args, declared_type_args_list
@@ -197,8 +208,8 @@ def _to_computation(
                 substitutions[type_var] = _type_name_to_type(ascribed_type_arg, {})
         ascribed_arg_types = (
             [cast(Type, AnonTypeVariable()) for arg in defn.args]
-            if len(defn.args) > 0
-            else [cast(Type, TypeApplication("Unit", []))]
+            if defn
+            else [cast(Type, Unit())]
         )
         ascribed_type = TypeApplication(
             "Lambda", ascribed_arg_types + [ascribed_return_type]
@@ -261,6 +272,8 @@ def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
         return TypeApplication(
             t.constructor, [_apply_substitutions(arg, substitutions) for arg in t.args]
         )
+    elif isinstance(t, Unit):
+        return t
     else:
         raise TypeInferenceError(f"Unknown type {t}")
 
@@ -280,6 +293,8 @@ def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
     elif isinstance(t1, TypeVariable) and not _occurs(t2, t1):
         substitutions[t1] = t2
         return t2
+    elif isinstance(t1, Unit) and isinstance(t2, Unit):
+        return t1
     # If we have two type applications of the same arity,
     # then unify the types and the corresponding type arguments.
     # The overall substitution that unifies the two applications is just the composition

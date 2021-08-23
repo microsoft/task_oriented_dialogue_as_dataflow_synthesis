@@ -1,10 +1,11 @@
 from typing import Dict
 
+import pytest
+
 from dataflow.core.definition import Definition
 from dataflow.core.lispress import lispress_to_program, parse_lispress
 from dataflow.core.program import TypeName
-from dataflow.core.type_inference import infer_types, TypeInferenceError
-import pytest
+from dataflow.core.type_inference import TypeInferenceError, infer_types
 
 
 def _do_inference_test(expr: str, expected: str, library: Dict[str, Definition]):
@@ -20,7 +21,9 @@ SIMPLE_PLUS_LIBRARY = {
     "plusLong": Definition(
         "+", [], [TypeName("Long"), TypeName("Long")], TypeName("Long")
     ),
-    "single_element_list": Definition("single_element_list", ["T"], [TypeName("T")], TypeName("List", [TypeName("T")])),
+    "single_element_list": Definition(
+        "single_element_list", ["T"], [TypeName("T")], TypeName("List", [TypeName("T")])
+    ),
 }
 
 
@@ -33,9 +36,7 @@ def test_simple():
     assert res == expected_program
 
     expected_program, res = _do_inference_test(
-        "(+ 1 2)",
-        "^Number (^(Number) + ^Number 1 ^Number 2)",
-        SIMPLE_PLUS_LIBRARY,
+        "(+ 1 2)", "^Number (^(Number) + ^Number 1 ^Number 2)", SIMPLE_PLUS_LIBRARY,
     )
     assert res == expected_program
 
@@ -43,18 +44,14 @@ def test_simple():
 def test_types_disagree():
     with pytest.raises(TypeInferenceError):
         _do_inference_test(
-            "^Number (plusLong 3L 1)",
-            "^Number (plusLong 3L 1)",
-            SIMPLE_PLUS_LIBRARY,
+            "^Number (plusLong 3L 1)", "^Number (plusLong 3L 1)", SIMPLE_PLUS_LIBRARY,
         )
 
 
 def test_ascription_disagrees():
     with pytest.raises(TypeInferenceError):
         _do_inference_test(
-            "^Number (plusLong 3L 1L)",
-            "^Number (plusLong 3L 1L)",
-            SIMPLE_PLUS_LIBRARY,
+            "^Number (plusLong 3L 1L)", "^Number (plusLong 3L 1L)", SIMPLE_PLUS_LIBRARY,
         )
 
 
