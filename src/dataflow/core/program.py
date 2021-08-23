@@ -2,7 +2,7 @@
 #  Licensed under the MIT license.
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import List, Optional, Union, Tuple, Set
+from typing import List, Optional, Set, Tuple, Union
 
 
 @dataclass(frozen=True)
@@ -36,6 +36,12 @@ class TypeName:
     base: str
     type_args: List["TypeName"] = field(default_factory=list)
 
+    def __repr__(self) -> str:
+        if len(self.type_args) == 0:
+            return self.base
+        else:
+            return f'({self.base} {" ".join(a.__repr__() for a in self.type_args)})'
+
 
 @dataclass(frozen=True)
 class Expression:
@@ -59,4 +65,3 @@ def roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
         i for i, c in arg_counts.items() if c >= 2
     }  # args that are used multiple times as args
     return roots, reentrancies
-
