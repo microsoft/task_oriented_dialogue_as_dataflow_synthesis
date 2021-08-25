@@ -5,12 +5,7 @@ from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional, Sequence, Set, cast
 
 from dataflow.core.definition import Definition, lispress_library_to_library
-from dataflow.core.lispress import (
-    lispress_to_program,
-    parse_lispress,
-    program_to_lispress,
-    render_pretty,
-)
+from dataflow.core.lispress import lispress_to_program, parse_lispress
 from dataflow.core.program import (
     BuildStructOp,
     CallLikeOp,
@@ -421,8 +416,6 @@ if __name__ == "__main__":
                 print(
                     f'Type inference failed on {dialogue["dialogue_id"]}:{turn_index}: {e}'
                 )
-            except Exception as e:
-                print(f'Crash on {dialogue["dialogue_id"]}:{turn_index}: {e}')
     print(
         f"Type-checking succeeded on {count}/{tries} ({count * 100.0/tries} %) turns."
     )
