@@ -1,18 +1,20 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 import pytest
 
 from dataflow.core.definition import Definition
 from dataflow.core.lispress import lispress_to_program, parse_lispress
-from dataflow.core.program import TypeName
+from dataflow.core.program import Program, TypeName
 from dataflow.core.type_inference import TypeInferenceError, infer_types
 
 
-def _do_inference_test(expr: str, expected: str, library: Dict[str, Definition]):
+def _do_inference_test(
+    expr: str, expected: str, library: Dict[str, Definition]
+) -> Tuple[Program, Program]:
     lispress = parse_lispress(expr)
     program, _ = lispress_to_program(lispress, 0)
     res = infer_types(program, library)
-    (expected_program, unused_idx) = lispress_to_program(parse_lispress(expected), 0,)
+    (expected_program, _) = lispress_to_program(parse_lispress(expected), 0)
     return expected_program, res
 
 
