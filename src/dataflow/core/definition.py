@@ -39,9 +39,11 @@ def lispress_library_to_library(lispress_str: str) -> Dict[str, Definition]:
     For example an input might look like
 
     (def + (^Long a ^Long b) ^Long ???)
-    (def - (^Long a ^Long b) ^Long ???)
+    (package my.namespace
+      (def - (^Long a ^Long b) ^Long ???)
+    )
 
-    The returned library would contain an entry for '+' and '-'.
+    The returned library would contain an entry for '+' and 'my.namespace.-'.
     """
     # The files are at flat list of global files and namespaces packages.
     # Wrap everything in parens to make it parse as a single expression.
