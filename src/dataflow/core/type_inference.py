@@ -111,7 +111,7 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
       each function invocation as a TypeApplication of the form
       Lambda[AnonVariable1, AnonVariable12..., Output],
       where Output is Expression.type if defined or an AnonymousTypeVariable otherwise.
-    • Unify (see _unify) the Definition of the function (from `lib`) with the
+    • Unify (see _unify) the Definition of the function (from `library`) with the
       Computation. Each unification mutably updates the substitutions map,
       which maps TypeVariables to their instantiations.
     • Recurse down the Computation tree, unifying the current Type of the Computation
