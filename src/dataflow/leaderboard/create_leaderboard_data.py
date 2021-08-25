@@ -11,7 +11,7 @@ import random
 from typing import List
 
 from dataflow.core.dialogue import Dialogue, TurnId
-from dataflow.core.io import load_jsonl_file, save_jsonl_file
+from dataflow.core.io_utils import load_jsonl_file, save_jsonl_file
 from dataflow.core.turn_prediction import TurnAnswer, UtteranceWithContext
 
 

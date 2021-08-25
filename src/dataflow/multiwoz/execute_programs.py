@@ -15,7 +15,7 @@ import jsons
 import numpy as np
 
 from dataflow.core.dialogue import Dialogue, Turn
-from dataflow.core.io import load_jsonl_file, load_jsonl_file_and_build_lookup
+from dataflow.core.io_utils import load_jsonl_file, load_jsonl_file_and_build_lookup
 from dataflow.core.program import BuildStructOp, CallLikeOp, Expression, ValueOp
 from dataflow.core.program_utils import DataflowFn
 from dataflow.multiwoz.salience_model import (

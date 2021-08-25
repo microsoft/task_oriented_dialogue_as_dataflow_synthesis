@@ -12,7 +12,7 @@ from typing import Dict, cast
 
 import jsons
 
-from dataflow.core.io import load_jsonl_file_and_build_lookup
+from dataflow.core.io_utils import load_jsonl_file_and_build_lookup
 from dataflow.multiwoz.create_belief_state_prediction_report import (
     BeliefStatePredictionReportDatum,
 )

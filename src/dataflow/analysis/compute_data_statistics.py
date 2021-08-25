@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from dataflow.core.dialogue import Dialogue, Turn, TurnId
-from dataflow.core.io import load_jsonl_file, save_jsonl_file
+from dataflow.core.io_utils import load_jsonl_file, save_jsonl_file
 from dataflow.core.program_utils import DataflowFn
 
 

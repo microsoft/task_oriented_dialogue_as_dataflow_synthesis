@@ -10,7 +10,7 @@ import json
 from typing import Iterable, List, Optional, Set, Tuple
 
 from dataflow.core.dialogue import TurnId
-from dataflow.core.io import load_jsonl_file
+from dataflow.core.io_utils import load_jsonl_file
 from dataflow.core.lispress import try_round_trip
 from dataflow.core.turn_prediction import TurnAnswer, TurnPrediction, missing_prediction
 

@@ -18,7 +18,7 @@ import jsons
 import pandas as pd
 
 from dataflow.core.dialogue import TurnId
-from dataflow.core.io import load_jsonl_file
+from dataflow.core.io_utils import load_jsonl_file
 
 
 @dataclass

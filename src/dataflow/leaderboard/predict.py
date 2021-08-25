@@ -12,7 +12,7 @@ import jsons
 from more_itertools import chunked
 
 from dataflow.core.dialogue import TurnId
-from dataflow.core.io import save_jsonl_file
+from dataflow.core.io_utils import save_jsonl_file
 from dataflow.core.turn_prediction import TurnPrediction
 
 
