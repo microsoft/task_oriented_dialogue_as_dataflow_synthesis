@@ -16,6 +16,9 @@ from dataflow.core.program import (
     roots_and_reentrancies,
 )
 
+# Note: not related to Harbor's lambda type (Lambda1).
+LAMBDA = "Lambda"
+
 
 @dataclass(frozen=True)
 class TypeInferenceError(Exception):
@@ -31,9 +34,11 @@ class TypeVariable(Type):
 
 
 class NamedTypeVariable(TypeVariable):
-    """A named type variable like T. Note that named type variables have scope:
+    """A named type variable like T.
+    Note that named type variables have scope:
     several different functions might use the name T but they are distinct type
-    variables. As such, reference identity for NamedTypeVariables matters."""
+    variables. As such, reference identity for NamedTypeVariables matters.
+    """
 
     name: str
 
@@ -46,7 +51,8 @@ class NamedTypeVariable(TypeVariable):
 
 class AnonTypeVariable(TypeVariable):
     """An anonymous type variable used to represent types that need to be inferred.
-    Compared by reference equality."""
+    Compared by reference equality.
+    """
 
     pass
 
@@ -73,7 +79,8 @@ class TypeApplication(Type):
 @dataclass(frozen=False)
 class Computation:
     """A representation of a single function application during type inference.
-    Value literals are treated as functions from empty arguments to their value."""
+    Value literals are treated as functions from empty arguments to their value.
+    """
 
     # The name of the function or value literal.
     op: Optional[str]
@@ -84,7 +91,7 @@ class Computation:
     # Declared type arguments based on the signature of op (defined in a Definition).
     type_args: List[NamedTypeVariable]
     # The type of this function, always represented as a
-    # TypeApplication("Lambda", arg_types + [return_type])
+    # TypeApplication(LAMBDA, arg_types + [return_type])
     # Mutated during type inference.
     type: TypeApplication
 
@@ -94,36 +101,38 @@ class Computation:
         return self.type.args[-1]
 
 
-def infer_types(program: Program, lib: Dict[str, Definition]) -> Program:
+def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
     """Main entry point of a Hindley-Milner like inference algorithm.
-    The high-level algorithm is :
+
+    The algorithm maintains a mutably-updated map of substitutions from TypeVariables
+    to other Types.
+    The high-level flow is:
     • Convert each Expression in `program` to a Computation, which in turn represents
       each function invocation as a TypeApplication of the form
       Lambda[AnonVariable1, AnonVariable12..., Output],
       where Output is Expression.type if defined or an AnonymousTypeVariable otherwise.
-    • Unify (see _unify) the Definition of the function (from `library`) with the
-      Computation. Each unification mutable updates the substitutions map,
+    • Unify (see _unify) the Definition of the function (from `lib`) with the
+      Computation. Each unification mutably updates the substitutions map,
       which maps TypeVariables to their instantiations.
     • Recurse down the Computation tree, unifying the current Type of the Computation
       with the "actual Type" given by Lambda[Rec1, Rec2, ..., current Type]
       where each argument type comes from a recursive call to _infer_types_rec.
     • Read off the return type and type arguments each Computation by applying
       all accumulated substitutions and then return a new Program where
-      each Expression has full instantiated type arguments and return types.
+      each Expression has fully instantiated type arguments and return types.
 
     Currently, will crash if there are any free type variables after inference
-    has run.
-    Will also crash if type inference fails.
+    has run. Will also crash if type inference fails.
     """
 
     id_to_expr = {expr.id: expr for expr in program.expressions}
 
     substitutions: Dict[TypeVariable, Type] = {}
-    computations = _to_computations(program, lib, substitutions, id_to_expr)
+    computations = _to_computations(program, library, substitutions, id_to_expr)
 
     # The main work.
     inferred_computations = [
-        _infer_types_rec(c, lib, substitutions) for c in computations
+        _infer_types_rec(c, library, substitutions) for c in computations
     ]
 
     return _to_program_with_inferred_types(
@@ -172,16 +181,16 @@ def _to_program_with_inferred_types(
 
 def _infer_types_rec(
     computation: Computation,
-    lib: Dict[str, Definition],
+    library: Dict[str, Definition],
     substitutions: Dict[TypeVariable, Type],
 ) -> Computation:
 
     inferred_args = [
-        _infer_types_rec(arg, lib, substitutions).return_type
+        _infer_types_rec(arg, library, substitutions).return_type
         for arg in computation.args
     ]
 
-    actual_type = TypeApplication("Lambda", inferred_args + [computation.return_type])
+    actual_type = TypeApplication(LAMBDA, inferred_args + [computation.return_type])
     unified = _unify(actual_type, computation.type, substitutions)
     assert isinstance(
         unified, TypeApplication
@@ -192,7 +201,7 @@ def _infer_types_rec(
 
 def _to_computations(
     program: Program,
-    lib: Dict[str, Definition],
+    library: Dict[str, Definition],
     substitutions: Dict[TypeVariable, Type],
     id_to_expr: Dict[str, Expression],
 ) -> Sequence[Computation]:
@@ -205,7 +214,7 @@ def _to_computations(
         if isinstance(expression.op, (CallLikeOp, BuildStructOp)):
             if isinstance(expression.op, CallLikeOp):
                 op = expression.op.name
-                defn = lib[op]
+                defn = library[op]
                 defn_arg_types = [arg_type for (unused_arg_name, arg_type) in defn.args]
                 defn_type_name = defn.type
             elif isinstance(expression.op, BuildStructOp):
@@ -216,7 +225,7 @@ def _to_computations(
                     expression.op.push_go
                 ), "Can't handle non-push_go in type inference"
                 op = expression.op.op_schema
-                defn = lib[op]
+                defn = library[op]
                 arg_map = dict(defn.args)
                 num_positional_args = 0
                 while (
@@ -252,7 +261,7 @@ def _to_computations(
             declared_type_args_list = []
 
             def mk_primitive_constructor(p: str) -> TypeApplication:
-                return TypeApplication("Lambda", [TypeApplication(p)])
+                return TypeApplication(LAMBDA, [TypeApplication(p)])
 
             if type_name in ("String", "Long", "Number", "Boolean"):
                 defn_type = mk_primitive_constructor(type_name)
@@ -275,9 +284,7 @@ def _to_computations(
         anon_arg_types = (
             [cast(Type, AnonTypeVariable()) for arg in defn_arg_types] if defn else []
         )
-        ascribed_type = TypeApplication(
-            "Lambda", anon_arg_types + [ascribed_return_type]
-        )
+        ascribed_type = TypeApplication(LAMBDA, anon_arg_types + [ascribed_return_type])
         comp_type = _unify(ascribed_type, defn_type, substitutions)
         assert isinstance(
             comp_type, TypeApplication
@@ -338,50 +345,61 @@ def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):
         raise TypeInferenceError(f"Unknown type {t}")
 
 
-def _unify(t1: Type, t2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
-    """See e.g. section 2.2 of
-    https://course.ccs.neu.edu/cs4410sp19/lec_type-inference_notes.html"""
-    t1 = _apply_substitutions(t1, substitutions)
-    t2 = _apply_substitutions(t2, substitutions)
-    if t1 == t2:
-        return t1
-    # If either t1 or t2 is a type variable, and it does not occur in the other type,
-    # then produce the substitution that binds it to the other type.
-    elif isinstance(t2, TypeVariable) and not isinstance(t1, TypeVariable):
-        # Lol, pylint thinks that because t1 and t2 match the param names but are
-        # out of order, there might be a bug.
-        # pylint: disable=arguments-out-of-order
-        return _unify(t2, t1, substitutions)
-    elif isinstance(t1, TypeVariable) and not _occurs(t2, t1):
-        substitutions[t1] = t2
-        return t2
+def _unify(type1: Type, type2: Type, substitutions: Dict[TypeVariable, Type]) -> Type:
+    """Returns a type that substitutes any TypeVariables in of `type1` or `type2`
+    with corresponding TypeApplications in the other argument.
 
-    # If we have two type applications of the same arity,
-    # then unify the types and the corresponding type arguments.
-    # The overall substitution that unifies the two applications is just the composition
-    # of all the resulting substitutions together.
-    elif (
-        isinstance(t1, TypeApplication)
-        and isinstance(t2, TypeApplication)
-        and (
-            t1.constructor == t2.constructor
-            # special-case hack. The raw data was weaker type inference. Sometimes
-            # we can replace Dynamics, which are left behind when something can't be
-            # inferred, with something tighter.
-            or "Dynamic" in (t1.constructor, t2.constructor)
-        )
-        and len(t1.args) == len(t2.args)
-    ):
-        unified_args = [
-            _unify(arg1, arg2, substitutions) for (arg1, arg2) in zip(t1.args, t2.args)
-        ]
-        return TypeApplication(t1.constructor, unified_args)
-    # All other cases result in a unification failure.
-    else:
-        raise TypeInferenceError(f"Can't unify {t1} and {t2}")
+    The substitutions are mutably recorded in `substitutions`.
+    Before recursively unifying, this function first applies any substitutions already
+    present in `substitutions` to both arguments.
+
+    See e.g. section 2.2 of
+    https://course.ccs.neu.edu/cs4410sp19/lec_type-inference_notes.html
+    """
+    type1 = _apply_substitutions(type1, substitutions)
+    type2 = _apply_substitutions(type2, substitutions)
+
+    def rec(t1: Type, t2: Type) -> Type:
+        if t1 == t2:
+            return t1
+        # If either t1 or t2 is a type variable and it does not occur in the other type,
+        # then produce the substitution that binds it to the other type.
+        elif isinstance(t2, TypeVariable) and not isinstance(t1, TypeVariable):
+            # Lol, pylint thinks that because t1 and t2 match the param names but are
+            # out of order, there might be a bug.
+            # pylint: disable=arguments-out-of-order
+            return rec(t2, t1)
+        elif isinstance(t1, TypeVariable) and not _occurs(t2, t1):
+            substitutions[t1] = t2
+            return t2
+
+        # If we have two type applications of the same arity,
+        # then unify the types and the corresponding type arguments.
+        # The overall substitution that unifies the two applications is just the
+        # composition of all the resulting substitutions together.
+        elif (
+            isinstance(t1, TypeApplication)
+            and isinstance(t2, TypeApplication)
+            and (
+                t1.constructor == t2.constructor
+                # special-case hack. The raw data was weaker type inference. Sometimes
+                # we can replace Dynamics, which are left behind when something can't be
+                # inferred, with something tighter.
+                or "Dynamic" in (t1.constructor, t2.constructor)
+            )
+            and len(t1.args) == len(t2.args)
+        ):
+            unified_args = [rec(arg1, arg2) for (arg1, arg2) in zip(t1.args, t2.args)]
+            return TypeApplication(t1.constructor, unified_args)
+        # All other cases result in a unification failure.
+        else:
+            raise TypeInferenceError(f"Can't unify {t1} and {t2}")
+
+    return rec(type1, type2)
 
 
 def _occurs(t: Type, var: TypeVariable) -> bool:
+    """Checks whether `var` occurs anywhere in `t`."""
     if t == var:
         return True
     elif isinstance(t, TypeApplication):
@@ -397,7 +415,7 @@ if __name__ == "__main__":
     lispress_file = sys.argv[2]
     library_file_handle = open(library_file, "r")
 
-    library = lispress_library_to_library(library_file_handle.read())
+    lib = lispress_library_to_library(library_file_handle.read())
     library_file_handle.close()
 
     tries = 0
@@ -409,7 +427,7 @@ if __name__ == "__main__":
             tries += 1
             try:
                 inferred = infer_types(
-                    lispress_to_program(parse_lispress(lispress), 0)[0], library
+                    lispress_to_program(parse_lispress(lispress), 0)[0], lib
                 )
                 count += 1
             except TypeInferenceError as e:
