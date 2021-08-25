@@ -21,7 +21,7 @@ from dataflow.core.dialogue import (
     TurnId,
     UserUtterance,
 )
-from dataflow.core.io import (
+from dataflow.core.io_utils import (
     load_jsonl_file,
     load_jsonl_file_and_build_lookup,
     save_jsonl_file,
