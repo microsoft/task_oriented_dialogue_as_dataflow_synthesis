@@ -418,7 +418,11 @@ if __name__ == "__main__":
                 )
                 count += 1
             except TypeInferenceError as e:
-                print(f'Type inference failed on {dialogue["dialogue_id"]}:{turn_index}: {e}')
+                print(
+                    f'Type inference failed on {dialogue["dialogue_id"]}:{turn_index}: {e}'
+                )
             except Exception as e:
                 print(f'Crash on {dialogue["dialogue_id"]}:{turn_index}: {e}')
-    print(f"Type-checking succeeded on {count}/{tries} ({count * 100.0/tries} %) turns.")
+    print(
+        f"Type-checking succeeded on {count}/{tries} ({count * 100.0/tries} %) turns."
+    )

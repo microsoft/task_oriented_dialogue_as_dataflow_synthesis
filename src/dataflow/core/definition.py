@@ -93,4 +93,4 @@ def _parse_param(param: Lispress) -> Tuple[str, TypeName]:
     # Option[T] is an optional argument, so just make it T
     if isinstance(type_ascription, list) and type_ascription[0] == "Option":
         type_ascription = type_ascription[1]
-    return (param_name, lispress_to_type_name(type_ascription))
+    return param_name, lispress_to_type_name(type_ascription)
