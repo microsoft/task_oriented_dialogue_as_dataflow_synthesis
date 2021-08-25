@@ -10,7 +10,7 @@ import argparse
 import json
 from typing import Any, Dict, Iterator, List
 
-from dataflow.core.io import save_jsonl_file
+from dataflow.core.io_utils import save_jsonl_file
 from dataflow.multiwoz.belief_state_tracker_datum import (
     BeliefState,
     BeliefStateTrackerDatum,

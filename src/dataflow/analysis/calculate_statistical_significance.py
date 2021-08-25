@@ -15,7 +15,7 @@ import pandas as pd
 from statsmodels.stats.contingency_tables import mcnemar
 
 from dataflow.core.dialogue import TurnId
-from dataflow.core.io import load_jsonl_file
+from dataflow.core.io_utils import load_jsonl_file
 from dataflow.onmt_helpers.evaluate_onmt_predictions import evaluate_dialogue
 
 
