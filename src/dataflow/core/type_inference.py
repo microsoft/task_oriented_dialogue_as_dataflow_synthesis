@@ -215,8 +215,10 @@ def _to_computations(
             if isinstance(expression.op, CallLikeOp):
                 op = expression.op.name
                 defn = library[op]
-                defn_arg_types = [arg_type for (unused_arg_name, arg_type) in defn.args]
-                defn_type_name = defn.type
+                defn_arg_types = [
+                    arg_type for (unused_arg_name, arg_type) in defn.params
+                ]
+                defn_type_name = defn.return_type
             elif isinstance(expression.op, BuildStructOp):
                 assert (
                     expression.op.empty_base
@@ -226,7 +228,7 @@ def _to_computations(
                 ), "Can't handle non-push_go in type inference"
                 op = expression.op.op_schema
                 defn = library[op]
-                arg_map = dict(defn.args)
+                arg_map = dict(defn.params)
                 num_positional_args = 0
                 while (
                     num_positional_args < len(expression.op.op_fields)
@@ -239,20 +241,20 @@ def _to_computations(
                     defn_arg_type = arg_map[named_arg]
                     named_args.append(defn_arg_type)
                 defn_arg_types = [
-                    arg_type for (name, arg_type) in defn.args[:num_positional_args]
+                    arg_type for (name, arg_type) in defn.params[:num_positional_args]
                 ] + named_args
-                defn_type_name = defn.type
+                defn_type_name = defn.return_type
 
             declared_type_args_list = [
-                NamedTypeVariable(arg_name) for arg_name in defn.type_args
+                NamedTypeVariable(arg_name) for arg_name in defn.type_params
             ]
             declared_type_args = {var.name: var for var in declared_type_args_list}
             defn_type = _definition_to_type(
                 defn_type_name, defn_arg_types, declared_type_args
             )
             assert expression.type_args is None or len(expression.type_args) == len(
-                defn.type_args
-            ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
+                defn.type_params
+            ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_params}"
         elif isinstance(expression.op, ValueOp):
             value_info = json.loads(expression.op.value)
             type_name = value_info["schema"]

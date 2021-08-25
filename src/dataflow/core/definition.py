@@ -15,21 +15,34 @@ class Definition:
     """A function signature. For example,
     Definition("foo", ["T"], [("arg1", TypeName("Long")), ("arg2", TypeName("T"))], TypeName("Double"))
     would be
+
     T = TypeVar("T")
     def foo(arg1: Long, arg2: T) -> Double:
 
-    in Python.
+    in Python, and
+
+    (def ^(T) foo (^Long arg1 ^T arg2) ^Double ???)
+
+    in Lispress.
 
     This class is currently only used in type_inference.py, but we might use
     it elsewhere too."""
 
     name: str
-    type_args: List[str]
-    args: List[Tuple[str, TypeName]]
-    type: TypeName
+    type_params: List[str]
+    params: List[Tuple[str, TypeName]]
+    return_type: TypeName
 
 
 def lispress_library_to_library(lispress_str: str) -> Dict[str, Definition]:
+    """Parses a list of lispress function defs into a indexed collection of Definitions.
+    For example an input might look like
+
+    (def + (^Long a ^Long b) ^Long ???)
+    (def - (^Long a ^Long b) ^Long ???)
+
+    The returned library would contain an entry for '+' and '-'.
+    """
     # The files are at flat list of global files and namespaces packages.
     # Wrap everything in parens to make it parse as a single expression.
     sexp = parse_lispress("(" + lispress_str + ")")
