@@ -2,10 +2,9 @@
 #  Licensed under the MIT license.
 import json
 import re
-from collections import Counter
 from dataclasses import replace
 from json import JSONDecodeError, loads
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from more_itertools import chunked
 
@@ -17,6 +16,7 @@ from dataflow.core.program import (
     Program,
     TypeName,
     ValueOp,
+    roots_and_reentrancies,
 )
 from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args
 from dataflow.core.program_utils import is_idx_str as is_express_idx_str
@@ -353,16 +353,6 @@ def _desugar_gets(sexp: Lispress) -> Lispress:
         return [_desugar_gets(s) for s in sexp]
 
 
-def _roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
-    ids = {e.id for e in program.expressions}
-    arg_counts = Counter(a for e in program.expressions for a in e.arg_ids)
-    roots = ids.difference(arg_counts)  # ids that are never used as args
-    reentrancies = {
-        i for i, c in arg_counts.items() if c >= 2
-    }  # args that are used multiple times as args
-    return roots, reentrancies
-
-
 def _program_to_unsugared_lispress(program: Program) -> Lispress:
     """
     Nests `program` into an s-expression.
@@ -374,7 +364,7 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     if len(program.expressions) == 0:
         return []
 
-    roots, reentrancies = _roots_and_reentrancies(program)
+    roots, reentrancies = roots_and_reentrancies(program)
     assert roots, "program must have at least one root"
 
     reentrant_ids: Dict[str, str] = {}
@@ -447,8 +437,8 @@ _long_number_regex = re.compile("^([0-9]+)L$")
 
 
 def unnest_line(
-    s: Lispress, idx: Idx, var_id_bindings: Tuple[Tuple[str, int], ...],
-) -> Tuple[List[Expression], Idx, Idx, Tuple[Tuple[str, int], ...]]:
+    s: Lispress, idx: Idx, var_id_bindings: Dict[str, int],
+) -> Tuple[List[Expression], Idx, Idx, Dict[str, int]]:
     """
     Helper function for `_unsugared_lispress_to_program`.
     Converts a Lispress s-expression into a Program, keeping track of
@@ -470,7 +460,9 @@ def unnest_line(
                 expr, idx = mk_value_op(value=int(n), schema="Long", idx=idx)
                 return [expr], idx, idx, var_id_bindings
             else:
-
+                if s in var_id_bindings:
+                    expr_id = var_id_bindings[s]
+                    return [], expr_id, idx, var_id_bindings
                 # bare value
                 value = loads(s)
                 known_value_types = {
@@ -509,10 +501,9 @@ def unnest_line(
                 return [expr], idx, idx, var_id_bindings
         elif _is_idx_str(hd):
             # argId pointer
-            var_id_dict = dict(var_id_bindings)
             # look up step index for var
-            assert hd in var_id_dict
-            expr_id = var_id_dict[hd]
+            assert hd in var_id_bindings
+            expr_id = var_id_bindings[hd]
             return [], expr_id, idx, var_id_bindings
         elif is_express_idx_str(hd):
             # external reference
@@ -529,7 +520,7 @@ def unnest_line(
                     body, idx, var_id_bindings
                 )
                 result_exprs.extend(exprs)
-                var_id_bindings += ((var_name, arg_idx),)
+                var_id_bindings[var_name] = arg_idx
             for body in body_forms:
                 exprs, arg_idx, idx, var_id_bindings = unnest_line(
                     body, idx, var_id_bindings
@@ -608,7 +599,7 @@ def unnest_line(
 
 
 def _unsugared_lispress_to_program(fs: Lispress, idx: Idx) -> Tuple[Program, Idx]:
-    arg_id_map: Tuple[Tuple[str, int], ...] = ()
+    arg_id_map: Dict[str, int] = {}
     expressions = []
     if isinstance(fs, list) and len(fs) == 0:
         # special-case the empty program
