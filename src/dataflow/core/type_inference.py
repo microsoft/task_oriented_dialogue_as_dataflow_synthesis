@@ -307,7 +307,7 @@ def _definition_to_type(
     return_type = _type_name_to_type(def_type, declared_type_args)
     arg_types = [_type_name_to_type(arg, declared_type_args) for arg in declared_args]
 
-    return TypeApplication("Lambda", arg_types + [return_type])
+    return TypeApplication(LAMBDA, arg_types + [return_type])
 
 
 def _type_name_to_type(
