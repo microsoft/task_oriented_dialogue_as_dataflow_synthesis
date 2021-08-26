@@ -1,9 +1,11 @@
 import json
+import sys
 from abc import ABC
 from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional, Sequence, Set, cast
 
-from dataflow.core.definition import Definition
+from dataflow.core.definition import Definition, lispress_library_to_library
+from dataflow.core.lispress import lispress_to_program, parse_lispress
 from dataflow.core.program import (
     BuildStructOp,
     CallLikeOp,
@@ -126,16 +128,20 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
     id_to_expr = {expr.id: expr for expr in program.expressions}
 
     substitutions: Dict[TypeVariable, Type] = {}
-    computation = _to_computation(program, library, substitutions, id_to_expr)
+    computations = _to_computations(program, library, substitutions, id_to_expr)
 
     # The main work.
-    inferred_computation = _infer_types_rec(computation, library, substitutions)
+    inferred_computations = [
+        _infer_types_rec(c, library, substitutions) for c in computations
+    ]
 
-    return _to_program_with_inferred_types(inferred_computation, program, substitutions)
+    return _to_program_with_inferred_types(
+        inferred_computations, program, substitutions
+    )
 
 
 def _to_program_with_inferred_types(
-    inferred_computation: Computation,
+    inferred_computations: Sequence[Computation],
     orig_program: Program,
     substitutions: Dict[TypeVariable, Type],
 ):
@@ -152,7 +158,8 @@ def _to_program_with_inferred_types(
             for arg in comp.args:
                 set_types_rec(arg)
 
-    set_types_rec(inferred_computation)
+    for c in inferred_computations:
+        set_types_rec(c)
     new_expressions = []
     for expr in orig_program.expressions:
         computation = id_to_computation[expr.id]
@@ -192,29 +199,62 @@ def _infer_types_rec(
     return computation
 
 
-def _to_computation(
+def _to_computations(
     program: Program,
     library: Dict[str, Definition],
     substitutions: Dict[TypeVariable, Type],
     id_to_expr: Dict[str, Expression],
-) -> Computation:
+) -> Sequence[Computation]:
     closed_list: Dict[str, Computation] = {}
 
     def rec(expression: Expression) -> Computation:
         if expression.id in closed_list:
             return closed_list[expression.id]
         rec_args = [rec(id_to_expr[arg_expr_id]) for arg_expr_id in expression.arg_ids]
-        if isinstance(expression.op, CallLikeOp):
-            op = expression.op.name
-            defn = library[op]
+        if isinstance(expression.op, (CallLikeOp, BuildStructOp)):
+            if isinstance(expression.op, CallLikeOp):
+                op = expression.op.name
+                defn = library[op]
+                defn_arg_types = [
+                    arg_type for (unused_arg_name, arg_type) in defn.params
+                ]
+                defn_type_name = defn.return_type
+            elif isinstance(expression.op, BuildStructOp):
+                assert (
+                    expression.op.empty_base
+                ), "Can't handle empty_base in type inference"
+                assert (
+                    expression.op.push_go
+                ), "Can't handle non-push_go in type inference"
+                op = expression.op.op_schema
+                defn = library[op]
+                arg_map = dict(defn.params)
+                num_positional_args = 0
+                while (
+                    num_positional_args < len(expression.op.op_fields)
+                    and expression.op.op_fields[num_positional_args] is None
+                ):
+                    num_positional_args += 1
+
+                named_args = []
+                for named_arg in expression.op.op_fields[num_positional_args:]:
+                    defn_arg_type = arg_map[named_arg]
+                    named_args.append(defn_arg_type)
+                defn_arg_types = [
+                    arg_type for (name, arg_type) in defn.params[:num_positional_args]
+                ] + named_args
+                defn_type_name = defn.return_type
+
             declared_type_args_list = [
-                NamedTypeVariable(arg_name) for arg_name in defn.type_args
+                NamedTypeVariable(arg_name) for arg_name in defn.type_params
             ]
             declared_type_args = {var.name: var for var in declared_type_args_list}
-            defn_type = _definition_to_type(defn, declared_type_args)
+            defn_type = _definition_to_type(
+                defn_type_name, defn_arg_types, declared_type_args
+            )
             assert expression.type_args is None or len(expression.type_args) == len(
-                defn.type_args
-            ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_args}"
+                defn.type_params
+            ), f"Must either have no type arguments or the same number as the function declaration, but got {expression.type_args} and {defn.type_params}"
         elif isinstance(expression.op, ValueOp):
             value_info = json.loads(expression.op.value)
             type_name = value_info["schema"]
@@ -229,9 +269,6 @@ def _to_computation(
                 defn_type = mk_primitive_constructor(type_name)
             else:
                 raise TypeInferenceError(f"Unknown primitive type {type_name}")
-
-        elif isinstance(expression.op, BuildStructOp):
-            assert f"BuildStructOp {expression.op} not supported in type inference"
         else:
             assert False, f"Unexpected op {expression.op}"
 
@@ -247,7 +284,7 @@ def _to_computation(
             ):
                 substitutions[type_var] = _type_name_to_type(ascribed_type_arg, {})
         anon_arg_types = (
-            [cast(Type, AnonTypeVariable()) for arg in defn.args] if defn else []
+            [cast(Type, AnonTypeVariable()) for arg in defn_arg_types] if defn else []
         )
         ascribed_type = TypeApplication(LAMBDA, anon_arg_types + [ascribed_return_type])
         comp_type = _unify(ascribed_type, defn_type, substitutions)
@@ -259,18 +296,16 @@ def _to_computation(
         )
 
     (roots, _) = roots_and_reentrancies(program)
-    assert (
-        len(roots) == 1
-    ), f"Expected Program to have a single root, got {roots} in {program}"
-    root_id = list(roots)[0]
-    return rec(id_to_expr[root_id])
+    return [rec(id_to_expr[root_id]) for root_id in roots]
 
 
 def _definition_to_type(
-    definition: Definition, declared_type_args: Dict[str, NamedTypeVariable]
+    def_type: TypeName,
+    declared_args: Sequence[TypeName],
+    declared_type_args: Dict[str, NamedTypeVariable],
 ) -> Type:
-    return_type = _type_name_to_type(definition.type, declared_type_args)
-    arg_types = [_type_name_to_type(arg, declared_type_args) for arg in definition.args]
+    return_type = _type_name_to_type(def_type, declared_type_args)
+    arg_types = [_type_name_to_type(arg, declared_type_args) for arg in declared_args]
 
     return TypeApplication(LAMBDA, arg_types + [return_type])
 
@@ -347,7 +382,13 @@ def _unify(type1: Type, type2: Type, substitutions: Dict[TypeVariable, Type]) ->
         elif (
             isinstance(t1, TypeApplication)
             and isinstance(t2, TypeApplication)
-            and t1.constructor == t2.constructor
+            and (
+                t1.constructor == t2.constructor
+                # special-case hack. The raw data was weaker type inference. Sometimes
+                # we can replace Dynamics, which are left behind when something can't be
+                # inferred, with something tighter.
+                or "Dynamic" in (t1.constructor, t2.constructor)
+            )
             and len(t1.args) == len(t2.args)
         ):
             unified_args = [rec(arg1, arg2) for (arg1, arg2) in zip(t1.args, t2.args)]
@@ -367,3 +408,38 @@ def _occurs(t: Type, var: TypeVariable) -> bool:
         return any(_occurs(a, var) for a in t.args)
     else:
         return False
+
+
+def main():
+    """Simple main that takes a library lispress file and .dataflow_dialogue.jsonl file
+    and runs type checking on all lispress plans.
+    """
+    print("Semantic Machines\N{TRADE MARK SIGN} software.")
+    library_file = sys.argv[1]
+    lispress_file = sys.argv[2]
+    library_file_handle = open(library_file, "r")
+
+    lib = lispress_library_to_library(library_file_handle.read())
+    library_file_handle.close()
+
+    tries = 0
+    count = 0
+    for line in open(lispress_file):
+        dialogue = json.loads(line)
+        for (turn_index, turn) in enumerate(dialogue["turns"]):
+            lispress = turn["lispress"]
+            tries += 1
+            try:
+                infer_types(lispress_to_program(parse_lispress(lispress), 0)[0], lib)
+                count += 1
+            except TypeInferenceError as e:
+                print(
+                    f'Type inference failed on {dialogue["dialogue_id"]}:{turn_index}: {e}'
+                )
+    print(
+        f"Type-checking succeeded on {count}/{tries} ({count * 100.0 / tries} %) turns."
+    )
+
+
+if __name__ == "__main__":
+    main()

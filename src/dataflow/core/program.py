@@ -18,6 +18,7 @@ class CallLikeOp:
 @dataclass(frozen=True)
 class BuildStructOp:
     op_schema: str
+    # Named arguments. None for positional arguments
     op_fields: List[Optional[str]]
     empty_base: bool
     push_go: bool
