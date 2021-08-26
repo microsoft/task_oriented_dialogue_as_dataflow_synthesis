@@ -410,9 +410,11 @@ def _occurs(t: Type, var: TypeVariable) -> bool:
         return False
 
 
-# Simple main that takes a library lispress file and a
-# .dataflow_dialogue.jsonl file and runs type checking on all lispress plans.
-if __name__ == "__main__":
+def main():
+    """Simple main that takes a library lispress file and .dataflow_dialogue.jsonl file
+    and runs type checking on all lispress plans.
+    """
+    print("Semantic Machines\N{TRADE MARK SIGN} software.")
     library_file = sys.argv[1]
     lispress_file = sys.argv[2]
     library_file_handle = open(library_file, "r")
@@ -428,14 +430,16 @@ if __name__ == "__main__":
             lispress = turn["lispress"]
             tries += 1
             try:
-                inferred = infer_types(
-                    lispress_to_program(parse_lispress(lispress), 0)[0], lib
-                )
+                infer_types(lispress_to_program(parse_lispress(lispress), 0)[0], lib)
                 count += 1
             except TypeInferenceError as e:
                 print(
                     f'Type inference failed on {dialogue["dialogue_id"]}:{turn_index}: {e}'
                 )
     print(
-        f"Type-checking succeeded on {count}/{tries} ({count * 100.0/tries} %) turns."
+        f"Type-checking succeeded on {count}/{tries} ({count * 100.0 / tries} %) turns."
     )
+
+
+if __name__ == "__main__":
+    main()

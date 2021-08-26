@@ -23,7 +23,10 @@ class Definition:
 
     (def ^(T) foo (^Long arg1 ^T arg2) ^Double ???)
 
-    in Lispress.
+    in Lispress. The ??? is the "body" of the def, which for signatures
+    is empty. It's slightly easier to interoperate with the Scala Express code if we
+    assume there's always a body because that's where return type annotations live
+    right now.
 
     This class is currently only used in type_inference.py, but we might use
     it elsewhere too."""
@@ -32,6 +35,11 @@ class Definition:
     type_params: List[str]
     params: List[Tuple[str, TypeName]]
     return_type: TypeName
+
+    def __post_init__(self):
+        assert len(set(name for name, typeName in self.params)) == len(
+            self.params
+        ), f"Duplicate arg names found for {self.name}. Args were {self.params}"
 
 
 def lispress_library_to_library(lispress_str: str) -> Dict[str, Definition]:
@@ -51,12 +59,12 @@ def lispress_library_to_library(lispress_str: str) -> Dict[str, Definition]:
     assert isinstance(
         sexp, list
     ), f"Expected list of S-Expressions in file {lispress_str}"
-    acc: Dict[str, Definition] = {}
+    res: Dict[str, Definition] = {}
     for def_or_package in sexp:
         if isinstance(def_or_package, list) and def_or_package[0] == "def":
             # def in the global namespace
             defn = _def_to_definition(def_or_package, namespace="")
-            acc[defn.name] = defn
+            res[defn.name] = defn
         elif isinstance(def_or_package, list) and def_or_package[0] == "package":
             assert isinstance(
                 def_or_package, list
@@ -64,8 +72,8 @@ def lispress_library_to_library(lispress_str: str) -> Dict[str, Definition]:
             (unused_package_kw, package_name, *defs) = def_or_package
             for lispress_def in defs:
                 defn = _def_to_definition(lispress_def, namespace=package_name)
-                acc[defn.name] = defn
-    return acc
+                res[defn.name] = defn
+    return res
 
 
 def _def_to_definition(lispress_def: Lispress, namespace: str) -> Definition:

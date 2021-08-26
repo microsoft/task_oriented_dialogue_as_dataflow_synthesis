@@ -14,7 +14,7 @@ def _do_inference_test(
     lispress = parse_lispress(expr)
     program, _ = lispress_to_program(lispress, 0)
     res = infer_types(program, library)
-    (expected_program, unused_idx) = lispress_to_program(parse_lispress(expected), 0,)
+    (expected_program, _) = lispress_to_program(parse_lispress(expected), 0)
     return expected_program, res
 
 
@@ -23,7 +23,7 @@ SIMPLE_PLUS_LIBRARY = {
         "+", ["T"], [("x", TypeName("T")), ("y", TypeName("T"))], TypeName("T")
     ),
     "plusLong": Definition(
-        "+", [], [("x", TypeName("Long")), ("x", TypeName("Long"))], TypeName("Long")
+        "+", [], [("x", TypeName("Long")), ("y", TypeName("Long"))], TypeName("Long")
     ),
     "single_element_list": Definition(
         "single_element_list",
