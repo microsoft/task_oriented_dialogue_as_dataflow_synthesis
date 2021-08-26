@@ -24,9 +24,9 @@ class Definition:
     (def ^(T) foo (^Long arg1 ^T arg2) ^Double ???)
 
     in Lispress. The ??? is the "body" of the def, which for signatures
-    is empty. It's slightly easier to interoperate with the Scala Express code if we
-    assume there's always a body because that's where return type annotations live
-    right now.
+    is empty. It's slightly easier there's always a body because that's where return
+    type annotations live right now. This of this as the the = 0; in C++
+    abstract methods.
 
     This class is currently only used in type_inference.py, but we might use
     it elsewhere too."""
