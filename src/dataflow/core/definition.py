@@ -18,15 +18,15 @@ class Definition:
 
     T = TypeVar("T")
     def foo(arg1: Long, arg2: T) -> Double:
+        pass
 
     in Python, and
 
     (def ^(T) foo (^Long arg1 ^T arg2) ^Double ???)
 
-    in Lispress. The ??? is the "body" of the def, which for signatures
-    is empty. It's slightly easier there's always a body because that's where return
-    type annotations live right now. This of this as the the = 0; in C++
-    abstract methods.
+    in Lispress. The ??? is the "body" of the def, much like `pass` in Python.
+    It's slightly easier there's always a body because that's where return
+    type annotations live right now.
 
     This class is currently only used in type_inference.py, but we might use
     it elsewhere too."""
