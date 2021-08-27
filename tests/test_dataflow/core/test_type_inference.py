@@ -46,14 +46,14 @@ SIMPLE_PLUS_LIBRARY = {
 
 def test_simple():
     expected_program, res = _do_inference_test(
-        "(+ (plusLong 3L 1L) 2L)",
-        "^Long (^(Long) + ^Long (plusLong ^Long 3L ^Long 1L) ^Long 2L)",
-        SIMPLE_PLUS_LIBRARY,
+        "(+ 1 2)", "^Number (^(Number) + ^Number 1 ^Number 2)", SIMPLE_PLUS_LIBRARY,  #
     )
     assert res == expected_program
 
     expected_program, res = _do_inference_test(
-        "(+ 1 2)", "^Number (^(Number) + ^Number 1 ^Number 2)", SIMPLE_PLUS_LIBRARY,
+        "(+ (plusLong 3L 1L) 2L)",
+        "^Long (^(Long) + ^Long (plusLong ^Long 3L ^Long 1L) ^Long 2L)",
+        SIMPLE_PLUS_LIBRARY,
     )
     assert res == expected_program
 

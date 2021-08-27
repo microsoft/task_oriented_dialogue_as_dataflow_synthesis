@@ -20,6 +20,7 @@ setup(
         "pandas==1.0.0",
         "spacy==2.2.1",
         "statsmodels==0.11.1",
+        "cached-property==1.5.1",
     ],
     extra_requires={
         "OpenNMT-py": ["OpenNMT-py==1.0.0", "pytorch>=1.2.0,<=1.4.0"]
