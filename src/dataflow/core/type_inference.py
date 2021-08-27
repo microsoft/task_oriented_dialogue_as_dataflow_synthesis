@@ -329,7 +329,7 @@ def _type_to_type_name(t: Type) -> TypeName:
     assert isinstance(
         t, TypeApplication
     ), f"_type_to_type_name expects a Type that is fully instantiated with no variables, but got {t}"
-    return TypeName(t.constructor, [_type_to_type_name(a) for a in t.args])
+    return TypeName(t.constructor, tuple([_type_to_type_name(a) for a in t.args]))
 
 
 def _apply_substitutions(t: Type, substitutions: Dict[TypeVariable, Type]):

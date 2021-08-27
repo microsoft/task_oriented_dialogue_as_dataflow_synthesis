@@ -20,25 +20,25 @@ def _do_inference_test(
 
 SIMPLE_PLUS_LIBRARY = {
     "+": Definition(
-        "+", ["T"], [("x", TypeName("T")), ("y", TypeName("T"))], TypeName("T")
+        "+", ["T"], (("x", TypeName("T")), ("y", TypeName("T")),), TypeName("T")
     ),
     "plusLong": Definition(
-        "+", [], [("x", TypeName("Long")), ("y", TypeName("Long"))], TypeName("Long")
+        "+", [], (("x", TypeName("Long")), ("y", TypeName("Long")),), TypeName("Long")
     ),
     "single_element_list": Definition(
         "single_element_list",
         ["T"],
-        [("e", TypeName("T"))],
+        (("e", TypeName("T")),),
         TypeName("List", [TypeName("T")]),
     ),
     "NamedArgs": Definition(
         "HasNamedArgs",
         [],
-        [
+        (
             ("arg1", TypeName("Long")),
             ("arg2", TypeName("Long")),
             ("arg3", TypeName("String")),
-        ],
+        ),
         TypeName("Long"),
     ),
 }
