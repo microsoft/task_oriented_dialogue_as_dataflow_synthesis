@@ -60,7 +60,7 @@ class Program:
     expressions: List[Expression]
 
     @cached_property
-    def expression_by_id(self) -> Dict[str, Expression]:
+    def expressions_by_id(self) -> Dict[str, Expression]:
         return {expression.id: expression for expression in self.expressions}
 
 
