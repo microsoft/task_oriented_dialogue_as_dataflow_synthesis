@@ -20,25 +20,25 @@ def _do_inference_test(
 
 SIMPLE_PLUS_LIBRARY = {
     "+": Definition(
-        "+", ["T"], (("x", TypeName("T")), ("y", TypeName("T")),), TypeName("T")
+        "+", ["T"], [("x", TypeName("T")), ("y", TypeName("T")),], TypeName("T")
     ),
     "plusLong": Definition(
-        "+", [], (("x", TypeName("Long")), ("y", TypeName("Long")),), TypeName("Long")
+        "+", [], [("x", TypeName("Long")), ("y", TypeName("Long")),], TypeName("Long")
     ),
     "single_element_list": Definition(
         "single_element_list",
         ["T"],
-        (("e", TypeName("T")),),
+        [("e", TypeName("T"))],
         TypeName("List", [TypeName("T")]),
     ),
     "NamedArgs": Definition(
         "HasNamedArgs",
         [],
-        (
+        [
             ("arg1", TypeName("Long")),
             ("arg2", TypeName("Long")),
             ("arg3", TypeName("String")),
-        ),
+        ],
         TypeName("Long"),
     ),
 }
@@ -53,15 +53,6 @@ def test_simple():
     expected_program, res = _do_inference_test(
         "(+ (plusLong 3L 1L) 2L)",
         "^Long (^(Long) + ^Long (plusLong ^Long 3L ^Long 1L) ^Long 2L)",
-        SIMPLE_PLUS_LIBRARY,
-    )
-    assert res == expected_program
-
-
-def test_named_args():
-    expected_program, res = _do_inference_test(
-        '(NamedArgs 1L :arg3 "2")',
-        '^Long (NamedArgs ^Long 1L :arg3 ^String "2")',
         SIMPLE_PLUS_LIBRARY,
     )
     assert res == expected_program
