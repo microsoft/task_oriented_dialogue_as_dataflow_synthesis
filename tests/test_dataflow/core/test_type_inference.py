@@ -29,7 +29,7 @@ SIMPLE_PLUS_LIBRARY = {
         "single_element_list",
         ["T"],
         [("e", TypeName("T"))],
-        TypeName("List", [TypeName("T")]),
+        TypeName("List", (TypeName("T"),)),
     ),
     "NamedArgs": Definition(
         "HasNamedArgs",

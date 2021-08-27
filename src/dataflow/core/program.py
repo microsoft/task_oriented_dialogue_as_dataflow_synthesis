@@ -2,7 +2,7 @@
 #  Licensed under the MIT license.
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from cached_property import cached_property
 
@@ -38,7 +38,7 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 class TypeName:
     base: str
     # Tuples preferred so TypeNames can be hashable
-    type_args: Sequence["TypeName"] = field(default_factory=tuple)
+    type_args: Tuple["TypeName", ...] = field(default_factory=tuple)
 
     def __repr__(self) -> str:
         if len(self.type_args) == 0:

@@ -612,11 +612,11 @@ def _unsugared_lispress_to_program(fs: Lispress, idx: Idx) -> Tuple[Program, Idx
 
 def lispress_to_type_name(e: Lispress) -> TypeName:
     """Given a s-expression forming a typename, converts it to a TypeName.
-    E.g. (List T) => TypeName("List", [TypeName("T")])"""
+    E.g. (List T) => TypeName("List", (TypeName("T"),))"""
     if isinstance(e, str):
         return TypeName(e)
     elif isinstance(e, list):
         (constructor, *args) = e
-        return TypeName(constructor, [lispress_to_type_name(a) for a in args])
+        return TypeName(constructor, tuple([lispress_to_type_name(a) for a in args]))
     else:
         raise ValueError(f"unexpected lispress {e}")
