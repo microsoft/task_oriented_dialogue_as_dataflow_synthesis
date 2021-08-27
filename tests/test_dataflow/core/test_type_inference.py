@@ -67,6 +67,15 @@ def test_named_args():
     assert res == expected_program
 
 
+def test_named_args():
+    expected_program, res = _do_inference_test(
+        '(NamedArgs 1L :arg3 "2")',
+        '^Long (NamedArgs ^Long 1L :arg3 ^String "2")',
+        SIMPLE_PLUS_LIBRARY,
+    )
+    assert res == expected_program
+
+
 def test_types_disagree():
     with pytest.raises(TypeInferenceError):
         _do_inference_test(
