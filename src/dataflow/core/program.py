@@ -37,6 +37,7 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 @dataclass(frozen=True)
 class TypeName:
     base: str
+    # Tuples preferred so TypeNames can be hashable
     type_args: Sequence["TypeName"] = field(default_factory=tuple)
 
     def __repr__(self) -> str:
