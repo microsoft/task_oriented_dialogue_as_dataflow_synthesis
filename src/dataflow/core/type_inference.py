@@ -242,6 +242,8 @@ def _to_computations(
 
                 named_args = []
                 for named_arg in expression.op.op_fields[num_positional_args:]:
+                    if named_arg not in arg_map:
+                        raise TypeInferenceError(f"Unknown argument {named_arg} for function {op}")
                     defn_arg_type = arg_map[named_arg]
                     named_args.append(defn_arg_type)
                 defn_arg_types = [
