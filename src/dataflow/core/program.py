@@ -2,7 +2,9 @@
 #  Licensed under the MIT license.
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
+
+from cached_property import cached_property
 
 
 @dataclass(frozen=True)
@@ -35,7 +37,8 @@ Op = Union[ValueOp, CallLikeOp, BuildStructOp]
 @dataclass(frozen=True)
 class TypeName:
     base: str
-    type_args: List["TypeName"] = field(default_factory=list)
+    # Tuples preferred so TypeNames can be hashable
+    type_args: Tuple["TypeName", ...] = field(default_factory=tuple)
 
     def __repr__(self) -> str:
         if len(self.type_args) == 0:
@@ -56,6 +59,10 @@ class Expression:
 @dataclass(frozen=True)
 class Program:
     expressions: List[Expression]
+
+    @cached_property
+    def expressions_by_id(self) -> Dict[str, Expression]:
+        return {expression.id: expression for expression in self.expressions}
 
 
 def roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:

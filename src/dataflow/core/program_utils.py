@@ -200,9 +200,9 @@ def mk_call_op(name: str, args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Id
 
 def mk_type_name(sexp: Sexp) -> TypeName:
     if isinstance(sexp, str):
-        return TypeName(sexp, [])
+        return TypeName(sexp, ())
     hd, *tl = sexp
-    return TypeName(hd, [mk_type_name(e) for e in tl])
+    return TypeName(hd, tuple([mk_type_name(e) for e in tl]))
 
 
 def mk_value_op(value: Any, schema: str, idx: Idx) -> Tuple[Expression, Idx]:

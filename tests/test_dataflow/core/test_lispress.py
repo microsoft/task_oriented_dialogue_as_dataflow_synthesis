@@ -232,5 +232,5 @@ def test_type_args_in_program():
     lispress = parse_lispress(lispress_str)
     program, _ = lispress_to_program(lispress, 0)
     assert len(program.expressions) == 1
-    assert program.expressions[0].type_args == [TypeName("PleasantryCalendar", [])]
+    assert program.expressions[0].type_args == [TypeName("PleasantryCalendar", ())]
     assert program.expressions[0].type is None
