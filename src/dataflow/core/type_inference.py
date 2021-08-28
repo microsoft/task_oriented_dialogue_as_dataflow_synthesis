@@ -121,8 +121,8 @@ def infer_types(program: Program, library: Dict[str, Definition]) -> Program:
       all accumulated substitutions and then return a new Program where
       each Expression has fully instantiated type arguments and return types.
 
-    Currently, will crash if there are any free type variables after inference
-    has run. Will also crash if type inference fails.
+    If there are any free type variables after inference
+    has run, they will be replaced with Dynamic. Will crash if type inference fails.
     """
 
     id_to_expr = {expr.id: expr for expr in program.expressions}
@@ -276,7 +276,7 @@ def _to_computations(
             else:
                 raise TypeInferenceError(f"Unknown primitive type {type_name}")
         else:
-            assert False, f"Unexpected op {expression.op}"
+            raise ValueError(f"Unexpected op {expression.op}")
 
         ascribed_return_type = (
             _type_name_to_type(expression.type, {})
@@ -332,6 +332,8 @@ def _type_name_to_type(
 
 
 def _type_to_type_name(t: Type) -> TypeName:
+    if isinstance(t, TypeVariable):
+        return TypeName("Dynamic")
     assert isinstance(
         t, TypeApplication
     ), f"_type_to_type_name expects a Type that is fully instantiated with no variables, but got {t}"
