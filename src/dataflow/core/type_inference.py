@@ -214,6 +214,8 @@ def _to_computations(
         if isinstance(expression.op, (CallLikeOp, BuildStructOp)):
             if isinstance(expression.op, CallLikeOp):
                 op = expression.op.name
+                if op not in library:
+                    raise TypeInferenceError(f"Unknown function {op}")
                 defn = library[op]
                 defn_arg_types = [
                     arg_type for (unused_arg_name, arg_type) in defn.params
@@ -227,6 +229,8 @@ def _to_computations(
                     expression.op.push_go
                 ), "Can't handle non-push_go in type inference"
                 op = expression.op.op_schema
+                if op not in library:
+                    raise TypeInferenceError(f"Unknown function {op}")
                 defn = library[op]
                 arg_map = dict(defn.params)
                 num_positional_args = 0
