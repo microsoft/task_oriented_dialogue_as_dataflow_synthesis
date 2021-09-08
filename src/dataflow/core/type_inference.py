@@ -168,7 +168,6 @@ def _to_program_with_inferred_types(
                 expr,
                 type=_type_to_type_name(computation.return_type),
                 type_args=[
-                    # TODO handle the case where there remain free type variables
                     _type_to_type_name(_apply_substitutions(t, substitutions))
                     for t in computation.type_args
                 ]
