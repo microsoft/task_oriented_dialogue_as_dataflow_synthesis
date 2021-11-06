@@ -23,6 +23,8 @@ from dataflow.core.program_utils import is_idx_str as is_express_idx_str
 from dataflow.core.program_utils import (
     is_struct_op_schema,
     mk_call_op,
+    mk_lambda,
+    mk_lambda_arg,
     mk_struct_op,
     mk_type_name,
     mk_value_op,
@@ -368,6 +370,7 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
     assert roots, "program must have at least one root"
 
     reentrant_ids: Dict[str, str] = {}
+    lambda_args: Dict[str, Sexp] = {}
     sexps_by_id: Dict[str, Sexp] = {}
     root_sexps: List[Sexp] = []
     let_bindings: List[Sexp] = []
@@ -392,11 +395,19 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
             has_positional = any(k is None for k, _ in named_args)
             if not has_positional:
                 named_args = sorted(get_named_args(expression))  # sort alphabetically
-            for arg_name, arg_id in named_args:
+            for i, (arg_name, arg_id) in enumerate(named_args):
                 if arg_name is not None and not arg_name.startswith("arg"):
                     # name of named argument
                     curr += [_key_to_named_arg(arg_name)]
-                if arg_id in reentrant_ids:
+                if (
+                    arg_id in lambda_args
+                    and i == 0
+                    and isinstance(expression.op, CallLikeOp)
+                    and expression.op.name == DataflowFn.Lambda.value
+                ):
+                    # lambda arg binding
+                    curr += [[lambda_args[arg_id]]]
+                elif arg_id in reentrant_ids:
                     # reentrant steps are referred to by id
                     curr += [reentrant_ids[arg_id]]
                 elif arg_id in sexps_by_id:
@@ -411,10 +422,19 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
             curr = [META_CHAR, type_name_to_lispress(expression.type), curr]
         # add it to results
         if idx in reentrancies:
-            # give reentrancies fresh ids as they are encountered
+            # give reentrancies (including lambda args) fresh ids as they are encountered
             new_id = _idx_to_var_str(len(reentrant_ids))
             reentrant_ids[idx] = new_id
-            let_bindings.extend([new_id, curr])
+            if (
+                isinstance(expression.op, CallLikeOp)
+                and expression.op.name == DataflowFn.LambdaArg.value
+            ):
+                # handle lambda args
+                curr = [META_CHAR, type_name_to_lispress(expression.type), new_id]
+                lambda_args[idx] = curr
+            else:
+                # handle normal reentrancies
+                let_bindings.extend([new_id, curr])
         elif idx in roots:
             root_sexps += [curr]
         else:
@@ -527,6 +547,32 @@ def unnest_line(
                 )
                 result_exprs.extend(exprs)
             return result_exprs, arg_idx, idx, var_id_bindings
+
+        elif hd == DataflowFn.Lambda.value:
+            # (lambda (^ArgType arg_name) body)
+            assert (
+                len(tl) == 2 and len(tl[0]) == 1
+            ), f"{DataflowFn.Lambda.value} binding must have a single arg, and a single body"
+            (arg,), body = tl
+            assert (
+                len(arg) == 3 and arg[0] == META_CHAR
+            ), f"{DataflowFn.Lambda.value} arg must have a type ascription, and a name"
+            _, arg_type, arg_name = arg
+            assert isinstance(arg_name, str)
+
+            arg_expr, arg_idx = mk_lambda_arg(mk_type_name(arg_type), idx)
+            result_exprs = [arg_expr]
+            # new arg binding is only in effect inside the body of the lambda
+            inner_var_id_bindings = dict(var_id_bindings)
+            inner_var_id_bindings[arg_name] = arg_idx
+            body_exprs, body_idx, idx, var_id_bindings = unnest_line(
+                body, arg_idx, inner_var_id_bindings
+            )
+            result_exprs.extend(body_exprs)
+            lambda_expr, idx = mk_lambda(arg_idx, body_idx, body_idx)
+            result_exprs.append(lambda_expr)
+            return result_exprs, idx, idx, var_id_bindings
+
         elif hd == SEQUENCE:
             # handle programs that have multiple statements sequenced together
             result_exprs = []

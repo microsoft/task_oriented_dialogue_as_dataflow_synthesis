@@ -22,6 +22,9 @@ NEW = "new"
 # BuildStructOp special arg
 NON_EMPTY_BASE = "nonEmptyBase"
 
+# special 0-arg function that stands in for a lambda's argument
+LAMBDA_ARG = "lambda_arg"
+
 Idx = int
 
 
@@ -42,6 +45,12 @@ class DataflowFn(Enum):
     Refer = "refer"
     RoleConstraint = "roleConstraint"
     Get = "get"  # access a member field of an object
+    # keyword that introduces an anonymous function with a single parameter
+    # syntax: `(lambda (^ArgType xN) arg_body)`
+    # where `N` is an int and `arg_body` may reference `xN`
+    Lambda = "lambda"
+    # special 0-arg function that stands in for a lambda's argument
+    LambdaArg = "lambda_arg"
 
 
 def idx_str(idx: Idx) -> str:
@@ -188,11 +197,14 @@ def mk_struct_op(
     return flat_exp, new_idx
 
 
-def mk_call_op(name: str, args: List[Idx], idx: Idx = 0) -> Tuple[Expression, Idx]:
+def mk_call_op(
+    name: str, args: List[Idx], tpe: Optional[TypeName] = None, idx: Idx = 0
+) -> Tuple[Expression, Idx]:
     new_idx = idx + 1
     flat_exp = Expression(
         id=idx_str(new_idx),
         op=CallLikeOp(name=name),
+        type=tpe,
         arg_ids=[idx_str(v) for v in args],
     )
     return flat_exp, new_idx
@@ -210,3 +222,11 @@ def mk_value_op(value: Any, schema: str, idx: Idx) -> Tuple[Expression, Idx]:
     dumped = dumps({"schema": schema, "underlying": value})
     expr = Expression(id=idx_str(my_idx), op=ValueOp(value=dumped))
     return expr, my_idx
+
+
+def mk_lambda_arg(type_name: TypeName, idx: Idx = 0) -> Tuple[Expression, Idx]:
+    return mk_call_op(name=DataflowFn.LambdaArg.value, tpe=type_name, args=[], idx=idx)
+
+
+def mk_lambda(arg_idx: Idx, body_idx: Idx, idx: Idx = 0) -> Tuple[Expression, Idx]:
+    return mk_call_op(name=DataflowFn.Lambda.value, args=[arg_idx, body_idx], idx=idx)

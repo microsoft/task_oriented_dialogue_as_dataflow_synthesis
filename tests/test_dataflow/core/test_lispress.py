@@ -129,6 +129,42 @@ surface_strings = [
       "veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeerylong")
     #(PersonName "short")))
 """,
+    # nested lambdas
+    """
+(action
+  (Inform
+    (^(Navigation) Find
+      :focus (Some
+        (Constraint.apply
+          (lambda
+            (^Navigation x0)
+            (allows
+              (Constraint.apply
+                (lambda
+                  (^AppleDuration x1)
+                  (allows (?= 10) (AppleDuration.minutes x1))))
+              (Navigation.travelTime x0))))))))
+""",
+    """
+(action
+  (Prompt
+    (^(Message) Create
+      :object (Some
+        (Constraint.apply
+          (lambda
+            (^Message x0)
+            (allows
+              (Constraint.apply
+                (lambda
+                  (^Contact x1)
+                  (allows
+                    (Constraint.apply
+                      (lambda
+                        (^Person x2)
+                        (allows (^(String) always) (Person.nameHint x2))))
+                    (Contact.person x1))))
+              (Message.recipients x0))))))))
+""",
 ]
 
 
