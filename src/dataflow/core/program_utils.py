@@ -22,9 +22,6 @@ NEW = "new"
 # BuildStructOp special arg
 NON_EMPTY_BASE = "nonEmptyBase"
 
-# special 0-arg function that stands in for a lambda's argument
-LAMBDA_ARG = "lambda_arg"
-
 Idx = int
 
 
