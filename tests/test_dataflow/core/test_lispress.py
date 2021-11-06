@@ -180,19 +180,22 @@ def test_surface_to_sexp_round_trips():
         assert round_tripped_surface_string == surface_string
 
 
+def round_trip_through_program(s):
+    sexp = parse_lispress(s)
+    program, _ = lispress_to_program(sexp, 0)
+    round_tripped_sexp = program_to_lispress(program)
+    return render_pretty(round_tripped_sexp, max_width=60)
+
+
 def test_surface_to_program_round_trips():
     """
     Goes all the way to `Program` and so is stricter
     than `test_surface_to_sexp_round_trips`.
     """
     for surface_string in surface_strings:
-        surface_string = surface_string.strip()
-        sexp = parse_lispress(surface_string)
-        program, _ = lispress_to_program(sexp, 0)
-        round_tripped_sexp = program_to_lispress(program)
-        assert round_tripped_sexp == sexp
-        round_tripped_surface_string = render_pretty(round_tripped_sexp, max_width=60)
-        assert round_tripped_surface_string == surface_string
+        s = surface_string.strip()
+        round_tripped_surface_string = round_trip_through_program(s)
+        assert round_tripped_surface_string == s
 
 
 def test_program_to_lispress_with_quotes_inside_string():
@@ -270,3 +273,8 @@ def test_type_args_in_program():
     assert len(program.expressions) == 1
     assert program.expressions[0].type_args == [TypeName("PleasantryCalendar", ())]
     assert program.expressions[0].type is None
+
+
+def test_fully_typed_reference():
+    s = "(lambda (^Unit x0) ^Unit x0)"
+    assert round_trip_through_program(s) == "(lambda (^Unit x0) x0)"

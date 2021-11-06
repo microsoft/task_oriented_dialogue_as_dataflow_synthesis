@@ -522,7 +522,7 @@ def unnest_line(
         elif _is_idx_str(hd):
             # argId pointer
             # look up step index for var
-            assert hd in var_id_bindings
+            assert hd in var_id_bindings, s
             expr_id = var_id_bindings[hd]
             return [], expr_id, idx, var_id_bindings
         elif is_express_idx_str(hd):
@@ -596,8 +596,9 @@ def unnest_line(
             exprs, arg_idx, idx, var_id_bindings = unnest_line(
                 sexpr, idx=idx, var_id_bindings=var_id_bindings
             )
-            # Update is type declaration.
-            exprs[-1] = replace(exprs[-1], type=mk_type_name(type_declaration))
+            # Update its type declaration if it's more than just a variable reference.
+            if exprs:
+                exprs[-1] = replace(exprs[-1], type=mk_type_name(type_declaration))
             return exprs, arg_idx, idx, var_id_bindings
         elif hd == OpType.Value.value:
             assert (
