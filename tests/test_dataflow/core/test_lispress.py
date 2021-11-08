@@ -165,6 +165,17 @@ surface_strings = [
                     (Contact.person x1))))
               (Message.recipients x0))))))))
 """,
+    # nested lambda type-arg
+    """
+(plan
+  (revise
+    (^(Unit) Path.apply "Create")
+    (^((Constraint Person)) Path.apply
+      "object.recipients.person")
+    (lambda
+      (^(Constraint Person) x0)
+      (& x0 (Person.nameHint_? (?= "Payne"))))))
+""",
 ]
 
 

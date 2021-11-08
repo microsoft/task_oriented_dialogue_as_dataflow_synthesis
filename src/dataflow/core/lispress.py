@@ -430,7 +430,12 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
                 and expression.op.name == DataflowFn.LambdaArg.value
             ):
                 # handle lambda args
-                curr = [META_CHAR, type_name_to_lispress(expression.type), new_id]
+                type_arg_lispress = (
+                    [type_name_to_lispress(a) for a in expression.type_args]
+                    if expression.type_args is not None
+                    else []
+                )
+                curr = [META_CHAR] + type_arg_lispress + [new_id]
                 lambda_args[idx] = curr
             else:
                 # handle normal reentrancies
@@ -549,16 +554,26 @@ def unnest_line(
             return result_exprs, arg_idx, idx, var_id_bindings
 
         elif hd == DataflowFn.Lambda.value:
+            # (lambda (arg_name) body)
+            # or
             # (lambda (^ArgType arg_name) body)
             assert (
                 len(tl) == 2 and len(tl[0]) == 1
             ), f"{DataflowFn.Lambda.value} binding must have a single arg, and a single body"
             (arg,), body = tl
-            assert (
-                len(arg) == 3 and arg[0] == META_CHAR
-            ), f"{DataflowFn.Lambda.value} arg must have a type ascription, and a name"
-            _, arg_type, arg_name = arg
-            assert isinstance(arg_name, str)
+            if len(arg) == 1:
+                # arg has no type ascription
+                arg_type = None
+                (arg_name,) = arg
+            else:
+                # arg has a type ascription
+                assert (
+                    len(arg) == 3 and arg[0] == META_CHAR
+                ), f"{DataflowFn.Lambda.value} arg must have a name, and may optionally have a type ascription"
+                _, arg_type, arg_name = arg
+            assert isinstance(
+                arg_name, str
+            ), f"{DataflowFn.Lambda.value} arg name must be a str"
 
             arg_expr, arg_idx = mk_lambda_arg(mk_type_name(arg_type), idx)
             result_exprs = [arg_expr]
