@@ -287,5 +287,9 @@ def test_type_args_in_program():
 
 
 def test_fully_typed_reference():
+    # This is a regression test, formerly an Exception was thrown.
     s = "(lambda (^Unit x0) ^Unit x0)"
+    # The second type ascription is not retained because x0 is represented by
+    # a single node in a Program, and so can't have two separate type
+    # ascriptions.
     assert round_trip_through_program(s) == "(lambda (^Unit x0) x0)"
