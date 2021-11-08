@@ -430,12 +430,12 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
                 and expression.op.name == DataflowFn.LambdaArg.value
             ):
                 # handle lambda args
-                type_arg_lispress = (
+                type_arg_lispress: List[Sexp] = (
                     [type_name_to_lispress(a) for a in expression.type_args]
                     if expression.type_args is not None
                     else []
                 )
-                curr = [META_CHAR] + type_arg_lispress + [new_id]
+                curr = [META_CHAR, *type_arg_lispress, new_id]
                 lambda_args[idx] = curr
             else:
                 # handle normal reentrancies
