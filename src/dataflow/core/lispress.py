@@ -421,8 +421,11 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
         if expression.type:
             curr = [META_CHAR, type_name_to_lispress(expression.type), curr]
         # add it to results
-        if idx in reentrancies:
-            # give reentrancies (including lambda args) fresh ids as they are encountered
+        if idx in reentrancies or (
+            isinstance(expression.op, CallLikeOp)
+            and expression.op.name == DataflowFn.LambdaArg.value
+        ):
+            # give reentrancies and lambda args fresh ids as they are encountered
             new_id = _idx_to_var_str(len(reentrant_ids))
             reentrant_ids[idx] = new_id
             if (
