@@ -176,6 +176,17 @@ surface_strings = [
       (^(Constraint Person) x0)
       (& x0 (Person.nameHint_? (?= "Payne"))))))
 """,
+    # lambda arg that is never referenced
+    """
+(plan
+  (revise
+    (^(Unit) Path.apply "Create")
+    (^((Option (Constraint ConfirmStatus))) Path.apply
+      "confirmation")
+    (lambda
+      (^(Option (Constraint ConfirmStatus)) x0)
+      (Some (?= (ConfirmStatus.Accepted))))))
+""",
 ]
 
 
