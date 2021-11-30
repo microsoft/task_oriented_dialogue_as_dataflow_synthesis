@@ -222,7 +222,7 @@ be earlier than a previously mentioned event's time". The program is:
             (Execute
               (refer 
                 (& 
-                  (roleConstraint (Path.apply \"start\"))
+                  (roleConstraint (Path.apply "start"))
                   (extensionConstraint (^(Time) EmptyStructConstraint))
                 )
               )
