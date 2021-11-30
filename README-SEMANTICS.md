@@ -214,7 +214,7 @@ be earlier than a previously mentioned event's time". The program is:
 (Yield 
   (Execute 
     (ReviseConstraint 
-      (refer (^(Dynamic) roleConstraint (Path.apply \"output\")))
+      (refer (^(Dynamic) roleConstraint (Path.apply "output")))
       (^(Event) ConstraintTypeIntension)
       (Event.start_? 
         (DateTime.time_? 
