@@ -17,31 +17,29 @@ concrete example.
 Here is a program for the utterance "Create a work meeting on
 Monday at 11 AM":
 ```clojure
-(Yield :output 
-  (CreateCommitEventWrapper :event 
-    (CreatePreflightEventWrapper :constraint 
-      (Constraint[Event] 
-        :start 
-          (Constraint[DateTime]
-            :date (?= (NextDOW :dow #(DayOfWeek "MONDAY")))
-            :time (?= (NumberAM :number #(Number 11)))
-          )) 
-        :subject (?= #(String "work meeting"))
-      )
-    )
-  )
-)
+(Yield 
+  (CreateCommitEventWrapper 
+    (CreatePreflightEventWrapper 
+      (& 
+        (Event.subject_? 
+          (?= "work meeting")) 
+        (Event.start_? 
+          (& 
+            (DateTime.date_? (?= (NextDOW (Monday)))) 
+            (DateTime.time_? (?= (NumberAM 11L)))))))))
 ```
 
-This program constructs a compositional constraint of type `Constraint[Event]`,
-which contains two sub-constraints: `start` and `subject`. Each sub-constraint
-can be compositional too. For example, the `start` field (which represents
-a constraint on the start time of the event) has two sub-constraints: `date` and
-`time`.
+This program constructs a conjunction of constraints of type `(Constraint Event)`
+containing two sub-constraints, one on each of the `start` and `subject` fields. 
+Each sub-constraint can be compositional too. For example, the `start` field 
+(which represents constraint on the start time of the event) has two sub-constraints: 
+`date` and `time`. In general, a method called `Foo.bar_?` takes a single argument of
+type `(Constraint Bar)` where `Bar` is the type of the field `bar` on `Foo` and
+returns a `(Constraint Foo)`.
 
 Let's take a closer look at the `date` sub-field. This field contains
 a `Date` constraint constructed by the `?=` function.
-Here, `?=` means "exact match". It takes an
+Here, `?=` means "exact match". It takes a
 reference object of type `T` and returns a constraint
 that is satisfied if the input value is equal to the
 reference. In this example, the `date` constraint is satisfied if
@@ -58,8 +56,8 @@ she doesn't specify any concrete time, but both "morning" and
 "after the lunch" can be represented as time constraints.
 
 After the `Event` constraint is constructed, it is sent to
-`CreatePreflightEventWrapper`, which solves a constraint satisfaction problem to figure out
-the actual `Event` that the user wants to create. If a concrete solution
+`CreatePreflightEventWrapper`, which solves a constraint satisfaction problem to figure
+out the actual `Event` that the user wants to create. If a concrete solution
 cannot be determined, then the solver will either inject some
 heuristic preference (e.g. the meeting is preferred to be scheduled in
 the business hours and the default length is 30 minutes) to tighten the
@@ -87,30 +85,26 @@ is used in the update and the deletion programs too.
 If the user says "Yes" in the next turn, then the confirmation program
 will be like:
 ```clojure
-(Yield :output (Execute :intension (ConfirmAndReturnAction)))
+(Yield (Execute (^(Dynamic) ConfirmAndReturnAction)))
 ```
 The `ConfirmAndReturnAction` function puts a "confirm" token to the
 dataflow graph and returns the last turn's program. The `Execute`
 function then re-executes that program. This time, since the creation
 is confirmed, the `CreateCommitEventWrapper` call will succeed and
-the event will be added to the user's calendar.
+the event will be added to the user's calendar. `Dynamic` is a special type
+(inspired by [Haskell](https://hackage.haskell.org/package/base-4.15.0.0/docs/Data-Dynamic.html))
+that we use whenever a type variable is unconstrained.
 
 ## Query Event
 
 The user can query events in the calendar. If the user says
 "Where is the avocado festival?", then the program is:
 ```clojure
-(Yield :output 
-  (:location 
+(Yield 
+  (Event.location 
     (singleton 
-      (:results 
-        (FindEventWrapperWithDefaults :constraint 
-          (Constraint[Event] :subject (?~= #(String "avocado festival")))
-        )
-      )
-    )
-  )
-)
+      (QueryEventResponse.results 
+        (FindEventWrapperWithDefaults (Event.subject_? (?~= "cat sitting")))))))
 ```
 This program builds an `Event` constraint requiring the event's
 subject to fuzzily match the string "avocado festival" (the `?~=`
@@ -134,27 +128,25 @@ handling mechanism (See Section 5 of
 The user can update existing events. For example, if
 the user says "Change my meeting tomorrow to 4 PM", then the program is:
 ```clojure
-(Yield :output 
-  (UpdateCommitEventWrapper :event 
+(Yield 
+  (UpdateCommitEventWrapper 
     (UpdatePreflightEventWrapper 
-      :id 
-        (:id 
-          (singleton 
-            (:results 
-              (FindEventWrapperWithDefaults :constraint
-                (Constraint[Event] :start 
-                  (Constraint[DateTime] :date (?= (Tomorrow)))) 
-                )
+      (Event.id 
+        (singleton 
+          (QueryEventResponse.results 
+            (FindEventWrapperWithDefaults
+              (Event.start_? 
+                (DateTime.date_? (?= (Tomorrow)))) 
               )
             )
           )
         )
-      :update 
-        (Constraint[Event] :start 
-          (Constraint[DateTime] :time 
-            (?= (NumberPM :number #(Number 4)))
+        (Event.start_? 
+          (DateTime.time_? 
+            (?= (NumberPM 4L))
           )
         )
+      )
     )
   )
 )
@@ -184,16 +176,16 @@ Deletion is similar to update, except that you don't
 need to specify a constraint for the new event. If the user says
 "Delete my meeting with Emma", then the program is:
 ```clojure
-(Yield :output 
-  (DeleteCommitEventWrapper :event 
-    (DeletePreflightEventWrapper :id 
-      (:id 
+(Yield 
+  (DeleteCommitEventWrapper 
+    (DeletePreflightEventWrapper 
+      (Event.id 
         (singleton 
-          (:results 
-            (FindEventWrapperWithDefaults :constraint 
-              (Constraint[Event] :attendees 
-                (AttendeeListHasRecipientConstraint :recipientConstraint 
-                  (RecipientWithNameLike :name #(PersonName "Emma"))
+          (QueryEventResponse.results 
+            (FindEventWrapperWithDefaults 
+              (Event.attendees_?
+                (AttendeeListHasRecipientConstraint 
+                  (RecipientWithNameLike (PersonName.apply "Emma"))
                 )
               )
             )
@@ -204,7 +196,7 @@ need to specify a constraint for the new event. If the user says
   )
 )
 ```
-The program builds a `Constraint[Event]` specifying that the event's attendee
+The program builds an `Event` consraint specifying that the event's attendee
 list must contain "Emma". The constraint is sent to `FindEventWrapperWithDefaults`
 to query the database. If the event can
 be found, then its id is sent to `DeletePreflightEventWrapper` (which
@@ -219,28 +211,25 @@ the user asks "Anything earlier?" in a follow-up turn, then we interpret
 it as "redo an existing computation but constrain the event time to
 be earlier than a previously mentioned event's time". The program is:
 ```clojure
-(Yield :output 
-  (Execute :intension 
+(Yield 
+  (Execute 
     (ReviseConstraint 
-      :rootLocation (roleConstraint #(Path "output")) 
-      :oldLocation (Constraint[Constraint[Event]]) 
-      :new 
-        (Constraint[Event] :start 
-          (Constraint[DateTime] :time 
-            (?< 
-              (Execute :intension 
-                (refer 
-                  (andConstraint 
-                    (roleConstraint 
-                      (append #(List[Path] []) #(Path "start"))
-                    ) 
-                    (extensionConstraint (Constraint[Time]))
-                  )
+      (refer (^(Dynamic) roleConstraint (Path.apply "output")))
+      (^(Event) ConstraintTypeIntension)
+      (Event.start_? 
+        (DateTime.time_? 
+          (?< 
+            (Execute
+              (refer 
+                (& 
+                  (roleConstraint (Path.apply "start"))
+                  (extensionConstraint (^(Time) EmptyStructConstraint))
                 )
               )
             )
           )
         )
+      )
     )
   )
 )
@@ -252,7 +241,7 @@ a structure, and the `extensionConstraint` constrains the result of
 that computation. In this example, it only requires the value type
 to be `Time`.
 
-The program then constructs a new `Constraint[Event]`
+The program then constructs a new `Event` constraint
 requiring the start time to be earlier than the referred time.
 Finally, it uses
 `ReviseConstraint` to find an existing root program, and revises
@@ -265,5 +254,5 @@ It is worth noting that the above program is a valid revision program
 regardless of the type of the previous request: whether it is a creation,
 query, update, deletion or another revision,
 they all operate on a
-`Constraint[Event]`. This uniformity guarantees that the program
+`Event` constraint. This uniformity guarantees that the program
 can be written independent of the dialogue history.
