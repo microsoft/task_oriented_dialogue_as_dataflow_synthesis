@@ -256,3 +256,32 @@ query, update, deletion or another revision,
 they all operate on a
 `Event` constraint. This uniformity guarantees that the program
 can be written independent of the dialogue history.
+
+
+## API Calls and Model Operations
+
+Some SMCalFlow library functions call web APIs or perform inference with a
+trained model.
+These do the bulk of the work and take up the bulk of the execution time.
+The following is a complete list of the slow API calls and model operations:
+ * RecipientAvailability,
+ * FindReports,
+ * FindManager,
+ * UpdatePreflightEventWrapper,
+ * CreatePreflightEventWrapper,
+ * DeletePreflightEventWrapper,
+ * FindEventWrapperWithDefaults,
+ * RecipientWithNameLike,
+ * Yield (generation model).
+
+Some API calls also do real work, but are near-instantaneous:
+ * DeleteCommitEventWrapper,
+ * UpdateCommitEventWrapper,
+ * CreateCommitEventWrapper,
+ * EventAttendance,
+ * refer (refer model),
+ * ReviseConstraint (revise model).
+
+The remainder of the functions are near-instantaneous.
+They serve to construct the constraints and other arguments to the API calls
+and model operations.
