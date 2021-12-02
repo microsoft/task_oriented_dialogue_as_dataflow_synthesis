@@ -3,7 +3,7 @@
 This directory contains the conversational semantic parsing datasets we used for the experiments of the following paper:
 
 ```bibtex
-@inproceedings{SMValueAgnosticParsing2020,
+@inproceedings{SMValueAgnosticParsing2021,
   author = {Platanios, Emmanouil Antonios and Pauls, Adam and Roy, Subhro and Zhang, Yuchen and Kyte, Alex and Guo, Alan and Thomson, Sam and Krishnamurthy, Jayant and Wolfe, Jason and Andreas, Jacob and Klein, Dan},
   title = {Value-Agnostic Conversational Semantic Parsing},
   booktitle = {Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics},
