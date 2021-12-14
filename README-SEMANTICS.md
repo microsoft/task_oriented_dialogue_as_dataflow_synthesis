@@ -104,7 +104,7 @@ The user can query events in the calendar. If the user says
   (Event.location 
     (singleton 
       (QueryEventResponse.results 
-        (FindEventWrapperWithDefaults (Event.subject_? (?~= "cat sitting")))))))
+        (FindEventWrapperWithDefaults (Event.subject_? (?~= "avocado festival")))))))
 ```
 This program builds an `Event` constraint requiring the event's
 subject to fuzzily match the string "avocado festival" (the `?~=`
