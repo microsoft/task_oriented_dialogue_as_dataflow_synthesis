@@ -591,16 +591,6 @@ def unnest_line(
             result_exprs.append(lambda_expr)
             return result_exprs, idx, idx, var_id_bindings
 
-        elif hd == SEQUENCE:
-            # handle programs that have multiple statements sequenced together
-            result_exprs = []
-            arg_idx = idx  # in case `tl` is empty
-            for statement in tl:
-                exprs, arg_idx, idx, var_id_bindings = unnest_line(
-                    statement, idx, var_id_bindings
-                )
-                result_exprs.extend(exprs)
-            return result_exprs, arg_idx, idx, var_id_bindings
         elif hd == META_CHAR:
             # type ascriptions look like (^T Expr), e.g. (^Number (+ 1 2))
             # would be (1 + 2): Number in Scala.
@@ -664,15 +654,12 @@ def unnest_line(
 
 
 def _unsugared_lispress_to_program(fs: Lispress, idx: Idx) -> Tuple[Program, Idx]:
-    arg_id_map: Dict[str, int] = {}
-    expressions = []
     if isinstance(fs, list) and len(fs) == 0:
         # special-case the empty program
-        return Program(expressions=[]), idx
+        exprs = []
     else:
-        exprs, _, idx, arg_id_map = unnest_line(fs, idx, arg_id_map)
-        expressions.extend(exprs)
-    return Program(expressions=expressions), idx
+        exprs, _, idx, _ = unnest_line(fs, idx, {})
+    return Program(expressions=exprs), idx
 
 
 def lispress_to_type_name(e: Lispress) -> TypeName:
