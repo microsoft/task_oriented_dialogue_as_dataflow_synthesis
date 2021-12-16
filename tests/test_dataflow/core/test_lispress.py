@@ -304,3 +304,14 @@ def test_fully_typed_reference():
     # a single node in a Program, and so can't have two separate type
     # ascriptions.
     assert round_trip_through_program(s) == "(lambda (^Unit x0) x0)"
+
+
+def test_let_bindings_are_canonicalized():
+    """
+    Let bindings should be topologically sorted,
+    with ties broken by alphabetically sorting their bodies.
+    Also tests that `do` ordering (including multiple mentions) is maintained.
+    """
+    s = '(let (x0 1 x1 "") (do x0 x1 x1 x0))'
+    # formerly would return `'(do 1 "")'`
+    assert round_trip_through_program(s) == '(let (x0 "" x1 1) (do x1 x0 x0 x1))'
