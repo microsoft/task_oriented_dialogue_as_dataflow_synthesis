@@ -329,3 +329,9 @@ def test_canonicalize_program():
     assert do.op.name == DataflowFn.Do.value
     assert do.arg_ids == [e.id for e in p.expressions]
     assert render_pretty(program_to_lispress(p)) == '(do "" 1L)'
+
+
+def test_let_bindings_canonicalized():
+    a = """(let (x0 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (& (Event.subject_? (?~= "lunch")) (Event.attendees_? (AttendeeListHasRecipientConstraint (RecipientWithNameLike (^(Recipient) EmptyStructConstraint) (PersonName.apply "Jeff")))))))) x1 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (Event.subject_? (?~= "haircut appointment")))))) (Yield (CreateCommitEventWrapper (CreatePreflightEventWrapper (& (Event.start_? (DateTimeAndConstraintBetweenEvents x0 x1)) (Event.end_? (DateTimeAndConstraintBetweenEvents x0 x1)))))))"""
+    b = """(let (x0 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (Event.subject_? (?~= "haircut appointment"))))) x1 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (& (Event.subject_? (?~= "lunch")) (Event.attendees_? (AttendeeListHasRecipientConstraint (RecipientWithNameLike (^(Recipient) EmptyStructConstraint) (PersonName.apply "Jeff"))))))))) (Yield (CreateCommitEventWrapper (CreatePreflightEventWrapper (& (Event.start_? (DateTimeAndConstraintBetweenEvents x1 x0)) (Event.end_? (DateTimeAndConstraintBetweenEvents x1 x0)))))))"""
+    assert _round_trip(a) == _round_trip(b)
