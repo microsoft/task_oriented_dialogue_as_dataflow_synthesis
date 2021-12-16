@@ -1,5 +1,5 @@
 from dataflow.core.lispress import (
-    _try_round_trip,
+    _round_trip,
     lispress_to_program,
     parse_lispress,
     program_to_lispress,
@@ -232,60 +232,60 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 
 def test_bare_values():
-    assert _try_round_trip("0L") == "0L"
-    assert _try_round_trip("0") == "0.0"
-    assert _try_round_trip("0.0") == "0.0"
-    assert _try_round_trip("#(Number 0)") == "0.0"
-    assert _try_round_trip("#(Number 0.0)") == "0.0"
+    assert _round_trip("0L") == "0L"
+    assert _round_trip("0") == "0.0"
+    assert _round_trip("0.0") == "0.0"
+    assert _round_trip("#(Number 0)") == "0.0"
+    assert _round_trip("#(Number 0.0)") == "0.0"
 
 
 def test_typenames():
-    roundtrip = _try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
+    roundtrip = _round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
     assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
 
 
 def test_typename_with_args():
-    roundtrip = _try_round_trip("^(Number Foo) (^(String) foo (bar) ^Bar (bar))")
+    roundtrip = _round_trip("^(Number Foo) (^(String) foo (bar) ^Bar (bar))")
     assert roundtrip == "^(Number Foo) (^(String) foo (bar) ^Bar (bar))"
 
 
 def test_sorts_named_args():
     # TODO: scary: named
-    roundtrip = _try_round_trip("(Foo :foo 1.0 :bar 3.0)")
+    roundtrip = _round_trip("(Foo :foo 1.0 :bar 3.0)")
     assert roundtrip == "(Foo :bar 3.0 :foo 1.0)"
 
 
 def test_mixed_named_and_positional_args():
     # TODO: scary: named
-    roundtrip = _try_round_trip("(Foo 1.0 2.0 :bar 3)")
+    roundtrip = _round_trip("(Foo 1.0 2.0 :bar 3)")
     assert roundtrip == "(Foo 1.0 2.0 :bar 3.0)"
 
 
 def test_number_float():
     lispress = "(Yield (> (a) 0.0))"
-    assert _try_round_trip(lispress) == lispress
-    assert _try_round_trip("(Yield (> (a) 0))") == lispress
-    assert _try_round_trip("(toHours 4)") == "(toHours 4.0)"
+    assert _round_trip(lispress) == lispress
+    assert _round_trip("(Yield (> (a) 0))") == lispress
+    assert _round_trip("(toHours 4)") == "(toHours 4.0)"
 
 
 def test_bool():
-    assert _try_round_trip("(toHours true)") == "(toHours true)"
+    assert _round_trip("(toHours true)") == "(toHours true)"
 
 
 def test_string():
-    assert _try_round_trip('(+ (a) #(String "b"))') == '(+ (a) "b")'
-    assert _try_round_trip('(+ (a) #(PersonName "b"))') == '(+ (a) #(PersonName "b"))'
+    assert _round_trip('(+ (a) #(String "b"))') == '(+ (a) "b")'
+    assert _round_trip('(+ (a) #(PersonName "b"))') == '(+ (a) #(PersonName "b"))'
 
 
 def test_escaped_name():
     string = "(a\\ b)"
     assert parse_lispress(string) == ["a b"]
-    assert _try_round_trip(string) == string
+    assert _round_trip(string) == string
 
 
 def test_strip_copy_strings():
-    assert _try_round_trip('#(String " Tom ")') == '"Tom"'
-    assert _try_round_trip('" Tom "') == '"Tom"'
+    assert _round_trip('#(String " Tom ")') == '"Tom"'
+    assert _round_trip('" Tom "') == '"Tom"'
 
 
 def test_type_args_in_program():
@@ -306,12 +306,11 @@ def test_fully_typed_reference():
     assert round_trip_through_program(s) == "(lambda (^Unit x0) x0)"
 
 
-def test_let_bindings_are_canonicalized():
+def test_let_bindings_canonicalized_and_do_ordering_maintained():
     """
-    Let bindings should be topologically sorted,
-    with ties broken by alphabetically sorting their bodies.
+    Let bindings should be bottom-up left-to-right.
     Also tests that `do` ordering (including multiple mentions) is maintained.
     """
-    s = '(let (x0 1 x1 "") (do x0 x1 x1 x0))'
+    s = '(let (x0 1 x1 "") (do x1 x0 x0 x1))'
     # formerly would return `'(do 1 "")'`
-    assert round_trip_through_program(s) == '(let (x0 "" x1 1) (do x1 x0 x0 x1))'
+    assert round_trip_through_program(s) == '(let (x0 "" x1 1) (do x0 x1 x1 x0))'

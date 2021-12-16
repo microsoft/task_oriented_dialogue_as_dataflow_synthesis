@@ -65,11 +65,16 @@ class Program:
         return {expression.id: expression for expression in self.expressions}
 
 
-def roots_and_reentrancies(program: Program) -> Tuple[Set[str], Set[str]]:
-    ids = {e.id for e in program.expressions}
+def roots_and_reentrancies(program: Program) -> Tuple[List[str], Set[str]]:
+    """
+    Returns ids of roots (expressions that never appear as arguments) and
+    reentrancies (expressions that appear more than once as arguments).
+    Now that `do` expressions get their own nodes, there should be exactly
+    one root.
+    """
     arg_counts = Counter(a for e in program.expressions for a in e.arg_ids)
-    roots = ids.difference(arg_counts)  # ids that are never used as args
-    reentrancies = {
-        i for i, c in arg_counts.items() if c >= 2
-    }  # args that are used multiple times as args
+    # ids that are never used as args
+    roots = [e.id for e in program.expressions if e.id not in arg_counts]
+    # args that are used multiple times as args
+    reentrancies = {i for i, c in arg_counts.items() if c >= 2}
     return roots, reentrancies

@@ -36,6 +36,7 @@ class OpType(Enum):
 class DataflowFn(Enum):
     """Special Dataflow functions"""
 
+    Do = "do"  # keyword for sequencing programs that have multiple statements
     Find = "find"  # search
     Abandon = "abandon"
     Revise = "ReviseConstraint"
@@ -109,7 +110,7 @@ def mk_salience(tpe: str, idx: Idx) -> Tuple[List[Expression], Idx]:
 
 def mk_salient_action(idx: Idx) -> Tuple[List[Expression], Idx]:
     """ (roleConstraint #(Path "output")) """
-    path_expr, path_idx = mk_value_op(schema="Path", value="output", idx=idx,)
+    path_expr, path_idx = mk_value_op(schema="Path", value="output", idx=idx)
     intension_expr, intension_idx = mk_call_op(
         name=DataflowFn.RoleConstraint.value, args=[path_idx], idx=path_idx,
     )
@@ -194,7 +195,10 @@ def mk_struct_op(
 
 
 def mk_call_op(
-    name: str, args: List[Idx], type_args: Optional[List[TypeName]] = None, idx: Idx = 0
+    name: str,
+    args: List[Idx],
+    type_args: Optional[List[TypeName]] = None,
+    idx: Idx = 0,
 ) -> Tuple[Expression, Idx]:
     new_idx = idx + 1
     flat_exp = Expression(
