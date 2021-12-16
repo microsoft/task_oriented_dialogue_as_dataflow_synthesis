@@ -1,4 +1,5 @@
 from dataflow.core.lispress import (
+    _canonicalize_program,
     _round_trip,
     lispress_to_program,
     parse_lispress,
@@ -6,7 +7,7 @@ from dataflow.core.lispress import (
     render_pretty,
 )
 from dataflow.core.program import Program, TypeName
-from dataflow.core.program_utils import mk_value_op
+from dataflow.core.program_utils import DataflowFn, mk_value_op
 
 surface_strings = [
     """
@@ -314,3 +315,17 @@ def test_let_bindings_canonicalized_and_do_ordering_maintained():
     s = '(let (x0 1 x1 "") (do x1 x0 x0 x1))'
     # formerly would return `'(do 1 "")'`
     assert round_trip_through_program(s) == '(let (x0 "" x1 1) (do x0 x1 x1 x0))'
+
+
+def test_canonicalize_program():
+    s, _ = mk_value_op(value="", schema="String", idx=0)
+    i, _ = mk_value_op(value=1, schema="Long", idx=1)
+    # program with multiple roots
+    p = Program(expressions=[s, i])
+    canonicalized = _canonicalize_program(p)
+    assert canonicalized.expressions[:2] == p.expressions
+    assert len(canonicalized.expressions) == len(p.expressions) + 1
+    do = canonicalized.expressions[-1]
+    assert do.op.name == DataflowFn.Do.value
+    assert do.arg_ids == [e.id for e in p.expressions]
+    assert render_pretty(program_to_lispress(p)) == '(do "" 1L)'

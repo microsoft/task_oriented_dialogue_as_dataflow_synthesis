@@ -655,7 +655,7 @@ def unnest_line(
 def _unsugared_lispress_to_program(fs: Lispress, idx: Idx) -> Tuple[Program, Idx]:
     if isinstance(fs, list) and len(fs) == 0:
         # special-case the empty program
-        exprs = []
+        exprs: List[Expression] = []
     else:
         exprs, _, idx, _ = unnest_line(fs, idx, {})
     return Program(expressions=exprs), idx
@@ -681,14 +681,14 @@ def _canonicalize_program(program: Program) -> Program:
     exprs = program.expressions_by_id
     if len(exprs) == 0:
         return program
-    roots, reentrancies = roots_and_reentrancies(program)
+    roots, _ = roots_and_reentrancies(program)
     if len(roots) > 1:
         # add a `do` expression so there is a single root
         new_id = max([-1] + [unwrap_idx_str(i) for i in exprs.keys()]) + 1
         new_idx = idx_str(new_id)
         do = Expression(id=new_idx, op=CallLikeOp(DataflowFn.Do.value), arg_ids=roots)
         exprs[new_idx] = do
-        roots = [do]
+        roots = [new_idx]
     assert len(roots) == 1
     (root,) = roots
 
