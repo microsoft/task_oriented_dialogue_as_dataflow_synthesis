@@ -1,12 +1,13 @@
 from dataflow.core.lispress import (
-    _try_round_trip,
+    _canonicalize_program,
+    _round_trip,
     lispress_to_program,
     parse_lispress,
     program_to_lispress,
     render_pretty,
 )
 from dataflow.core.program import Program, TypeName
-from dataflow.core.program_utils import mk_value_op
+from dataflow.core.program_utils import DataflowFn, mk_value_op
 
 surface_strings = [
     """
@@ -232,60 +233,60 @@ def test_program_to_lispress_with_quotes_inside_string():
 
 
 def test_bare_values():
-    assert _try_round_trip("0L") == "0L"
-    assert _try_round_trip("0") == "0.0"
-    assert _try_round_trip("0.0") == "0.0"
-    assert _try_round_trip("#(Number 0)") == "0.0"
-    assert _try_round_trip("#(Number 0.0)") == "0.0"
+    assert _round_trip("0L") == "0L"
+    assert _round_trip("0") == "0.0"
+    assert _round_trip("0.0") == "0.0"
+    assert _round_trip("#(Number 0)") == "0.0"
+    assert _round_trip("#(Number 0.0)") == "0.0"
 
 
 def test_typenames():
-    roundtrip = _try_round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
+    roundtrip = _round_trip("^Number (^(String) foo (bar) ^Bar (bar))")
     assert roundtrip == "^Number (^(String) foo (bar) ^Bar (bar))"
 
 
 def test_typename_with_args():
-    roundtrip = _try_round_trip("^(Number Foo) (^(String) foo (bar) ^Bar (bar))")
+    roundtrip = _round_trip("^(Number Foo) (^(String) foo (bar) ^Bar (bar))")
     assert roundtrip == "^(Number Foo) (^(String) foo (bar) ^Bar (bar))"
 
 
 def test_sorts_named_args():
     # TODO: scary: named
-    roundtrip = _try_round_trip("(Foo :foo 1.0 :bar 3.0)")
+    roundtrip = _round_trip("(Foo :foo 1.0 :bar 3.0)")
     assert roundtrip == "(Foo :bar 3.0 :foo 1.0)"
 
 
 def test_mixed_named_and_positional_args():
     # TODO: scary: named
-    roundtrip = _try_round_trip("(Foo 1.0 2.0 :bar 3)")
+    roundtrip = _round_trip("(Foo 1.0 2.0 :bar 3)")
     assert roundtrip == "(Foo 1.0 2.0 :bar 3.0)"
 
 
 def test_number_float():
     lispress = "(Yield (> (a) 0.0))"
-    assert _try_round_trip(lispress) == lispress
-    assert _try_round_trip("(Yield (> (a) 0))") == lispress
-    assert _try_round_trip("(toHours 4)") == "(toHours 4.0)"
+    assert _round_trip(lispress) == lispress
+    assert _round_trip("(Yield (> (a) 0))") == lispress
+    assert _round_trip("(toHours 4)") == "(toHours 4.0)"
 
 
 def test_bool():
-    assert _try_round_trip("(toHours true)") == "(toHours true)"
+    assert _round_trip("(toHours true)") == "(toHours true)"
 
 
 def test_string():
-    assert _try_round_trip('(+ (a) #(String "b"))') == '(+ (a) "b")'
-    assert _try_round_trip('(+ (a) #(PersonName "b"))') == '(+ (a) #(PersonName "b"))'
+    assert _round_trip('(+ (a) #(String "b"))') == '(+ (a) "b")'
+    assert _round_trip('(+ (a) #(PersonName "b"))') == '(+ (a) #(PersonName "b"))'
 
 
 def test_escaped_name():
     string = "(a\\ b)"
     assert parse_lispress(string) == ["a b"]
-    assert _try_round_trip(string) == string
+    assert _round_trip(string) == string
 
 
 def test_strip_copy_strings():
-    assert _try_round_trip('#(String " Tom ")') == '"Tom"'
-    assert _try_round_trip('" Tom "') == '"Tom"'
+    assert _round_trip('#(String " Tom ")') == '"Tom"'
+    assert _round_trip('" Tom "') == '"Tom"'
 
 
 def test_type_args_in_program():
@@ -304,3 +305,33 @@ def test_fully_typed_reference():
     # a single node in a Program, and so can't have two separate type
     # ascriptions.
     assert round_trip_through_program(s) == "(lambda (^Unit x0) x0)"
+
+
+def test_let_bindings_canonicalized_and_do_ordering_maintained():
+    """
+    Let bindings should be bottom-up left-to-right.
+    Also tests that `do` ordering (including multiple mentions) is maintained.
+    """
+    s = '(let (x0 1 x1 "") (do x1 x0 x0 x1))'
+    # formerly would return `'(do 1 "")'`
+    assert round_trip_through_program(s) == '(let (x0 "" x1 1) (do x0 x1 x1 x0))'
+
+
+def test_canonicalize_program():
+    s, _ = mk_value_op(value="", schema="String", idx=0)
+    i, _ = mk_value_op(value=1, schema="Long", idx=1)
+    # program with multiple roots
+    p = Program(expressions=[s, i])
+    canonicalized = _canonicalize_program(p)
+    assert canonicalized.expressions[:2] == p.expressions
+    assert len(canonicalized.expressions) == len(p.expressions) + 1
+    do = canonicalized.expressions[-1]
+    assert do.op.name == DataflowFn.Do.value
+    assert do.arg_ids == [e.id for e in p.expressions]
+    assert render_pretty(program_to_lispress(p)) == '(do "" 1L)'
+
+
+def test_let_bindings_canonicalized():
+    a = """(let (x0 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (& (Event.subject_? (?~= "lunch")) (Event.attendees_? (AttendeeListHasRecipientConstraint (RecipientWithNameLike (^(Recipient) EmptyStructConstraint) (PersonName.apply "Jeff")))))))) x1 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (Event.subject_? (?~= "haircut appointment")))))) (Yield (CreateCommitEventWrapper (CreatePreflightEventWrapper (& (Event.start_? (DateTimeAndConstraintBetweenEvents x0 x1)) (Event.end_? (DateTimeAndConstraintBetweenEvents x0 x1)))))))"""
+    b = """(let (x0 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (Event.subject_? (?~= "haircut appointment"))))) x1 (singleton (QueryEventResponse.results (FindEventWrapperWithDefaults (& (Event.subject_? (?~= "lunch")) (Event.attendees_? (AttendeeListHasRecipientConstraint (RecipientWithNameLike (^(Recipient) EmptyStructConstraint) (PersonName.apply "Jeff"))))))))) (Yield (CreateCommitEventWrapper (CreatePreflightEventWrapper (& (Event.start_? (DateTimeAndConstraintBetweenEvents x1 x0)) (Event.end_? (DateTimeAndConstraintBetweenEvents x1 x0)))))))"""
+    assert _round_trip(a) == _round_trip(b)

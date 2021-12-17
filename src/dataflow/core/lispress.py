@@ -4,7 +4,7 @@ import json
 import re
 from dataclasses import replace
 from json import JSONDecodeError, loads
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterator, List, Optional, Set, Tuple
 
 from more_itertools import chunked
 
@@ -18,7 +18,7 @@ from dataflow.core.program import (
     ValueOp,
     roots_and_reentrancies,
 )
-from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args
+from dataflow.core.program_utils import DataflowFn, Idx, OpType, get_named_args, idx_str
 from dataflow.core.program_utils import is_idx_str as is_express_idx_str
 from dataflow.core.program_utils import (
     is_struct_op_schema,
@@ -38,9 +38,7 @@ EXTERNAL_LABEL = "ExternalReference"
 NUM_INDENTATION_SPACES = 2
 # keyword for introducing variable bindings
 LET = "let"
-# keyword for sequencing programs that have multiple statements
-SEQUENCE = "do"
-SEQUENCE_SEXP: List[Sexp] = [SEQUENCE]  # to help out mypy
+DO_SEXP: List[Sexp] = [DataflowFn.Do.value]  # to help out mypy
 # variables will be named `x0`, `x1`, etc., in the order they are introduced.
 VAR_PREFIX = "x"
 # named args are given like `(fn :name1 arg1 :name2 arg2 ...)`
@@ -61,12 +59,12 @@ def try_round_trip(lispress_str: str) -> str:
     If it is not valid, returns the original string unmodified.
     """
     try:
-        return _try_round_trip(lispress_str)
+        return _round_trip(lispress_str)
     except Exception:  # pylint: disable=W0703
         return lispress_str
 
 
-def _try_round_trip(lispress_str: str) -> str:
+def _round_trip(lispress_str: str) -> str:
     # round-trip to canonicalize
     lispress = parse_lispress(lispress_str)
     program, _ = lispress_to_program(lispress, 0)
@@ -100,7 +98,8 @@ def strip_copy_strings(exp: Lispress) -> "Lispress":
 
 def program_to_lispress(program: Program) -> Lispress:
     """ Converts a Program to Lispress. """
-    unsugared = _program_to_unsugared_lispress(program)
+    canonicalized = _canonicalize_program(program)
+    unsugared = _program_to_unsugared_lispress(canonicalized)
     sugared_gets = _sugar_gets(unsugared)
     return sugared_gets
 
@@ -455,7 +454,7 @@ def _program_to_unsugared_lispress(program: Program) -> Lispress:
         if len(root_sexps) == 0
         else root_sexps[0]
         if len(root_sexps) == 1
-        else SEQUENCE_SEXP + root_sexps
+        else DO_SEXP + root_sexps
     )
     # `let` bindings go at the top-level
     return [LET, let_bindings, result] if len(let_bindings) > 0 else result
@@ -591,16 +590,6 @@ def unnest_line(
             result_exprs.append(lambda_expr)
             return result_exprs, idx, idx, var_id_bindings
 
-        elif hd == SEQUENCE:
-            # handle programs that have multiple statements sequenced together
-            result_exprs = []
-            arg_idx = idx  # in case `tl` is empty
-            for statement in tl:
-                exprs, arg_idx, idx, var_id_bindings = unnest_line(
-                    statement, idx, var_id_bindings
-                )
-                result_exprs.extend(exprs)
-            return result_exprs, arg_idx, idx, var_id_bindings
         elif hd == META_CHAR:
             # type ascriptions look like (^T Expr), e.g. (^Number (+ 1 2))
             # would be (1 + 2): Number in Scala.
@@ -664,15 +653,12 @@ def unnest_line(
 
 
 def _unsugared_lispress_to_program(fs: Lispress, idx: Idx) -> Tuple[Program, Idx]:
-    arg_id_map: Dict[str, int] = {}
-    expressions = []
     if isinstance(fs, list) and len(fs) == 0:
         # special-case the empty program
-        return Program(expressions=[]), idx
+        exprs: List[Expression] = []
     else:
-        exprs, _, idx, arg_id_map = unnest_line(fs, idx, arg_id_map)
-        expressions.extend(exprs)
-    return Program(expressions=expressions), idx
+        exprs, _, idx, _ = unnest_line(fs, idx, {})
+    return Program(expressions=exprs), idx
 
 
 def lispress_to_type_name(e: Lispress) -> TypeName:
@@ -685,3 +671,36 @@ def lispress_to_type_name(e: Lispress) -> TypeName:
         return TypeName(constructor, tuple([lispress_to_type_name(a) for a in args]))
     else:
         raise ValueError(f"unexpected lispress {e}")
+
+
+def _canonicalize_program(program: Program) -> Program:
+    """
+    Adds a top-level `do` expression if there are multiple roots,
+    and orders expressions left-to-right bottom-up.
+    """
+    exprs = program.expressions_by_id
+    if len(exprs) == 0:
+        return program
+    roots, _ = roots_and_reentrancies(program)
+    if len(roots) > 1:
+        # add a `do` expression so there is a single root
+        new_id = max([-1] + [unwrap_idx_str(i) for i in exprs.keys()]) + 1
+        new_idx = idx_str(new_id)
+        do = Expression(id=new_idx, op=CallLikeOp(DataflowFn.Do.value), arg_ids=roots)
+        exprs[new_idx] = do
+        roots = [new_idx]
+    assert len(roots) == 1
+    (root,) = roots
+
+    seen: Set[str] = set()
+
+    def traversal(i: str) -> Iterator[Expression]:
+        """Left-to-right bottom-up"""
+        if i not in seen:
+            seen.add(i)
+            e = exprs[i]
+            for c in e.arg_ids:
+                yield from traversal(c)
+            yield e
+
+    return Program(expressions=list(traversal(root)))
