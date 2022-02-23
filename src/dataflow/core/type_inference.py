@@ -54,8 +54,6 @@ class AnonTypeVariable(TypeVariable):
     Compared by reference equality.
     """
 
-    pass
-
     def __repr__(self):
         return f"$_{hex(id(self))}"
 

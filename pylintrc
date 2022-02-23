@@ -82,7 +82,6 @@ disable=R0903,W0511,I0011,C0111,
  line-too-long,
  bad-continuation,
  no-else-return,
- unnecessary-pass,
  arguments-differ,
  len-as-condition,
  not-callable
