@@ -14,10 +14,10 @@ setup(
     package_data={"dataflow": ["py.typed"]},
     zip_safe=False,
     install_requires=[
-        "jsons ~= 0.10.1, ~= 1.0",
+        "jsons >= 0.10.1, < 2",
         "more-itertools ~= 8.2",
         "pandas ~= 1.0",
-        "spacy ~= 2.2, ~= 3.0",
+        "spacy >= 2.2, < 4",
         "statsmodels ~= 0.11",
         "cached-property",
     ],
