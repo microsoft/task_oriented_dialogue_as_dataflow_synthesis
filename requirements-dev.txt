@@ -1,4 +1,4 @@
-black==19.10b0
+black==24.3.0
 pylint==2.4.4
 mypy==0.761
 pytest==4.6.3
