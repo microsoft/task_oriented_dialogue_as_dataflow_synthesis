@@ -62,10 +62,7 @@ If you use your own evaluation script, please pay attention to the notes in Step
    # The `PATH_TO_DATA_TGZ` is the path to the tgz file of the corresponding dataset.
    tar -xvzf PATH_TO_DATA_TGZ
    ```
-   * SMCalFlow 1.0 links
-     * [smcalflow.full.data.tgz](https://smresearchstorage.blob.core.windows.net/smcalflow-public/smcalflow.full.data.tgz)
-     * [smcalflow.inlined.data.tgz](https://smresearchstorage.blob.core.windows.net/smcalflow-public/smcalflow.inlined.data.tgz)
-   * SMCalFlow 2.0 can be found under the [datasets](./datasets) folder.
+   * Both SMCalFlow 1.0 and SMCalFlow 2.0 can be found under the [datasets](./datasets) folder.
    * The dataset is distributed under the [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/legalcode) license.
 2. Compute data statistics:
     ```bash
