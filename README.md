@@ -192,8 +192,8 @@ If you use your own evaluation script, please pay attention to the notes in Step
     
         |           | `--layers` | `--rnn_size` | model |
         | --------- | :-:        | :-:          | :-:   |
-        | dataflow  |     2      |     384      | [link](https://smresearchstorage.blob.core.windows.net/smcalflow-public/smcalflow.full.checkpoint_last.pt) |
-        | inline    |     3      |     384      | [link](https://smresearchstorage.blob.core.windows.net/smcalflow-public/smcalflow.inlined.checkpoint_last.pt) |
+        | dataflow  |     2      |     384      | [link](models/smcalflow.full.checkpoint_last.pt) |
+        | inline    |     3      |     384      | [link](models/smcalflow.inlined.checkpoint_last.pt) |
 
 6. Make predictions using a trained OpenNMT model. You need to replace the `checkpoint_last.pt` in the following script 
 with the final model you get from the previous step.
@@ -405,9 +405,9 @@ with the final model you get from the previous step.
     
         |                 | `--dropout` | `--layers` | `--rnn_size` | model |
         | ---------       | :-:        | :-:          | :-:         | :-:   |
-        | dataflow (`--num_context_turns 2`)     | 0.7 | 2 | 384 | [link](https://smresearchstorage.blob.core.windows.net/smcalflow-public/multiwoz.full.checkpoint_last.pt) |
-        | inline refer (`--num_context_turns 4`) | 0.3 | 3 | 320 | [link](https://smresearchstorage.blob.core.windows.net/smcalflow-public/multiwoz.inline_refer.checkpoint_last.pt) |
-        | inline both (`--num_context_turns 10`) | 0.7 | 2 | 320 | [link](https://smresearchstorage.blob.core.windows.net/smcalflow-public/multiwoz.inline_both.checkpoint_last.pt) |
+        | dataflow (`--num_context_turns 2`)     | 0.7 | 2 | 384 | [link](models/multiwoz.full.checkpoint_last.pt) |
+        | inline refer (`--num_context_turns 4`) | 0.3 | 3 | 320 | [link](models/multiwoz.inline_refer.checkpoint_last.pt) |
+        | inline both (`--num_context_turns 10`) | 0.7 | 2 | 320 | [link](models/multiwoz.inline_both.checkpoint_last.pt) |
 
 5. Make predictions using a trained OpenNMT model. You need to replace the `checkpoint_last.pt` in the following script with the actual model you get from
  the previous step.
